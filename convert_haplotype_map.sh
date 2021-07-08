@@ -4,7 +4,7 @@ SOURCE_MAP=$1
 LIFTOVER_F=$2
 
 if [[ ! -f ${SOURCE_MAP} || ! -f ${LIFTOVER_F} ]]; then
-  echo "Please provide a source map & liftover file"
+  echo "Please provide a source map & liftover file - ./convert_haplotype_map.sh ${SOURCE_MAP} ${LIFTOVER_FILE}"
   exit 1
 fi
 
