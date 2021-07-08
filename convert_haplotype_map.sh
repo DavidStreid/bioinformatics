@@ -20,7 +20,6 @@ mkdir -p ${TEMP_DIR}
 echo "Preparing Input Map and new Map: ${NEW_MAP}"
 HEADER_LINE="#"
 sed -e '1,/#/d' ${SOURCE_MAP} >> ${TEMP_MAP}
-sed '/#/q' ${SOURCE_MAP} >> ${NEW_MAP}
 
 echo "Converting ${SOURCE_MAP} to temporary BED file: ${TEMP_BED}"
 while IFS=$'\n' read -r -a line; do
