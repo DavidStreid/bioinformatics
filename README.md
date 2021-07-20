@@ -1,15 +1,6 @@
-# Haplotype Map Converter
-## INPUTS
-`INPUT_MAP`: Input Haplotype Map that needs to be converted
-`CHAIN_FILE`: Chain file translating alignments of one genome to another. See http://hgdownload.cse.ucsc.edu/goldenpath/${GENOME}}/liftOver/ for any `GENOME`
+# Bioinformatics Scripts
+Collection of tasks related to bioinformatics I've encountered. Each directory accomplishes one of them
 
-## Process
-* Converts `INPUT_MAP` to a temporary BED file
-* Uses liftOver (See liftOver in [UCSC Utilities](http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/)) to conver the BED file to the target genome using `CHAIN_FILE`
-* Converts temporary BED file back to the final `.map` file
-
-## Run
-```
-CHAIN_FILE=hg38ToHg19.over.chain
-./convert_haplotype_map.sh ${INPUT_MAP} ${CHAIN_FILE}
-```
+## Tasks
+* Haplotype Converter: Converts haplotype map to a different reference genome
+* Sam Comparison: Compares the numerical fields of two input SAM files created from different aligners (e.g. compares one aligner's MAPQ score to another on the same input FASTQ files)
