@@ -33,8 +33,7 @@ echo "[CHECK 1] Same number of entries extracted"
 B1_NUM=$(wc -l ${B1_EXTRACT} | cut -d' ' -f1)
 B2_NUM=$(wc -l ${B2_EXTRACT} | cut -d' ' -f1)
 if [[ ${B1_NUM} -ne ${B2_NUM} ]]; then
-  echo "Different number of QNAME entires between input SAM files: ${B1_NUM} != ${B2_NUM}"
-  exit 1
+  printf "\t[WARNING]Different number of QNAME entires between input SAM files: ${B1_NUM} != ${B2_NUM}\n"
 fi
 
 echo "[CHECK 2] Same QNames in each SAM"
@@ -43,9 +42,7 @@ B2_QNAMES="QNAMES___${B2_NAME}.txt"
 cat ${B1_EXTRACT} | cut -f1,2 | sort >> ${B1_QNAMES}
 cat ${B2_EXTRACT} | cut -f1,2 | sort >> ${B2_QNAMES}
 if [[ ! -z $(diff ${B1_QNAMES} ${B2_QNAMES}) ]]; then
-  echo "Detected different QNAMES"
-  diff ${B1_QNAMES} ${B2_QNAMES}
-  exit 1
+  printf "\t[WARNING] Detected different QNAMES\n"
 fi
 
 RESULTS=RESULTS___${B1_NAME}_${B2_NAME}.csv
@@ -54,6 +51,10 @@ while IFS= read -r b1_line
 do
   read_id=$(echo ${b1_line} | cut -f1,2)
   b2_line=$(cat ${B2_EXTRACT} | grep "${read_id}")
+  if [[ -z ${b2_line} ]]; then
+    printf "\tCould not find ${read_id} in ${B2_EXTRACT}. Skipping\n"
+    continue
+  fi
   b1_val=$(echo ${b1_line} | cut -f3)
   b2_val=$(echo ${b2_line} | cut -f3)
   diff=$(expr ${b1_val} - ${b2_val})
