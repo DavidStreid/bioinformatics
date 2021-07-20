@@ -26,8 +26,8 @@ B2_EXTRACT="EXTRACT___${B2_NAME}.csv"
 
 echo "Extracting QNAME (1) & value at (${IDX}): ${B1_NAME} & ${B2_NAME}"
 # Extract QNAME and additional SAM header field
-samtools view ${B1} | cut -f1,${IDX} > ${B1_EXTRACT}
-samtools view ${B2} | cut -f1,${IDX} > ${B2_EXTRACT}
+samtools view ${B1} | cut -f1,2,${IDX} > ${B1_EXTRACT}
+samtools view ${B2} | cut -f1,2,${IDX} > ${B2_EXTRACT}
 
 echo "[CHECK 1] Same number of entries extracted"
 B1_NUM=$(wc -l ${B1_EXTRACT} | cut -d' ' -f1)
@@ -40,8 +40,8 @@ fi
 echo "[CHECK 2] Same QNames in each SAM"
 B1_QNAMES="QNAMES___${B1_NAME}.txt"
 B2_QNAMES="QNAMES___${B2_NAME}.txt"
-cat ${B1_EXTRACT} | cut -f1 | sort >> ${B1_QNAMES}
-cat ${B2_EXTRACT} | cut -f1 | sort >> ${B2_QNAMES}
+cat ${B1_EXTRACT} | cut -f1,2 | sort >> ${B1_QNAMES}
+cat ${B2_EXTRACT} | cut -f1,2 | sort >> ${B2_QNAMES}
 if [[ ! -z $(diff ${B1_QNAMES} ${B2_QNAMES}) ]]; then
   echo "Detected different QNAMES"
   diff ${B1_QNAMES} ${B2_QNAMES}
@@ -52,12 +52,12 @@ RESULTS=RESULTS___${B1_NAME}_${B2_NAME}.csv
 echo "Comparing selected values. Writing to ${RESULTS}"
 while IFS= read -r b1_line
 do
-  qname=$(echo ${b1_line} | cut -f1)
-  b2_line=$(cat ${B2_EXTRACT} | grep "${qname}")
-  b1_val=$(echo ${b1_line} | cut -f2)
-  b2_val=$(echo ${b2_line} | cut -f2)
+  read_id=$(echo ${b1_line} | cut -f1,2)
+  b2_line=$(cat ${B2_EXTRACT} | grep "${read_id}")
+  b1_val=$(echo ${b1_line} | cut -f3)
+  b2_val=$(echo ${b2_line} | cut -f3)
   diff=$(expr ${b1_val} - ${b2_val})
-  echo "${qname},${b1_val},${b2_val},${diff}" >> ${RESULTS}
+  echo "${read_id},${b1_val},${b2_val},${diff}" >> ${RESULTS}
 done < ${B1_EXTRACT}
 
 echo "DONE"
