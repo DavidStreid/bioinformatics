@@ -46,19 +46,53 @@ if [[ ! -z $(diff ${B1_QNAMES} ${B2_QNAMES}) ]]; then
 fi
 
 RESULTS=RESULTS___${B1_NAME}_${B2_NAME}.csv
+
+echo "QNAME,FLAG_1,FLAG_2,V1,V2,DIFF" >> ${RESULTS}
+
 echo "Comparing selected values. Writing to ${RESULTS}"
 while IFS= read -r b1_line
 do
-  read_id=$(echo ${b1_line} | cut -f1,2)
-  b2_line=$(cat ${B2_EXTRACT} | grep "${read_id}")
-  if [[ -z ${b2_line} ]]; then
-    printf "\tCould not find ${read_id} in ${B2_EXTRACT}. Skipping\n"
-    continue
+  echo "${b1_line}"
+  qname_1=$(echo ${b1_line} | cut -d' ' -f1)
+  flag_1=$(echo ${b1_line} | cut -d' ' -f2)
+
+  r1=$(cat ${B2_EXTRACT} | grep "${qname_1}" | head -1)
+  r2=$(cat ${B2_EXTRACT} | grep "${qname_1}" | tail -1)
+
+  r1_flag=$(echo $r1 | cut -d' ' -f2)
+  r2_flag=$(echo $r2 | cut -d' ' -f2)
+
+  printf "\tChoosing read for flag_1=${flag_1}\n"
+  printf "\tr1_flag=${r1_flag}\n"
+  printf "\tr2_flag=${r2_flag}\n"
+
+  if [[ "${flag_1}" -gt "127" && "${r1_flag}" -gt "127" ]]; then
+    printf "\tChoosing ($r1_flag): $r1\n"
+    b2_line=$r1
+    flag_2=$r1_flag
+  else
+    printf "\tChoosing ($r2_flag): $r2\n"
+    b2_line=$r2
+    flag_2=$r2_flag
   fi
-  b1_val=$(echo ${b1_line} | cut -f3)
-  b2_val=$(echo ${b2_line} | cut -f3)
+
+  if [[ -z ${b2_line} ]]; then
+    printf "\t[SKIPPING] Could not find ${read_id} in ${B2_EXTRACT}"
+    continue
+  else
+    printf "\tComparing the following two lines\n"
+    printf "\t${B1_EXTRACT}\n"
+    printf "\t${b1_line}\n"
+    printf "\t${B2_EXTRACT}\n"
+    printf "\t${b2_line}\n"
+  fi
+  b1_val=$(echo ${b1_line} | cut -d' ' -f3)
+  b2_val=$(echo ${b2_line} | cut -d' ' -f3)
   diff=$(expr ${b1_val} - ${b2_val})
-  echo "${read_id},${b1_val},${b2_val},${diff}" >> ${RESULTS}
+  results_line="${qname_1},${flag_1},${flag_2},${b1_val},${b2_val},${diff}"
+  printf "\t${results_line}\n"
+  echo ""
+  echo "${results_line}" >> ${RESULTS}
 done < ${B1_EXTRACT}
 
 echo "DONE"
