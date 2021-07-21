@@ -46,7 +46,6 @@ if [[ ! -z $(diff ${B1_QNAMES} ${B2_QNAMES}) ]]; then
 fi
 
 RESULTS=RESULTS___${B1_NAME}_${B2_NAME}.csv
-
 echo "QNAME,FLAG_1,FLAG_2,V1,V2,DIFF" >> ${RESULTS}
 
 echo "Comparing selected values. Writing to ${RESULTS}"
@@ -62,18 +61,32 @@ do
   r1_flag=$(echo $r1 | cut -d' ' -f2)
   r2_flag=$(echo $r2 | cut -d' ' -f2)
 
-  printf "\tChoosing read for flag_1=${flag_1}\n"
-  printf "\tr1_flag=${r1_flag}\n"
-  printf "\tr2_flag=${r2_flag}\n"
+  printf "\tChoosing read for flag_1: ${flag_1}\n"
+  printf "\tr1_flag: ${r1_flag}\n"
+  printf "\tr2_flag: ${r2_flag}\n"
 
-  if [[ "${flag_1}" -gt "127" && "${r1_flag}" -gt "127" ]]; then
-    printf "\tChoosing ($r1_flag): $r1\n"
-    b2_line=$r1
-    flag_2=$r1_flag
+  if [[ "${flag_1}" -gt "127" ]]; then
+    # input flag indicates input read is R1 
+    if [[ "${r1_flag}" -gt "127" ]]; then
+      printf "\tChoosing r1 ($r1_flag): $r1\n"
+      b2_line=$r1
+      flag_2=$r1_flag
+    else
+      printf "\tChoosing r2 ($r2_flag): $r2\n"
+      b2_line=$r2
+      flag_2=$r2_flag
+    fi
   else
-    printf "\tChoosing ($r2_flag): $r2\n"
-    b2_line=$r2
-    flag_2=$r2_flag
+    # input flag indicates input read is R2
+    if [[ "${r1_flag}" -lt "128" ]]; then
+      printf "\tChoosing r1 ($r1_flag): $r1\n"
+      b2_line=$r1
+      flag_2=$r1_flag
+    else
+      printf "\tChoosing r2 ($r2_flag): $r2\n"
+      b2_line=$r2
+      flag_2=$r2_flag
+    fi    
   fi
 
   if [[ -z ${b2_line} ]]; then
