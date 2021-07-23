@@ -103,7 +103,7 @@ def get_results(k1, k2, dic):
             if line:
                 results.append(line)
         if len(k1_r1_flags) > 0 or len(k2_r1_flags) > 0:
-            print("Did not add all from %s. F1: %s, F2: %s" % (qname, ",".join(k1_r1_flags), ",".join(k2_r1_flags)))
+            print("Did not add all from %s. F1: %s, F2: %s" % (qname, ",".join([ str(f) for f in k1_r1_flags]), ",".join([ str(f) for f in k2_r1_flags])))
 
         while len(k1_r2_flags) > 0 and len(k2_r2_flags) > 0:
             f1 = k1_r2_flags.pop()
