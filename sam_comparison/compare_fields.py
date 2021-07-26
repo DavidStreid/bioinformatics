@@ -2,6 +2,7 @@
 
 import sys
 import os
+from difflib import SequenceMatcher
 
 USAGE="python compare_fields.py ${CSV1} ${CSV2}"
 R1='R1'
@@ -54,7 +55,7 @@ def create_results_dic(f, k, dic):
         if k not in dic[qname]:
             dic[qname][k] = {}
 
-        if flag in dic[qname][k] and score != dic[qname][k]:
+        if flag in dic[qname][k] and score != dic[qname][k][flag]:
             print("Overriding %s => %s for %s in %s (FLAG: %d)" % (dic[qname][k][flag], score, qname, k, flag))
         dic[qname][k][flag] = score
 
