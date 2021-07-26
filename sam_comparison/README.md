@@ -1,3 +1,7 @@
+## THIS WAS AN EDUCATIONAL EXPERIENCE. In the future, just use BamUtil
+
+[BamUtil](https://genome.sph.umich.edu/wiki/BamUtil:_diff)
+
 # Sam comparison
 Compares the numerical fields of two input SAM files created from different aligners (e.g. compares one aligner's MAPQ score to another on the same input FASTQ files)
 
