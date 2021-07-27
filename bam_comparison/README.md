@@ -1,31 +1,31 @@
-# SAM comparison
-Compares the numerical fields of two input SAM files created from different aligners (e.g. compares one aligner's MAPQ score to another on the same input FASTQ files)
+# BAM comparison
+Compares the numerical fields of two input BAM files created from different aligners (e.g. compares one aligner's MAPQ score to another on the same input FASTQ files)
 
 Tools:
 * [BamUtil](https://genome.sph.umich.edu/wiki/BamUtil:_diff)
 
 ## Steps
 
-1. Sort BAM
+1. **Sort BAM**
 ```
 samtools sort b1.bam -o b1_sorted.bam
 samtools sort b2.bam -o b2_sorted.bam 
 ```
 
-2. Run bam diff
+2. **Run bam diff**
 ```
 bam diff --in1 b1_sorted.bam --in2 b2_sorted.bam --mapQual >> bam_diff.csv
 ```
 * Note - `--mapQual` can be replaced w/ other metric to compare
 
-3. Parse `bam diff` output
+3. **Parse `bam diff` output**
 ```
 python bam_util_to_csv.py bam_diff.out      # outputs bam_differences.csv
 ``` 
 
-4. Graph 
+4. **Graph** 
 
-    **BAR**
+    BAR
     ```
     import pandas as pd
     import matplotlib.pyplot as plt
@@ -46,7 +46,7 @@ python bam_util_to_csv.py bam_diff.out      # outputs bam_differences.csv
     plt.savefig("bam1_v_diff.pdf")
     ```
     
-    **Scatter (v1 v. v2)**
+    Scatter (v1 v. v2)
     ```
     import pandas as pd
     import matplotlib.pyplot as plt
@@ -61,7 +61,7 @@ python bam_util_to_csv.py bam_diff.out      # outputs bam_differences.csv
     plt.ylabel("BAM2 Score")
     ```
     
-    **Scatter (v1 v. diff)**
+    Scatter (v1 v. diff)
     ```
     import pandas as pd
     import matplotlib.pyplot as plt
