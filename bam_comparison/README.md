@@ -24,6 +24,8 @@ python bam_util_to_csv.py bam_diff.out      # outputs bam_differences.csv
 ``` 
 
 4. Graph
+
+BAR
 ```
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -37,4 +39,34 @@ grouped['v1-v2'].plot(kind='bar')           # Or 'v2-v1'
 plt.title("BAM Value vs. Average Difference")
 plt.xlabel("BAM1 Score")                    # Or 'BAM2 Score'
 plt.ylabel("Avg(BAM1 Score - BAM2 Score)")  # Avg(BAM2 Score - BAM1 Score) 
+```
+
+Scatter (v1 v. v2)
+```
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib import colors
+
+df = pd.read_csv('bam_differences.csv')
+df.plot.scatter(x='v1', y='v2')
+
+plt.title("BAM1 Score vs BAM2 Score")
+plt.xlabel("BAM1 Score")
+plt.ylabel("BAM2 Score")
+```
+
+Scatter (v1 v. diff)
+```
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib import colors
+
+df = pd.read_csv('bam_differences.csv')
+df.plot.scatter(x='v1', y='v2')
+
+plt.title("BAM1 Score vs (BAM1-BAM2)")
+plt.xlabel("BAM1 Score")
+plt.ylabel("(BAM1-BAM2)")
 ```
