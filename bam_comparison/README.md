@@ -24,6 +24,7 @@ python bam_util_to_csv.py bam_diff.out      # outputs bam_differences.csv
 ``` 
 
 4. Graph 
+
     **BAR**
     ```
     import pandas as pd
