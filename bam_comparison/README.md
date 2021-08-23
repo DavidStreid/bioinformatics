@@ -31,6 +31,7 @@ python bam_util_to_csv.py bam_diff.out      # outputs bam_differences.csv
     import matplotlib.pyplot as plt
     import numpy as np
     from matplotlib import colors
+    from matplotlib.pyplot import figure 
     
     figure(figsize=(16,8), dpi=80)
     
