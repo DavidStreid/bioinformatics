@@ -27,8 +27,8 @@ log() {
 #########################################
 run_cmd () {
   INPUT_CMD=$@
-  echo ${INPUT_CMD}  >> ${LOG_FILE}
-  eval ${INPUT_CMD} >> ${LOG_FILE} 2>&1
+  echo ${INPUT_CMD} >> ${LOG_FILE}
+  eval "${INPUT_CMD}" >> ${LOG_FILE} 2>&1
 }
 
 create_splits_dir() {
@@ -51,10 +51,10 @@ create_splits_dir() {
     mkdir -p ${ref_2bit_dir} && \
     mkdir -p ${scaffold_lft_dir}
 
-  ref_lft_fname="lift_${ref_base}"
-  run_cmd "faSplit sequence ${ref_file} ${num_contigs} -lift=${ref_lft_fname}"
+  ref_lft_fname="chr"
+  run_cmd "faSplit sequence ${ref_file} ${num_contigs} -lift=${ref_lft_fname}.lft ${ref_lft_fname}"
 
-  for chr in chr*.fa; do
+  for chr in ${ref_lft_fname}*; do
     chr_base=$(basename ${chr} | cut -d'.' -f1)
     chr_2bit="${chr_base}.2bit"
     chr_size="${chr_base}.size"
@@ -65,9 +65,7 @@ create_splits_dir() {
     run_cmd "faToTwoBit ${chr} ${chr_2bit}"
     run_cmd "twoBitInfo ${chr_2bit} ${chr_size}"
 
-    log "${chr_size}" 
     num_bases=$(cat ${chr_size} | cut -f2)
-    log "${num_bases}" 
     run_cmd "faSplit size ${chr} ${num_bases} -lift=${chr_lift} ${lift_prefix}"
     num_files=$(ls -1 | grep "${lift_prefix}" | wc -l)
     if [[ ${num_files} -ne 1 ]]; then
