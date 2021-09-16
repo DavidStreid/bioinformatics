@@ -160,24 +160,3 @@ printf "\t... wrote 2bit to ${from_2bit}\n"
 echo "BLAT query sequences of $(basename ${to_splits_dir}) against the 2bit..."
 dir_blat_querys_against_FROM=$(blat_query ${to_splits_dir} ${from_2bit})
 echo "... wrote .psl files to ${dir_blat_querys_against_FROM}"
-
-# create_splits ${TO_REF}
-# create_2bit_from_ref ${FROM_REF}
-# twoBitInfo ${ref_2bit_name} chrom.sizes
-
-
-
-# WORKS
-# mkdir splits
-# cd splits
-# faSplit sequence ${REF} ${num_contigs} chr
-# cd -
-
-# Create 2bit genome sequence representation
-# cd ${REF_DIR}
-# REF_2BIT_NAME="${REF_BASE}.2bit"
-# faToTwoBit ${REF} ${REF_2BIT_NAME}
-# twoBitInfo ${REF_2BIT_NAME} chrom.sizes
-
-
-
