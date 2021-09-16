@@ -2,12 +2,24 @@
 
 FROM_REF=$1
 TO_REF=$2
+USE_LOCAL='false'
+
+while getopts 's:t:l' flag; do
+  case "${flag}" in
+    s) FROM_REF="${OPTARG}" ;;
+    t) TO_REF="${OPTARG}" ;;
+    l) USE_LOCAL='true' ;;
+    *) print_usage
+       exit 1 ;;
+  esac
+done
 
 if [[ ! -f ${FROM_REF} || ! -f ${TO_REF} ]]; then
   echo "Invalid Reference: ${FROM_REF}, ${TO_REF}"
   exit 1
 fi
 
+echo "Creating Liftover: ${FROM_REF} -> ${TO_REF} (USE_LOCAL=${USE_LOCAL})"
 FROM_REF=$(realpath ${FROM_REF})
 TO_REF=$(realpath ${TO_REF})
 
@@ -103,17 +115,38 @@ blat_query() {
   log "to_splits_dir_param=${to_splits_dir_param} from_2bit_param=${from_2bit_param}"
 
   split_ref_files=$(find ${to_splits_dir_param} -type f -name "chr*.fa")
+
+  JOB_ID_LIST_FILE="blat_lsf_jobs.txt"
   for chr_fa in ${split_ref_files}; do
     log "Processing ${chr_fa}"
     chr_base=$(basename ${chr_fa} | cut -d'.' -f1)
-    run_cmd "blat ${from_2bit_param} ${chr_fa} ${chr_base}.psl -tileSize=12 -minScore=100 -minIdentity=98" # -fastMap
+    if [[ USE_LOCAL == 'true' ]]; then
+      run_cmd "blat ${from_2bit_param} ${chr_fa} ${chr_base}.psl -tileSize=12 -minScore=100 -minIdentity=98"
+    else
+      JOB_NAME="BLAT_${chr_base}"
+      SUBMIT=$(bsub -J ${JOB_NAME} -o ${JOB_NAME} -n 10 -M 12 "blat ${from_2bit_param} ${chr_fa} ${chr_base}.psl -tileSize=12 -minScore=100 -minIdentity=98")
+      log ${SUBMIT}
+      JOB_ID=$(echo $SUBMIT | egrep -o '[0-9]{5,}') # Parses out job id from output
+      echo ${JOB_ID} >> ${JOB_ID_LIST_FILE}         # Save job id to wait on later
+    fi
   done
+
   ref_base_name=$(basename ${to_splits_dir_param})
   PSL_DIR=${WORK_DIR}/psl/${ref_base_name}
-  mkdir -p ${PSL_DIR}
-  log "Moving *.psl to ${PSL_DIR}"
-   
-  mv "chr*.psl" ${PSL_DIR}
+
+  if [[ -f ${JOB_ID_LIST_FILE} && USE_LOCAL == "true" ]]; then
+    # LSF was chosen
+    ALL_JOBS=$(cat ${JOB_ID_LIST_FILE} | tr '\n' ' ')
+    log "Submitted Jobs (${EXECUTOR}): %s"
+    log "${ALL_JOBS}"
+    for job_id in ${ALL_JOBS}; do
+      log "Waiting for ${job_id} to finish"
+      bwait -w "ended(${job_id})" &
+    done
+  fi
+
+  run_cmd "mkdir -p ${PSL_DIR}"
+  run_cmd "mv 'chr*.psl' ${PSL_DIR}"
   echo ${PSL_DIR}
 }
 
