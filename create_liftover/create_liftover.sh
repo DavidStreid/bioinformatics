@@ -134,7 +134,7 @@ blat_query() {
   ref_base_name=$(basename ${to_splits_dir_param})
   PSL_DIR=${WORK_DIR}/psl/${ref_base_name}
 
-  if [[ -f ${JOB_ID_LIST_FILE} && USE_LOCAL == "true" ]]; then
+  if [[ -f ${JOB_ID_LIST_FILE} && USE_LOCAL == "false" ]]; then
     # LSF was chosen
     ALL_JOBS=$(cat ${JOB_ID_LIST_FILE} | tr '\n' ' ')
     log "Submitted Jobs (${EXECUTOR}): %s"
