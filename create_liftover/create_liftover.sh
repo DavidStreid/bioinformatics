@@ -122,7 +122,7 @@ to_splits_dir=$(create_splits_dir ${TO_REF})
 printf "\t... wrote splits to ${to_splits_dir}\n"
 echo "Creating 2bit of ${FROM_REF}..."
 from_2bit=$(create_2bit_from_ref ${FROM_REF})
-printf "\t... wrote 2bit to ${from_2bit}"
+printf "\t... wrote 2bit to ${from_2bit}\n"
 
 echo "BLAT query sequences of $(basename ${to_splits_dir}) against the 2bit..."
 dir_blat_querys_against_FROM=$(blat_query ${to_splits_dir} ${from_2bit})
