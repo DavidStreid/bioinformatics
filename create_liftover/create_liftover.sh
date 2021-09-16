@@ -29,9 +29,35 @@ create_splits_dir() {
 
   cd ${ref_dir}
   ref_splits_dir="${WORK_DIR}/splits/${ref_base}"
-  mkdir -p ${ref_splits_dir}
+  ref_size_dir="${WORK_DIR}/size/${ref_base}"
+  ref_lft_dir="${WORK_DIR}/lft/${ref_base}"
+
+  mkdir -p ${ref_splits_dir} && mkdir -p ${ref_lft_dir} && mkdir -p ${ref_size_dir}
   faSplit sequence ${ref_file} ${num_contigs} chr
+
+  for chr in chr*.fa; do
+    chr_base=$(basename ${chr} | cut -d'.' -f1)
+    chr_2bit="${chr_base}.2bit"
+    chr_size="${chr_base}.size"
+    chr_lift="${chr_base}.lft"
+    lift_prefix="lift_${chr_base}_"
+    # We need to create the .lft files to change the coordinates after alignment
+    log "Lift Creation: ${chr} -> ${chr_2bit} -> ${chr_size} -> ${chr_lift}"
+    faToTwoBit ${chr} ${chr_2bit}
+    twoBitInfo ${2bit_f} ${chr_size}
+    num_bases=$(cat ${twoBitInfo} | cut -f2)
+    faSplit size ${chr} ${num_bases} -lift=${chr_lift}
+    num_files=$(ls -1 | grep "${lift_prefix}" | wc -l)
+    if [[ ${num_files} -ne 1 ]]; then
+      log "[ERROR] - Too many lift entries for scaffold: ${chr_base}"
+      exit 1
+    fi
+    log "[SUCCESS] Created ${chr_lift}"
+  done
+
   mv chr*.fa ${ref_splits_dir}
+  mv chr*.size ${ref_size_dir}
+  mv chr*.lft ${ref_lft_dir}
   log "Moved chr*.fa to ${ref_splits_dir}"
 
   cd - > /dev/null 	# Don't want to echo this out
