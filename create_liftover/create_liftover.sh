@@ -20,6 +20,17 @@ log() {
   echo ${INPUT_CMD}  >> ${LOG_FILE}
 }
 
+#########################################
+# Executes and logs command
+# Arguments:
+#   INPUT_CMD - string of command to run, e.g. "picard CollectAlignmentSummaryMetrics ..."
+#########################################
+run_cmd () {
+  INPUT_CMD=$@
+  echo ${INPUT_CMD}  >> ${LOG_FILE}
+  eval ${INPUT_CMD} >> ${LOG_FILE} 2>&1
+}
+
 create_splits_dir() {
   ref_file=$1
   ref_dir=$(dirname ${ref_file})
@@ -27,13 +38,21 @@ create_splits_dir() {
   num_contigs=$(cat ${ref_file} | grep ">" | wc -l)
   log "Writing ${num_contigs} chr*.fa files for ${ref_file}"
 
-  cd ${ref_dir}
-  ref_splits_dir="${WORK_DIR}/splits/${ref_base}"
-  ref_size_dir="${WORK_DIR}/size/${ref_base}"
-  ref_lft_dir="${WORK_DIR}/lft/${ref_base}"
+  run_cmd "cd ${ref_dir}"
+  ref_splits_dir="${WORK_DIR}/${ref_base}/splits"
+  ref_size_dir="${WORK_DIR}/${ref_base}/size"
+  ref_lft_dir="${WORK_DIR}/${ref_base}/lft"
+  ref_2bit_dir="${WORK_DIR}/${ref_base}/2bit"
+  scaffold_lft_dir="${ref_lft_dir}/scaffolds"
 
-  mkdir -p ${ref_splits_dir} && mkdir -p ${ref_lft_dir} && mkdir -p ${ref_size_dir}
-  faSplit sequence ${ref_file} ${num_contigs} chr
+  mkdir -p ${ref_splits_dir} && \
+    mkdir -p ${ref_lft_dir} && \
+    mkdir -p ${ref_size_dir} && \
+    mkdir -p ${ref_2bit_dir} && \
+    mkdir -p ${scaffold_lft_dir}
+
+  ref_lft_fname="lift_${ref_base}"
+  run_cmd "faSplit sequence ${ref_file} ${num_contigs} -lift=${ref_lft_fname}"
 
   for chr in chr*.fa; do
     chr_base=$(basename ${chr} | cut -d'.' -f1)
@@ -43,10 +62,13 @@ create_splits_dir() {
     lift_prefix="lift_${chr_base}_"
     # We need to create the .lft files to change the coordinates after alignment
     log "Lift Creation: ${chr} -> ${chr_2bit} -> ${chr_size} -> ${chr_lift}"
-    faToTwoBit ${chr} ${chr_2bit}
-    twoBitInfo ${2bit_f} ${chr_size}
-    num_bases=$(cat ${twoBitInfo} | cut -f2)
-    faSplit size ${chr} ${num_bases} -lift=${chr_lift}
+    run_cmd "faToTwoBit ${chr} ${chr_2bit}"
+    run_cmd "twoBitInfo ${chr_2bit} ${chr_size}"
+
+    log "${chr_size}" 
+    num_bases=$(cat ${chr_size} | cut -f2)
+    log "${num_bases}" 
+    run_cmd "faSplit size ${chr} ${num_bases} -lift=${chr_lift} ${lift_prefix}"
     num_files=$(ls -1 | grep "${lift_prefix}" | wc -l)
     if [[ ${num_files} -ne 1 ]]; then
       log "[ERROR] - Too many lift entries for scaffold: ${chr_base}"
@@ -55,10 +77,10 @@ create_splits_dir() {
     log "[SUCCESS] Created ${chr_lift}"
   done
 
-  mv chr*.fa ${ref_splits_dir}
-  mv chr*.size ${ref_size_dir}
-  mv chr*.lft ${ref_lft_dir}
-  log "Moved chr*.fa to ${ref_splits_dir}"
+  run_cmd "mv chr*.fa ${ref_splits_dir}"
+  run_cmd "mv *.size ${ref_size_dir}"
+  run_cmd "mv chr*.lft ${ref_lft_dir}"
+  run_cmd "mv chr*.2bit ${ref_2bit_dir}"
 
   cd - > /dev/null 	# Don't want to echo this out
   echo $(realpath ${ref_splits_dir})
@@ -72,7 +94,7 @@ create_2bit_from_ref() {
   dir_for_2bit="${WORK_DIR}/2bit"
   mkdir -p ${dir_for_2bit}
   cd ${dir_for_2bit}
-  faToTwoBit ${ref_file} ${ref_2bit_name}
+  run_cmd "faToTwoBit ${ref_file} ${ref_2bit_name}"
   cd - > /dev/null      # Don't want to echo this out
   echo "${dir_for_2bit}/${ref_2bit_name}"
 }
@@ -86,7 +108,7 @@ blat_query() {
   for chr_fa in ${split_ref_files}; do
     log "Processing ${chr_fa}"
     chr_base=$(basename ${chr_fa} | cut -d'.' -f1)
-    blat ${from_2bit_param} ${chr_fa} ${chr_base}.psl -tileSize=12 -minScore=100 -minIdentity=98 # -fastMap
+    run_cmd "blat ${from_2bit_param} ${chr_fa} ${chr_base}.psl -tileSize=12 -minScore=100 -minIdentity=98" # -fastMap
   done
   ref_base_name=$(basename ${to_splits_dir_param})
   PSL_DIR=${WORK_DIR}/psl/${ref_base_name}
