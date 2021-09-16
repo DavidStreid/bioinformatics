@@ -6,13 +6,20 @@ The source reference is treated like a reference and the target reference is bro
 is aligned via blat to the source.
 
 ## Usage
-Default is submit to LSF cluster
+#### Arguments `(-arg)`
+* `-s`: string, source reference FASTA to use 
+  > Eg: `-s GRCh37.fa`
+* `-t`: string, target reference FASTA to use
+  > Eg: `-t hs37d5.fa`
+* `-l`: flag (optional), run locally (default: lsf)
+
+Examples:
 ```
-./create_liftover.sh -s grch37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa -t hs37d5/hs37d5.fasta
-```
-To submit locally, add the `-l` option
-```
+# Submits jobs locally
 ./create_liftover.sh -s grch37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa -t hs37d5/hs37d5.fasta -l
+
+# Submist jobs to LSF
+./create_liftover.sh -s grch37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa -t hs37d5/hs37d5.fasta
 ```
 
 ## Tools Used
