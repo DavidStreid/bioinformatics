@@ -5,7 +5,15 @@ Simple script that takes source and target reference and creates a liftover chai
 The source reference is treated like a reference and the target reference is broken down into its scaffolds and each
 is aligned via blat to the source.
 
-
+## Usage
+Default is submit to LSF cluster
+```
+./create_liftover.sh -s grch37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa -t hs37d5/hs37d5.fasta
+```
+To submit locally, add the `-l` option
+```
+./create_liftover.sh -s grch37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa -t hs37d5/hs37d5.fasta -l
+```
 
 ## Tools Used
 
