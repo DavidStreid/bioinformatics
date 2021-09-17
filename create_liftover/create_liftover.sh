@@ -1,10 +1,12 @@
 #!/bin/bash
+#
+# Creates liftover file mapping from an input reference to another input reference
 
 while getopts 's:t:l' flag; do
   case "${flag}" in
-    s) FROM_REF="${OPTARG}" ;;
-    t) TO_REF="${OPTARG}" ;;
-    l) USE_LOCAL='true' ;;
+    s) FROM_REF="${OPTARG}" ;;      # Reference to convert      e.g. GRCh37
+    t) TO_REF="${OPTARG}" ;;        # Reference to convert TO   e.g. hs37d5
+    l) USE_LOCAL='true' ;;          # Option to submit the blat job to lsf or do it locally
     *) print_usage
        exit 1 ;;
   esac
@@ -19,19 +21,27 @@ echo "Creating Liftover: ${FROM_REF} -> ${TO_REF} (USE_LOCAL=${USE_LOCAL})"
 FROM_REF=$(realpath ${FROM_REF})
 TO_REF=$(realpath ${TO_REF})
 
+# Create work directory and log file
 WORK_DIR=$(pwd)/temp
 LOG_FILE=${WORK_DIR}/liftover.out
 mkdir -p ${WORK_DIR}
 
+#########################################
+# Logs output to @LOG_FILE
+#
+# Arguments:
+#   log_msg, string - message to log
+#########################################
 log() {
-  INPUT_CMD=$@
-  echo ${INPUT_CMD}  >> ${LOG_FILE}
+  log_msg=$@
+  echo ${log_msg}  >> ${LOG_FILE}
 }
 
 #########################################
 # Executes and logs command
+#
 # Arguments:
-#   INPUT_CMD - string of command to run, e.g. "picard CollectAlignmentSummaryMetrics ..."
+#   INPUT_CMD, string - command to run
 #########################################
 run_cmd () {
   INPUT_CMD=$@
@@ -39,10 +49,41 @@ run_cmd () {
   eval "${INPUT_CMD}" >> ${LOG_FILE} 2>&1
 }
 
+#########################################
+# Creates 2bit reference representation
+#
+# Arguments:
+#   ref_file, string - target FASTA ref
+# Returns:
+#   path to 2bit reference representation
+#########################################
+create_2bit_from_ref() {
+  ref_file=$1
+  ref_dir=$(dirname ${ref_file})
+  ref_base=$(basename ${ref_file} | cut -d'.' -f1)
+  ref_2bit_name="${ref_base}.2bit"
+  dir_for_2bit="${WORK_DIR}/2bit"
+  mkdir -p ${dir_for_2bit}
+  cd ${dir_for_2bit}
+  run_cmd "faToTwoBit ${ref_file} ${ref_2bit_name}"
+  cd - > /dev/null      # Don't want to echo this out
+  echo "${dir_for_2bit}/${ref_2bit_name}"
+}
+
+#########################################
+# Creates alignment .psl & metadata .lft
+# for each scaffold of target reference
+#
+# Arguments:
+#   ref_file, string - target FASTA ref
+#   ref_2bit, string - source .2bit ref
+#   setup_info, string - setup file name
+#########################################
 create_setup_files() {
   ref_file=$1
   ref_2bit=$2
-  setup_info_file=$3 # "setup_info.txt"
+  setup_info_file=$3
+
   ref_dir=$(dirname ${ref_file})
   ref_base=$(basename ${ref_file} | cut -d'.' -f1)
   num_contigs=$(cat ${ref_file} | grep ">" | wc -l)
@@ -118,7 +159,7 @@ create_setup_files() {
   fi
 
   # Organize all outputs
-  run_cmd "mv 'chr*.psl' ${ref_psl_dir}"
+  run_cmd "mv chr*.psl ${ref_psl_dir}"
   run_cmd "mv chr*.fa ${ref_splits_dir}"
   run_cmd "mv *.size ${ref_size_dir}"
   run_cmd "mv chr*.lft ${ref_lft_dir}"
@@ -142,20 +183,6 @@ create_setup_files() {
   done
 
   cd - > /dev/null 	# Don't want to echo this out
-  echo $(realpath ${ref_splits_dir})
-}
-
-create_2bit_from_ref() {
-  ref_file=$1
-  ref_dir=$(dirname ${ref_file})
-  ref_base=$(basename ${ref_file} | cut -d'.' -f1)
-  ref_2bit_name="${ref_base}.2bit"
-  dir_for_2bit="${WORK_DIR}/2bit"
-  mkdir -p ${dir_for_2bit}
-  cd ${dir_for_2bit}
-  run_cmd "faToTwoBit ${ref_file} ${ref_2bit_name}"
-  cd - > /dev/null      # Don't want to echo this out
-  echo "${dir_for_2bit}/${ref_2bit_name}"
 }
 
 echo "Creating 2bit of ${FROM_REF}..."
@@ -163,6 +190,7 @@ from_2bit=$(create_2bit_from_ref ${FROM_REF})
 printf "\t... wrote 2bit to ${from_2bit}\n"
 
 TO_SETUP_FILE="${WORK_DIR}/TO_SETUP_FILE.txt"
-echo "Setup for ${TO_REF}. Writing to ${TO_SETUP_FILE}..."
+echo "Setup for ${TO_REF}..."
 create_setup_files ${TO_REF} ${from_2bit} ${TO_SETUP_FILE}
+printf "\t... wrote setup info to ${TO_SETUP_FILE}\n"
 cat ${TO_SETUP_FILE} | grep ERROR
