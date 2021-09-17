@@ -1,9 +1,5 @@
 #!/bin/bash
 
-FROM_REF=$1
-TO_REF=$2
-USE_LOCAL='false'
-
 while getopts 's:t:l' flag; do
   case "${flag}" in
     s) FROM_REF="${OPTARG}" ;;
@@ -43,8 +39,12 @@ run_cmd () {
   eval "${INPUT_CMD}" >> ${LOG_FILE} 2>&1
 }
 
-create_splits_dir() {
+
+
+create_setup_files() {
   ref_file=$1
+  ref_2bit=$2
+  setup_info_file=$3 # "setup_info.txt"
   ref_dir=$(dirname ${ref_file})
   ref_base=$(basename ${ref_file} | cut -d'.' -f1)
   num_contigs=$(cat ${ref_file} | grep ">" | wc -l)
@@ -55,25 +55,29 @@ create_splits_dir() {
   ref_size_dir="${WORK_DIR}/${ref_base}/size"
   ref_lft_dir="${WORK_DIR}/${ref_base}/lft"
   ref_2bit_dir="${WORK_DIR}/${ref_base}/2bit"
-  scaffold_lft_dir="${ref_lft_dir}/scaffolds"
+  ref_psl_dir="${WORK_DIR}/${ref_base}/psl"
 
   mkdir -p ${ref_splits_dir} && \
     mkdir -p ${ref_lft_dir} && \
     mkdir -p ${ref_size_dir} && \
     mkdir -p ${ref_2bit_dir} && \
-    mkdir -p ${scaffold_lft_dir}
+    mkdir -p ${ref_psl_dir}
 
-  ref_lft_fname="chr"
-  run_cmd "faSplit sequence ${ref_file} ${num_contigs} -lift=${ref_lft_fname}.lft ${ref_lft_fname}"
+  ref_to_scaffold_split_basename="chr"
+  run_cmd "faSplit sequence ${ref_file} ${num_contigs} -lift=${ref_to_scaffold_split_basename}.lft ${ref_to_scaffold_split_basename}"
 
-  for chr in ${ref_lft_fname}*; do
+  JOB_ID_LIST_FILE="blat_lsf_jobs.txt"
+  for chr in ${ref_to_scaffold_split_basename}*; do
     chr_base=$(basename ${chr} | cut -d'.' -f1)
     chr_2bit="${chr_base}.2bit"
     chr_size="${chr_base}.size"
     chr_lift="${chr_base}.lft"
+    chr_blat="${chr_base}.psl"
+
     lift_prefix="lift_${chr_base}_"
+
     # We need to create the .lft files to change the coordinates after alignment
-    log "Lift Creation: ${chr} -> ${chr_2bit} -> ${chr_size} -> ${chr_lift}"
+    log "Setup Files: ${chr} -> ${chr_2bit} -> ${chr_size} -> ${chr_lift} -> ${chr_blat}"
     run_cmd "faToTwoBit ${chr} ${chr_2bit}"
     run_cmd "twoBitInfo ${chr_2bit} ${chr_size}"
 
@@ -84,13 +88,56 @@ create_splits_dir() {
       log "[ERROR] - Too many lift entries for scaffold: ${chr_base}"
       exit 1
     fi
+
+    chr_base=$(basename ${chr} | cut -d'.' -f1)
+    BLAT_CMD="blat ${ref_2bit} ${chr} ${chr_blat} -tileSize=12 -minScore=100 -minIdentity=98"
+    if [[ ${USE_LOCAL} == 'true' ]]; then
+      run_cmd ${BLAT_CMD}
+    else
+      JOB_NAME="BLAT_${chr_base}"
+      SUBMIT=$(bsub -J ${JOB_NAME} -o ${JOB_NAME} -n 10 -M 12 "${BLAT_CMD}")
+      log ${SUBMIT}
+      JOB_ID=$(echo $SUBMIT | egrep -o '[0-9]{5,}') # Parses out job id from output
+      echo ${JOB_ID} >> ${JOB_ID_LIST_FILE}         # Save job id to wait on later
+    fi
+
     log "[SUCCESS] Created ${chr_lift}"
   done
 
+  if [[ -f ${JOB_ID_LIST_FILE} && USE_LOCAL == "false" ]]; then
+    # LSF was chosen
+    ALL_JOBS=$(cat ${JOB_ID_LIST_FILE} | tr '\n' ' ')
+    log "Submitted Jobs (${EXECUTOR}): %s"
+    log "${ALL_JOBS}"
+    for job_id in ${ALL_JOBS}; do
+      log "Waiting for ${job_id} to finish"
+      bwait -w "ended(${job_id})" &
+    done
+  fi
+
+  # Organize all outputs
+  run_cmd "mv 'chr*.psl' ${ref_psl_dir}"
   run_cmd "mv chr*.fa ${ref_splits_dir}"
   run_cmd "mv *.size ${ref_size_dir}"
   run_cmd "mv chr*.lft ${ref_lft_dir}"
   run_cmd "mv chr*.2bit ${ref_2bit_dir}"
+
+  # Write all files for each scaffold to a line in a file
+  for split_file in ${ref_splits_dir}/${ref_to_scaffold_split_basename}*.fa; do
+    bname=$(basename ${chr} | cut -d'.' -f1)
+    bname_size=${ref_size_dir}/${bname}.size
+    bname_lft=${ref_lft_dir}/${bname}.lft
+    bname_2bit=${ref_2bit_dir}/${bname}.2bit
+    bname_psl=${ref_psl_dir}/${bname}.psl
+
+    log "Searching for ${split_file} ${bname_size} ${bname_lft} ${bname_2bit} ${bname_psl}"
+    if [[ -f ${split_file} && -f ${bname_size} && -f ${bname_lft} && -f ${bname_2bit} && -f ${bname_psl} ]]; then
+      echo "${bname} ${split_file} ${bname_size} ${bname_lft} ${bname_2bit} ${bname_psl}" >> ${setup_info_file}
+    else
+      echo "${bname} ERROR" >> ${setup_info_file}
+      log "[ERROR] Setup of ${bname} "
+    fi
+  done
 
   cd - > /dev/null 	# Don't want to echo this out
   echo $(realpath ${ref_splits_dir})
@@ -109,54 +156,11 @@ create_2bit_from_ref() {
   echo "${dir_for_2bit}/${ref_2bit_name}"
 }
 
-blat_query() {
-  to_splits_dir_param=$1
-  from_2bit_param=$2
-  log "to_splits_dir_param=${to_splits_dir_param} from_2bit_param=${from_2bit_param}"
-
-  split_ref_files=$(find ${to_splits_dir_param} -type f -name "chr*.fa")
-
-  JOB_ID_LIST_FILE="blat_lsf_jobs.txt"
-  for chr_fa in ${split_ref_files}; do
-    log "Processing ${chr_fa}"
-    chr_base=$(basename ${chr_fa} | cut -d'.' -f1)
-    if [[ USE_LOCAL == 'true' ]]; then
-      run_cmd "blat ${from_2bit_param} ${chr_fa} ${chr_base}.psl -tileSize=12 -minScore=100 -minIdentity=98"
-    else
-      JOB_NAME="BLAT_${chr_base}"
-      SUBMIT=$(bsub -J ${JOB_NAME} -o ${JOB_NAME} -n 10 -M 12 "blat ${from_2bit_param} ${chr_fa} ${chr_base}.psl -tileSize=12 -minScore=100 -minIdentity=98")
-      log ${SUBMIT}
-      JOB_ID=$(echo $SUBMIT | egrep -o '[0-9]{5,}') # Parses out job id from output
-      echo ${JOB_ID} >> ${JOB_ID_LIST_FILE}         # Save job id to wait on later
-    fi
-  done
-
-  ref_base_name=$(basename ${to_splits_dir_param})
-  PSL_DIR=${WORK_DIR}/psl/${ref_base_name}
-
-  if [[ -f ${JOB_ID_LIST_FILE} && USE_LOCAL == "false" ]]; then
-    # LSF was chosen
-    ALL_JOBS=$(cat ${JOB_ID_LIST_FILE} | tr '\n' ' ')
-    log "Submitted Jobs (${EXECUTOR}): %s"
-    log "${ALL_JOBS}"
-    for job_id in ${ALL_JOBS}; do
-      log "Waiting for ${job_id} to finish"
-      bwait -w "ended(${job_id})" &
-    done
-  fi
-
-  run_cmd "mkdir -p ${PSL_DIR}"
-  run_cmd "mv 'chr*.psl' ${PSL_DIR}"
-  echo ${PSL_DIR}
-}
-
-echo "Splitting ${TO_REF}..."
-to_splits_dir=$(create_splits_dir ${TO_REF})
-printf "\t... wrote splits to ${to_splits_dir}\n"
 echo "Creating 2bit of ${FROM_REF}..."
 from_2bit=$(create_2bit_from_ref ${FROM_REF})
 printf "\t... wrote 2bit to ${from_2bit}\n"
 
-echo "BLAT query sequences of $(basename ${to_splits_dir}) against the 2bit..."
-dir_blat_querys_against_FROM=$(blat_query ${to_splits_dir} ${from_2bit})
-echo "... wrote .psl files to ${dir_blat_querys_against_FROM}"
+TO_SETUP_FILE="TO_SETUP_FILE.txt"
+echo "Setup for ${TO_REF}. Writing to ${TO_SETUP_FILE}..."
+create_setup_files ${TO_REF} ${from_2bit} ${TO_SETUP_FILE}
+cat ${TO_SETUP_FILE} | grep ERROR
