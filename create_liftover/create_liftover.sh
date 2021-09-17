@@ -162,7 +162,7 @@ echo "Creating 2bit of ${FROM_REF}..."
 from_2bit=$(create_2bit_from_ref ${FROM_REF})
 printf "\t... wrote 2bit to ${from_2bit}\n"
 
-TO_SETUP_FILE="$(pwd)/TO_SETUP_FILE.txt"
+TO_SETUP_FILE="${WORK_DIR}/TO_SETUP_FILE.txt"
 echo "Setup for ${TO_REF}. Writing to ${TO_SETUP_FILE}..."
 create_setup_files ${TO_REF} ${from_2bit} ${TO_SETUP_FILE}
 cat ${TO_SETUP_FILE} | grep ERROR
