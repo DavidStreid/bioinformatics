@@ -39,8 +39,6 @@ run_cmd () {
   eval "${INPUT_CMD}" >> ${LOG_FILE} 2>&1
 }
 
-
-
 create_setup_files() {
   ref_file=$1
   ref_2bit=$2
@@ -56,12 +54,14 @@ create_setup_files() {
   ref_lft_dir="${WORK_DIR}/${ref_base}/lft"
   ref_2bit_dir="${WORK_DIR}/${ref_base}/2bit"
   ref_psl_dir="${WORK_DIR}/${ref_base}/psl"
+  ref_lift_dir="${WORK_DIR}/${ref_base}/lift_work"    # DISCARD - Should be identical to chr_*.fa. Created to get the .size files
 
   mkdir -p ${ref_splits_dir} && \
     mkdir -p ${ref_lft_dir} && \
     mkdir -p ${ref_size_dir} && \
     mkdir -p ${ref_2bit_dir} && \
-    mkdir -p ${ref_psl_dir}
+    mkdir -p ${ref_psl_dir} && \
+    mkdir -p ${ref_lift_dir}
 
   ref_to_scaffold_split_basename="chr"
   run_cmd "faSplit sequence ${ref_file} ${num_contigs} -lift=${ref_to_scaffold_split_basename}.lft ${ref_to_scaffold_split_basename}"
@@ -87,6 +87,8 @@ create_setup_files() {
     if [[ ${num_files} -ne 1 ]]; then
       log "[ERROR] - Too many lift entries for scaffold: ${chr_base}"
       exit 1
+    else
+      mv ${lift_prefix}* ${ref_lift_dir}
     fi
 
     chr_base=$(basename ${chr} | cut -d'.' -f1)
@@ -160,7 +162,7 @@ echo "Creating 2bit of ${FROM_REF}..."
 from_2bit=$(create_2bit_from_ref ${FROM_REF})
 printf "\t... wrote 2bit to ${from_2bit}\n"
 
-TO_SETUP_FILE="TO_SETUP_FILE.txt"
+TO_SETUP_FILE="$(pwd)/TO_SETUP_FILE.txt"
 echo "Setup for ${TO_REF}. Writing to ${TO_SETUP_FILE}..."
 create_setup_files ${TO_REF} ${from_2bit} ${TO_SETUP_FILE}
 cat ${TO_SETUP_FILE} | grep ERROR
