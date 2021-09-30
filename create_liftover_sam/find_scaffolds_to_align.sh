@@ -38,6 +38,10 @@ for map in ${sMaps}; do
     rm ${scaffolds_to_map_file}
   else
     printf "\t...${num_matches} matches\n"
-    cat ${scaffolds_to_map_file} | cut -f2,6
+    for match in $(cat ${scaffolds_to_map_file}); do
+      qry=$(echo ${match} | cut -f2)
+      ref=$(echo ${match} | cut -f6)
+      echo "bwa mem -M -t 40 ${ref} ${qry} > q${qry}_r${ref}.sam"
+    done
   fi
 done
