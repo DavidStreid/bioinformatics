@@ -38,7 +38,7 @@ else
     fname=$(head -1 ${f} | cut -d' ' -f1 | sed 's/>//')
     moved_file=${SPLIT_DIR}/${fname}.fa
     mv ${f} ${moved_file}
-    CMD="/opt/common/CentOS_7/bwa/bwa-0.7.17/bwa index ${moved_file}"
+    CMD="bwa index ${moved_file}"
     echo ${CMD}
     eval ${CMD}
   done
@@ -76,7 +76,7 @@ for map in ${sMaps}; do
       ref=$(echo ${match} | cut -d' ' -f6)
       qry_fa=${SPLIT_DIR}/${qry}.fa
       ref_fa=${SPLIT_DIR}/${ref}.fa
-      CMD="/opt/common/CentOS_7/bwa/bwa-0.7.17/bwa mem -M -t 40 ${ref_fa} ${qry_fa} > ${MAP_ALIGN_DIR}/q${qry}_r${ref}.sam"
+      CMD="bwa mem -M -t 40 ${ref_fa} ${qry_fa} > ${MAP_ALIGN_DIR}/q${qry}_r${ref}.sam"
       if [[ ${USE_LOCAL} != "true" ]]; then
         JOB_NAME="ALIGN__Q:${qry}_R:${ref}"
         CMD="bsub -J ${JOB_NAME} -o ${JOB_NAME}.out -n 8 -M 6 '${CMD}'"
