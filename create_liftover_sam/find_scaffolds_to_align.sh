@@ -1,14 +1,25 @@
 #!/bin/bash
 
-INPUT_REF=$1
-
-LOCATION=$(dirname "$0")
-SCAFFOLD_MAP_DIR="${LOCATION}/alternate_scaffold_mappings"
+USE_LOCAL='false'
+while getopts 'r:l' flag; do
+  case "${flag}" in
+    r) INPUT_REF="${OPTARG}" ;;     # Reference to create liftover file for, e.g. GRCh37
+    l) USE_LOCAL='true' ;;          # Option to submit the blat job to lsf or do it locally
+    *) print_usage
+       exit 1 ;;
+  esac
+done
 
 if [[ ! -f ${INPUT_REF} ]]; then
   echo "Please provide a valid reference file"
   exit 1
+else
+  echo "Running REF=${INPUT_REF} LOCAL=${USE_LOCAL}"
 fi
+
+LOCATION=$(dirname "$0")
+SCAFFOLD_MAP_DIR="${LOCATION}/alternate_scaffold_mappings"
+ALIGN_DIR=$(pwd)/sams
 
 num_contigs=$(cat ${INPUT_REF} | grep ">" | wc -l)
 echo "Writing ${num_contigs} chr*.fa files for ${INPUT_REF}"
@@ -38,10 +49,19 @@ for map in ${sMaps}; do
     rm ${scaffolds_to_map_file}
   else
     printf "\t...${num_matches} matches\n"
+    MAP_ALIGN_DIR=${ALIGN_DIR}/${map_name}
+    mkdir -p ${MAP_ALIGN_DIR}
+    echo "Writing SAM files to ${MAP_ALIGN_DIR}"
     while IFS= read -r match; do
       qry=$(echo ${match} | cut -d' ' -f2)
       ref=$(echo ${match} | cut -d' ' -f6)
-      echo "bwa mem -M -t 40 ${ref}.fa ${qry}.fa > q${qry}_r${ref}.sam"
+      CMD="bwa mem -M -t 40 ${ref}.fa ${qry}.fa > ${MAP_ALIGN_DIR}/q${qry}_r${ref}.sam"
+      if [[ ${USE_LOCAL} != "true" ]]; then
+        JOB_NAME="ALIGN__Q:${qry}_R:${ref}"
+        CMD="bsub -J ${JOB_NAME} -o ${JOB_NAME}.out -n 8 -M 6 '${CMD}'"
+      fi
+      echo ${CMD}
+      eval ${CMD}
     done < "${scaffolds_to_map_file}"
   fi
 done
