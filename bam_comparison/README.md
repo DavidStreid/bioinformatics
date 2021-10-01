@@ -24,6 +24,12 @@ python bam_util_to_csv.py bam_diff.out      # outputs bam_differences.csv
 ``` 
 
 4. **Graph** 
+```
+$ conda create --name grapher --file requirements.txt
+$ conda activate grapher
+(grapher)$ python graph.py
+```
+
 
     BAR
     ```
