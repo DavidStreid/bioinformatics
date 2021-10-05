@@ -54,24 +54,22 @@ def write_file(file_name, entry_list):
     merge_commands_file.close()
 
 def parse_entries(bam_util_output):
-    entries = ["template,v1,v2,v1-v2,v2-v1"]
-
-    total_missing_reads = 0
     lines = open(bam_util_output, "r")
-    first = True
-    entry = Entry('HEADER')
+    curr_read_id=None
+    entry_map = {}
     for line in lines:
         lead_char = line[0]
+
+        # READ_ID LINE
         if lead_char != "<" and lead_char != ">":
-            if entry.is_complete():
-                entries.append(entry.to_string())
-            elif first:
-                first = False
+            curr_read_id = line.strip()
+
+            # NOTE - It's possible for BAM IDs to be present at 2 different places in the input file, this is why we
+            # check to see if we've seen it before
+            if curr_read_id in entry_map:
+                entry = entry_map[curr_read_id]
             else:
-                total_missing_reads += 1
-                print("Read: %s was not complete - r1: %s, r2: %s" % (entry.read, entry.v1, entry.v2))
-            entry = Entry(line.strip())
-        #  If the record is from the first file (--in1), it begins with a '<'. If the record is from the 2nd file (--in2), it begins with a '>'.
+                entry = Entry(curr_read_id)
         else:
             score = line.split()[-1]
             if lead_char == "<":
@@ -82,11 +80,14 @@ def parse_entries(bam_util_output):
                 print("This shouldn't happen...: %s" % line)
                 sys.exit(1)
 
-    if entry.is_complete():
-        entries.append(entry.to_string())
-    else:
-        total_missing_reads += 1
-        print("Read: %s was not complete - r1: %s, r2: %s" % (entry.read, entry.v1, entry.v2))
+    entries = ["template,v1,v2,v1-v2,v2-v1"]
+    total_missing_reads = 0
+    for read_id, entry in entry_map.items():
+        if entry.is_complete():
+            entries.append(entry.to_string())
+        else:
+            total_missing_reads += 1
+            print("Read: %s was not complete - r1: %s, r2: %s" % (entry.read, entry.v1, entry.v2))
 
     if total_missing_reads > 0:
         print("Missing %d read(s)" % total_missing_reads)
