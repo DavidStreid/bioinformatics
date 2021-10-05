@@ -29,7 +29,7 @@ class Entry:
             sys.exit(1)
         self.v2 = int(v2)
     def is_complete(self):
-        return self.v2 and self.v1
+        return self.v2 != None and self.v1 != None
     def to_string(self):
         v1_minus_v2 = self.v1 - self.v2
         v2_minus_v1 = self.v2 - self.v1
@@ -102,8 +102,11 @@ def main():
         if not os.path.isfile(input):
             fail("%s is not a valid file" % input)
 
-    output_file = "bam_differences.csv"
     bam_util_output = inputs[0]
+
+    basename = bam_util_output.split(".")[0]
+
+    output_file = "{}___bam_differences.csv".format(basename)
 
     print("INPUT=%s OUTPUT=%s" % (bam_util_output, output_file))
     entries = parse_entries(bam_util_output)
