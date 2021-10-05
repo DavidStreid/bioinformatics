@@ -12,22 +12,25 @@ class Entry:
         self.read = read
 
     def set_v1(self, v1):
-        if self.v1:
-            print("Read %s has at least two reads for v1: %s" % (read, self.v1))
-            sys.exit(1)
         if not v1.isdigit():
-            print("Read %s v1 not numeric: %s" % (read, v1))
+            print("Read %s v1 not numeric: %s" % (self.read, v1))
             sys.exit(1)
-        self.v1 = int(v1)
+        int_v1 = int(v1)
+        if self.v1 and int_v1 != self.v1:
+            print("Read %s has more than two reads for v2 with different scores: first - %s, update - %s" % (self.read, self.v1, int_v1))
+            sys.exit(1)
+        self.v1 = int_v1
 
     def set_v2(self, v2):
-        if self.v2:
-            print("Read %s has at least two reads for v2: %s" % (read, self.v2))
-            sys.exit(1)
         if not v2.isdigit():
-            print("Read %s v2 not numeric: %s" % (read, v2))
+            print("Read %s v2 not numeric: %s" % (self.read, v2))
             sys.exit(1)
-        self.v2 = int(v2)
+        int_v2 = int(v2)
+        if self.v2 and int_v2 != self.v2:
+            print("Read %s has more than two reads for v2 with different scores: first - %s, update - %s" % (self.read, self.v2, int_v2))
+            sys.exit(1)
+        self.v2 = int_v2
+
     def is_complete(self):
         return self.v2 != None and self.v1 != None
     def to_string(self):
@@ -70,6 +73,7 @@ def parse_entries(bam_util_output):
                 entry = entry_map[curr_read_id]
             else:
                 entry = Entry(curr_read_id)
+                entry_map[curr_read_id] = entry
         else:
             score = line.split()[-1]
             if lead_char == "<":
