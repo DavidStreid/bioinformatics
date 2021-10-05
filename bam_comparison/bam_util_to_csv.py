@@ -10,9 +10,11 @@ class Entry:
     read = None
     v1 = None
     v2 = None
+    flag = None
 
-    def __init__(self, read):
+    def __init__(self, read, flag):
         self.read = read
+        self.flag = flag
 
     def set_v1(self, v1):
         if not v1.isdigit():
@@ -39,7 +41,7 @@ class Entry:
     def to_string(self):
         v1_minus_v2 = self.v1 - self.v2
         v2_minus_v1 = self.v2 - self.v1
-        return "%s,%d,%d,%d,%d" % (self.read, self.v1, self.v2, v1_minus_v2, v2_minus_v1)
+        return "%s,%s,%d,%d,%d,%d" % (self.read, self.flag, self.v1, self.v2, v1_minus_v2, v2_minus_v1)
 
 def fail(err_msg = None):
     """ Exits Application and logs error message """
@@ -66,20 +68,27 @@ def parse_entries(bam_util_output):
     for line in lines:
         lead_char = line[0]
 
-        # READ_ID LINE
         if lead_char != "<" and lead_char != ">":
+            # READ_ID LINE - first line of any entry
             curr_read_id = line.strip()
-
-            # NOTE - It's possible for BAM IDs to be present at 2 different places in the input file, this is why we
-            # check to see if we've seen it before
-            if curr_read_id in entry_map:
-                entry = entry_map[curr_read_id]
-            else:
-                entry = Entry(curr_read_id)
-                entry_map[curr_read_id] = entry
         else:
+            # Populate score entry for curr_read_id & flag
             score = line.split()[-1]
             flag = line.split()[1]
+
+            # Get flag_to_readId dictionary for read_id, or populate w/ empty dic
+            if curr_read_id not in entry_map:
+                entry_map[curr_read_id] = {}
+            read_entry = entry_map[curr_read_id]
+
+            # Get entry for flag of read_id, or populate w/ Entry
+            if flag not in read_entry:
+                entry = Entry(curr_read_id, flag)
+                read_entry[flag] = entry
+            else:
+                entry = read_entry[flag]
+
+            # Populate score for entry
             if lead_char == "<":
                 entry.set_v1(score)
             elif lead_char == ">":
@@ -88,14 +97,16 @@ def parse_entries(bam_util_output):
                 print("This shouldn't happen...: %s" % line)
                 sys.exit(1)
 
-    entries = ["template,v1,v2,v1-v2,v2-v1"]
+    entries = ["template,flag,v1,v2,v1-v2,v2-v1"]
     total_missing_reads = 0
-    for read_id, entry in entry_map.items():
-        if entry.is_complete():
-            entries.append(entry.to_string())
-        else:
-            total_missing_reads += 1
-            print("Read: %s was not complete - r1: %s, r2: %s" % (entry.read, entry.v1, entry.v2))
+    for flag_to_rIds, entry in entry_map.items():
+        for flag, entry in flag_to_rIds.items():
+            if entry.is_complete():
+                entries.append(entry.to_string())
+            else:
+                total_missing_reads += 1
+                err = "Read: %s was not complete - r1: %s, r2: %s" % (entry.read, entry.v1, entry.v2)
+                ERRORS.append(err)
 
     if total_missing_reads > 0:
         print("Missing %d read(s)" % total_missing_reads)
