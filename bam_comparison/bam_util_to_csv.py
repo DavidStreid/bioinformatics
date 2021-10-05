@@ -3,6 +3,9 @@
 import sys
 import os
 USAGE="python bam_util_to_csv.py /PATH/TO/bam_util_output"
+
+ERRORS = []
+
 class Entry:
     read = None
     v1 = None
@@ -17,8 +20,8 @@ class Entry:
             sys.exit(1)
         int_v1 = int(v1)
         if self.v1 and int_v1 != self.v1:
-            print("Read %s has more than two reads for v2 with different scores: first - %s, update - %s" % (self.read, self.v1, int_v1))
-            sys.exit(1)
+            err = "Read %s has more than two reads for v2 with different scores: first - %s, update - %s" % (self.read, self.v1, int_v1)
+            ERRORS.append(err)
         self.v1 = int_v1
 
     def set_v2(self, v2):
@@ -27,8 +30,8 @@ class Entry:
             sys.exit(1)
         int_v2 = int(v2)
         if self.v2 and int_v2 != self.v2:
-            print("Read %s has more than two reads for v2 with different scores: first - %s, update - %s" % (self.read, self.v2, int_v2))
-            sys.exit(1)
+            err = "Read %s has more than two reads for v2 with different scores: first - %s, update - %s" % (self.read, self.v2, int_v2)
+            ERRORS.append(err)
         self.v2 = int_v2
 
     def is_complete(self):
@@ -76,6 +79,7 @@ def parse_entries(bam_util_output):
                 entry_map[curr_read_id] = entry
         else:
             score = line.split()[-1]
+            flag = line.split()[1]
             if lead_char == "<":
                 entry.set_v1(score)
             elif lead_char == ">":
@@ -117,6 +121,8 @@ def main():
     entries = parse_entries(bam_util_output)
     print("WRITING %s" % output_file)
     write_file(output_file, entries)
+    print("ERRORS")
+    print("\n".join(ERRORS))
 
 if __name__ == '__main__':
     main()
