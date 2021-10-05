@@ -39,9 +39,26 @@ class Entry:
     def is_complete(self):
         return self.v2 != None and self.v1 != None
     def to_string(self):
-        v1_minus_v2 = self.v1 - self.v2
-        v2_minus_v1 = self.v2 - self.v1
+        if self.is_complete():
+            v1_minus_v2 = self.v1 - self.v2
+            v2_minus_v1 = self.v2 - self.v1
+        else:
+            return "%s,%s" % (self.read, self.flag) + "," + str(self.v1) + "," + str(self.v2) + ",None,None"
         return "%s,%s,%d,%d,%d,%d" % (self.read, self.flag, self.v1, self.v2, v1_minus_v2, v2_minus_v1)
+
+def is_flag_reverse_complemented(flag):
+    if not flag.isdigit():
+        # hex-representation to int
+        flag = int(flag, 16)
+    else:
+        flag = int(flag)
+    # 5th bit indicates reverse complement
+    fifth_bit = get_kth_bit(flag, 5)
+    return fifth_bit == 1
+
+def get_kth_bit(n, k):
+    # https://www.geeksforgeeks.org/find-value-k-th-bit-binary-representation/
+    return (n & (1 << (k - 1))) >> (k - 1)
 
 def fail(err_msg = None):
     """ Exits Application and logs error message """
@@ -99,14 +116,23 @@ def parse_entries(bam_util_output):
 
     entries = ["template,flag,v1,v2,v1-v2,v2-v1"]
     total_missing_reads = 0
-    for flag_to_rIds, entry in entry_map.items():
-        for flag, entry in flag_to_rIds.items():
+
+    added = []
+
+    for read_id, flag_to_entry_dic in entry_map.items():
+        for flag, entry in flag_to_entry_dic.items():
             if entry.is_complete():
+                # Entry w/ exact same flag is complete - write result and remove from dictionary
                 entries.append(entry.to_string())
-            else:
-                total_missing_reads += 1
-                err = "Read: %s was not complete - r1: %s, r2: %s" % (entry.read, entry.v1, entry.v2)
-                ERRORS.append(err)
+                added.append([read_id, flag])
+
+    for rf in added:
+        added_read_id = rf[0]
+        added_flag = rf[1]
+        del entry_map[added_read_id][added_flag]
+
+    # Process remaining entries
+    # TODO
 
     if total_missing_reads > 0:
         print("Missing %d read(s)" % total_missing_reads)
