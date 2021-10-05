@@ -14,3 +14,9 @@ conda activate liftover_sam
 ```
 $ ./find_scaffolds_to_align.sh -r GRCh37.fasta
 ```
+
+
+## References
+https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&chromInfoPage=
+
+https://www.biostars.org/p/304800/
