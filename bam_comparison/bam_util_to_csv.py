@@ -6,45 +6,143 @@ USAGE="python bam_util_to_csv.py /PATH/TO/bam_util_output"
 
 ERRORS = []
 
+FW_FLAG = 'fw'
+RC_FLAG = 'rc'
+DUP_FW_FLAG = 'dup_fw'
+DUP_RC_FLAG = 'dup_rc'
+
+V1 = 'v1'
+V2 = 'v2'
+
+total_missing_reads = 0
+
+def combine_flag_vals(dic, flag_list, val_type):
+    flag_vals = []
+    for f in flag_list:
+         for val in dic[f][val_type]:
+            entries = [ [f,v] for v in dic[f][val_type] ]
+            flag_vals.extend(entries)
+    return flag_vals
+
 class Entry:
     read = None
-    v1 = None
-    v2 = None
-    flag = None
+    flag_to_val_dic = {}
 
-    def __init__(self, read, flag):
+    def __init__(self, read):
         self.read = read
-        self.flag = flag
+        self.flag_to_val_dic = {}
 
-    def set_v1(self, v1):
+    def add_flag_paths(self, flag):
+        if flag not in self.flag_to_val_dic:
+             self.flag_to_val_dic[flag] = {}
+        val_dic = self.flag_to_val_dic[flag]
+        if V1 not in val_dic:
+            val_dic[V1] = []
+        if V2 not in val_dic:
+            val_dic[V2] = []
+
+    def add_v1(self, flag, v1):
         if not v1.isdigit():
             print("Read %s v1 not numeric: %s" % (self.read, v1))
             sys.exit(1)
         int_v1 = int(v1)
-        if self.v1 and int_v1 != self.v1:
-            err = "Read %s has more than two reads for v2 with different scores: first - %s, update - %s" % (self.read, self.v1, int_v1)
-            ERRORS.append(err)
-        self.v1 = int_v1
+        self.add_flag_paths(flag)
+        self.flag_to_val_dic[flag][V1].append(int_v1)
 
-    def set_v2(self, v2):
+    def add_v2(self, flag, v2):
         if not v2.isdigit():
             print("Read %s v2 not numeric: %s" % (self.read, v2))
             sys.exit(1)
         int_v2 = int(v2)
-        if self.v2 and int_v2 != self.v2:
-            err = "Read %s has more than two reads for v2 with different scores: first - %s, update - %s" % (self.read, self.v2, int_v2)
-            ERRORS.append(err)
-        self.v2 = int_v2
+        self.add_flag_paths(flag)
+        self.flag_to_val_dic[flag][V2].append(int_v2)
 
-    def is_complete(self):
-        return self.v2 != None and self.v1 != None
-    def to_string(self):
-        if self.is_complete():
-            v1_minus_v2 = self.v1 - self.v2
-            v2_minus_v1 = self.v2 - self.v1
-        else:
-            return "%s,%s" % (self.read, self.flag) + "," + str(self.v1) + "," + str(self.v2) + ",None,None"
-        return "%s,%s,%d,%d,%d,%d" % (self.read, self.flag, self.v1, self.v2, v1_minus_v2, v2_minus_v1)
+    def return_flag_val_pairs(self):
+        global total_missing_reads
+
+        # Note - this permanently modifies the flag_to_val_dic field
+        pairs = []
+
+        paired_up_flags = []
+        # Add pairs
+
+        for flag, val_dic in self.flag_to_val_dic.items():
+            v1_vals = val_dic[V1]
+            v2_vals = val_dic[V2]
+
+            pairing_dic = {}
+            while len(v1_vals) > 0:
+                v1_v = v1_vals.pop()
+                if v1_v in pairing_dic:
+                    pairing_dic[v1_v] += 1
+                else:
+                    pairing_dic[v1_v] = 1
+
+            unpaired_v2s = []
+            while len(v2_vals) > 0:
+                v2_v = v2_vals.pop()
+                if v2_v in pairing_dic:
+                    pairing_dic[v2_v] -= 1
+                    # print("ADDING: {} {} {} {}".format(self.read, flag, v2_v, v2_v))
+                    pairs.append([ flag, flag, v2_v, v2_v ])        # Same value
+                    if pairing_dic[v2_v] == 0:          # Remove if all values have been paired up
+                        del pairing_dic[v2_v]
+                else:
+                    unpaired_v2s.append(v2_v)
+
+            # Any unpaired values we pair up together
+            unpaired_v1s = list(pairing_dic.keys())
+            unpaired_v1s.sort()
+            unpaired_v2s.sort()
+            while len(unpaired_v1s) > 0 and len(unpaired_v2s) > 0:
+                pairs.append([flag, flag, unpaired_v1s.pop(), unpaired_v2s.pop()])
+
+            # All values for flag are paired
+            if len(unpaired_v1s) == 0 and len(unpaired_v2s) == 0:
+                paired_up_flags.append(flag)
+            # Unpaired values for flag are paired
+            else:
+                val_dic[V1] = unpaired_v1s
+                val_dic[V2] = unpaired_v2s
+
+        # Remove paired-up flags
+        for flag in paired_up_flags:
+            del self.flag_to_val_dic[flag]
+
+        # Add remaining pairs from flags that have only v1 or v2 values
+        remaining_flags = self.flag_to_val_dic.keys()
+        rc_v1_flags = [ f for f in remaining_flags if is_flag_reverse_complemented(f) and len(self.flag_to_val_dic[f][V1]) > 0 ]
+        rc_v2_flags = [ f for f in remaining_flags if is_flag_reverse_complemented(f) and len(self.flag_to_val_dic[f][V2]) > 0 ]
+        fw_v1_flags = [ f for f in remaining_flags if not is_flag_reverse_complemented(f) and len(self.flag_to_val_dic[f][V1]) > 0 ]
+        fw_v2_flags = [ f for f in remaining_flags if not is_flag_reverse_complemented(f) and len(self.flag_to_val_dic[f][V2]) > 0 ]
+
+        rc_v1_vals = combine_flag_vals(self.flag_to_val_dic, rc_v1_flags, V1)
+        rc_v2_vals = combine_flag_vals(self.flag_to_val_dic, rc_v2_flags, V2)
+        fw_v1_vals = combine_flag_vals(self.flag_to_val_dic, fw_v1_flags, V1)
+        fw_v2_vals = combine_flag_vals(self.flag_to_val_dic, fw_v2_flags, V2)
+
+        while len(rc_v1_vals) > 0 and len(rc_v2_vals) > 0:
+            rc_v1_entry = rc_v1_vals.pop()
+            rc_v2_entry = rc_v2_vals.pop()
+            pairs.append([rc_v1_entry[0], rc_v2_entry[0], rc_v1_entry[1], rc_v2_entry[1]])
+        while len(fw_v1_vals) > 0 and len(fw_v2_vals) > 0:
+            fw_v1_entry = fw_v1_vals.pop()
+            fw_v2_entry = fw_v2_vals.pop()
+            pairs.append([fw_v1_entry[0], fw_v2_entry[0], fw_v1_entry[1], fw_v2_entry[1]])
+
+        if len(rc_v1_vals) > 0 or len(rc_v2_vals) > 0:
+            total_missing_reads += (len(rc_v2_vals) + len(rc_v1_vals))
+            ERRORS.append("UNPAIRED [RC]: V1=[{}] V2=[{}]".format(
+                ",".join([f[0] + ":" + str(f[1]) for f in rc_v1_vals]),
+                ",".join([f[0] + ":" + str(f[1]) for f in rc_v2_vals])
+            ))
+        if len(fw_v1_vals) > 0 or len(fw_v2_vals) > 0:
+            total_missing_reads += (len(fw_v1_vals) + len(fw_v2_vals))
+            ERRORS.append("UNPAIRED [FW]: V1=[{}] V2=[{}]".format(
+                ",".join([f[0] + ":" + str(f[1]) for f in fw_v1_vals]),
+                ",".join([f[0] + ":" + str(f[1]) for f in fw_v2_vals])
+            ))
+        return pairs
 
 def is_flag_reverse_complemented(flag):
     if not flag.isdigit():
@@ -55,6 +153,16 @@ def is_flag_reverse_complemented(flag):
     # 5th bit indicates reverse complement
     fifth_bit = get_kth_bit(flag, 5)
     return fifth_bit == 1
+
+def is_flag_duplicate(flag):
+    if not flag.isdigit():
+        # hex-representation to int
+        flag = int(flag, 16)
+    else:
+        flag = int(flag)
+    # 11th bit indicates a duplicate
+    eleventh_bit = get_kth_bit(flag, 11)
+    return eleventh_bit == 1
 
 def get_kth_bit(n, k):
     # https://www.geeksforgeeks.org/find-value-k-th-bit-binary-representation/
@@ -78,6 +186,10 @@ def write_file(file_name, entry_list):
     merge_commands_file.write("\n".join(entry_list))
     merge_commands_file.close()
 
+def get_flag_entry(flag):
+    is_rc = is_flag_reverse_complemented(flag)
+    is_dup = is_flag_duplicate(flag)
+
 def parse_entries(bam_util_output):
     lines = open(bam_util_output, "r")
     curr_read_id=None
@@ -93,46 +205,33 @@ def parse_entries(bam_util_output):
             score = line.split()[-1]
             flag = line.split()[1]
 
-            # Get flag_to_readId dictionary for read_id, or populate w/ empty dic
             if curr_read_id not in entry_map:
-                entry_map[curr_read_id] = {}
-            read_entry = entry_map[curr_read_id]
-
-            # Get entry for flag of read_id, or populate w/ Entry
-            if flag not in read_entry:
-                entry = Entry(curr_read_id, flag)
-                read_entry[flag] = entry
-            else:
-                entry = read_entry[flag]
+                entry_map[curr_read_id] = Entry(curr_read_id)
+            entry = entry_map[curr_read_id]
 
             # Populate score for entry
             if lead_char == "<":
-                entry.set_v1(score)
+                entry.add_v1(flag, score)
             elif lead_char == ">":
-                entry.set_v2(score)
+                entry.add_v2(flag, score)
             else:
                 print("This shouldn't happen...: %s" % line)
                 sys.exit(1)
 
     entries = ["template,flag,v1,v2,v1-v2,v2-v1"]
-    total_missing_reads = 0
-
     added = []
 
-    for read_id, flag_to_entry_dic in entry_map.items():
-        for flag, entry in flag_to_entry_dic.items():
-            if entry.is_complete():
-                # Entry w/ exact same flag is complete - write result and remove from dictionary
-                entries.append(entry.to_string())
-                added.append([read_id, flag])
-
-    for rf in added:
-        added_read_id = rf[0]
-        added_flag = rf[1]
-        del entry_map[added_read_id][added_flag]
-
-    # Process remaining entries
-    # TODO
+    for read_id, entry in entry_map.items():
+        fv_pairs = entry.return_flag_val_pairs()
+        for fv_pair in fv_pairs:
+            f1 = fv_pair[0]
+            f2 = fv_pair[1]
+            v1 = str(fv_pair[2])
+            v2 = str(fv_pair[3])
+            d1 = str(fv_pair[2] - fv_pair[3])
+            d2 = str(fv_pair[3] - fv_pair[2])
+            line = "{},{},{},{},{},{},{}".format(read_id,f1,f2,v1,v2,d1,d2)
+            entries.append(line)
 
     if total_missing_reads > 0:
         print("Missing %d read(s)" % total_missing_reads)
@@ -163,5 +262,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
