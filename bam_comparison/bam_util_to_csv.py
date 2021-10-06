@@ -6,12 +6,7 @@ import pysam
 
 USAGE="python bam_util_to_csv.py /PATH/TO/bam_util_output"
 
-ERRORS = []
-
-FW_FLAG = 'fw'
-RC_FLAG = 'rc'
-DUP_FW_FLAG = 'dup_fw'
-DUP_RC_FLAG = 'dup_rc'
+ERRORS = [] # Save all errors until end and then log
 
 V1 = 'v1'
 V2 = 'v2'
@@ -131,13 +126,15 @@ class Entry:
 
         if len(rc_v1_vals) > 0 or len(rc_v2_vals) > 0:
             total_missing_reads += (len(rc_v2_vals) + len(rc_v1_vals))
-            ERRORS.append("UNPAIRED [RC]: V1=[{}] V2=[{}]".format(
+            ERRORS.append("UNPAIRED_RC,{},{},{}".format(
+                self.read,
                 ",".join([f[0] + ":" + str(f[1]) for f in rc_v1_vals]),
                 ",".join([f[0] + ":" + str(f[1]) for f in rc_v2_vals])
             ))
         if len(fw_v1_vals) > 0 or len(fw_v2_vals) > 0:
             total_missing_reads += (len(fw_v1_vals) + len(fw_v2_vals))
-            ERRORS.append("UNPAIRED [FW]: V1=[{}] V2=[{}]".format(
+            ERRORS.append("UNPAIRED_FW,{},{},{}".format(
+                self.read,
                 ",".join([f[0] + ":" + str(f[1]) for f in fw_v1_vals]),
                 ",".join([f[0] + ":" + str(f[1]) for f in fw_v2_vals])
             ))
@@ -198,6 +195,10 @@ def extract_bam_entries(bam_file, entry_map, type):
         read_id = aln_seg.query_name
         flag = aln_seg.flag
         score = aln_seg.mapping_quality
+
+        # TODO - Add refernece name. It would be interesting to see if reads are aligned to different scaffolds
+        # ref = aln_seg.reference_name
+
         if read_id not in entry_map:
             entry_map[read_id] = Entry(read_id)
         entry = entry_map[read_id]
@@ -249,6 +250,7 @@ def main():
 
     basename = "{}____{}".format(b1.split(".")[0], b2.split(".")[0])
     output_file = "{}___bam_differences.csv".format(basename)
+    missing_file = "{}___missing.csv".format(basename)
 
     print("%s=%s\n%s=%s\nOUTPUT=%s" % (CONTROL_BAM, b1, TARGET_BAM, b2, output_file))
     entries = parse_entries(b1, b2)
@@ -257,6 +259,7 @@ def main():
     write_file(output_file, entries)
     print("ERRORS")
     print("\n".join(ERRORS))
+    write_file(missing_file,ERRORS)
 
 if __name__ == '__main__':
     main()
