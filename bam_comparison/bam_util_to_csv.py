@@ -6,11 +6,10 @@ import pysam
 
 USAGE="python bam_util_to_csv.py /PATH/TO/bam_util_output"
 
-ERRORS = [] # Save all errors until end and then log
+# Save all errors until end and then log
+ERRORS = []
 
-V1 = 'v1'
-V2 = 'v2'
-
+# Constants to track 
 CONTROL_BAM = 'CONTROL_BAM'
 TARGET_BAM = 'TARGET_BAM'
 
@@ -36,20 +35,20 @@ class Entry:
         if flag not in self.flag_to_val_dic:
              self.flag_to_val_dic[flag] = {}
         val_dic = self.flag_to_val_dic[flag]
-        if V1 not in val_dic:
-            val_dic[V1] = []
-        if V2 not in val_dic:
-            val_dic[V2] = []
+        if CONTROL_BAM not in val_dic:
+            val_dic[CONTROL_BAM] = []
+        if TARGET_BAM not in val_dic:
+            val_dic[TARGET_BAM] = []
 
     def add_v1(self, flag, v1):
         int_v1 = int(v1)
         self.add_flag_paths(flag)
-        self.flag_to_val_dic[flag][V1].append(int_v1)
+        self.flag_to_val_dic[flag][CONTROL_BAM].append(int_v1)
 
     def add_v2(self, flag, v2):
         int_v2 = int(v2)
         self.add_flag_paths(flag)
-        self.flag_to_val_dic[flag][V2].append(int_v2)
+        self.flag_to_val_dic[flag][TARGET_BAM].append(int_v2)
 
     def return_flag_val_pairs(self):
         global total_missing_reads
@@ -61,8 +60,8 @@ class Entry:
         # Add pairs
 
         for flag, val_dic in self.flag_to_val_dic.items():
-            v1_vals = val_dic[V1]
-            v2_vals = val_dic[V2]
+            v1_vals = val_dic[CONTROL_BAM]
+            v2_vals = val_dic[TARGET_BAM]
 
             pairing_dic = {}
             while len(v1_vals) > 0:
@@ -96,8 +95,8 @@ class Entry:
                 paired_up_flags.append(flag)
             # Unpaired values for flag are paired
             else:
-                val_dic[V1] = unpaired_v1s
-                val_dic[V2] = unpaired_v2s
+                val_dic[CONTROL_BAM] = unpaired_v1s
+                val_dic[TARGET_BAM] = unpaired_v2s
 
         # Remove paired-up flags
         for flag in paired_up_flags:
@@ -105,15 +104,15 @@ class Entry:
 
         # Add remaining pairs from flags that have only v1 or v2 values
         remaining_flags = self.flag_to_val_dic.keys()
-        rc_v1_flags = [ f for f in remaining_flags if is_flag_reverse_complemented(f) and len(self.flag_to_val_dic[f][V1]) > 0 ]
-        rc_v2_flags = [ f for f in remaining_flags if is_flag_reverse_complemented(f) and len(self.flag_to_val_dic[f][V2]) > 0 ]
-        fw_v1_flags = [ f for f in remaining_flags if not is_flag_reverse_complemented(f) and len(self.flag_to_val_dic[f][V1]) > 0 ]
-        fw_v2_flags = [ f for f in remaining_flags if not is_flag_reverse_complemented(f) and len(self.flag_to_val_dic[f][V2]) > 0 ]
+        rc_v1_flags = [ f for f in remaining_flags if is_flag_reverse_complemented(f) and len(self.flag_to_val_dic[f][CONTROL_BAM]) > 0 ]
+        rc_v2_flags = [ f for f in remaining_flags if is_flag_reverse_complemented(f) and len(self.flag_to_val_dic[f][TARGET_BAM]) > 0 ]
+        fw_v1_flags = [ f for f in remaining_flags if not is_flag_reverse_complemented(f) and len(self.flag_to_val_dic[f][CONTROL_BAM]) > 0 ]
+        fw_v2_flags = [ f for f in remaining_flags if not is_flag_reverse_complemented(f) and len(self.flag_to_val_dic[f][TARGET_BAM]) > 0 ]
 
-        rc_v1_vals = combine_flag_vals(self.flag_to_val_dic, rc_v1_flags, V1)
-        rc_v2_vals = combine_flag_vals(self.flag_to_val_dic, rc_v2_flags, V2)
-        fw_v1_vals = combine_flag_vals(self.flag_to_val_dic, fw_v1_flags, V1)
-        fw_v2_vals = combine_flag_vals(self.flag_to_val_dic, fw_v2_flags, V2)
+        rc_v1_vals = combine_flag_vals(self.flag_to_val_dic, rc_v1_flags, CONTROL_BAM)
+        rc_v2_vals = combine_flag_vals(self.flag_to_val_dic, rc_v2_flags, TARGET_BAM)
+        fw_v1_vals = combine_flag_vals(self.flag_to_val_dic, fw_v1_flags, CONTROL_BAM)
+        fw_v2_vals = combine_flag_vals(self.flag_to_val_dic, fw_v2_flags, TARGET_BAM)
 
         while len(rc_v1_vals) > 0 and len(rc_v2_vals) > 0:
             rc_v1_entry = rc_v1_vals.pop()
@@ -185,7 +184,6 @@ def extract_bam_entries(bam_file, entry_map, type):
     samfile = pysam.AlignmentFile(bam_file, "rb")
     aln_segments = samfile.fetch()
     for aln_seg in aln_segments:
-        #aln_seg.is_reverse
         read_id = aln_seg.query_name
         flag = aln_seg.flag
         score = aln_seg.mapping_quality
