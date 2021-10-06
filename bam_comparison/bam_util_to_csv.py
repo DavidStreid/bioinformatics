@@ -132,33 +132,23 @@ class Entry:
         if len(rc_v1_vals) > 0 or len(rc_v2_vals) > 0:
             total_missing_reads += (len(rc_v2_vals) + len(rc_v1_vals))
             ERRORS.append("UNPAIRED [RC]: V1=[{}] V2=[{}]".format(
-                ",".join([f[0] + ":" + str(f[1]) for f in rc_v1_vals]),
-                ",".join([f[0] + ":" + str(f[1]) for f in rc_v2_vals])
+                ",".join([str(f[0]) + ":" + str(f[1]) for f in rc_v1_vals]),
+                ",".join([str(f[0]) + ":" + str(f[1]) for f in rc_v2_vals])
             ))
         if len(fw_v1_vals) > 0 or len(fw_v2_vals) > 0:
             total_missing_reads += (len(fw_v1_vals) + len(fw_v2_vals))
             ERRORS.append("UNPAIRED [FW]: V1=[{}] V2=[{}]".format(
-                ",".join([f[0] + ":" + str(f[1]) for f in fw_v1_vals]),
-                ",".join([f[0] + ":" + str(f[1]) for f in fw_v2_vals])
+                ",".join([str(f[0]) + ":" + str(f[1]) for f in fw_v1_vals]),
+                ",".join([str(f[0]) + ":" + str(f[1]) for f in fw_v2_vals])
             ))
         return pairs
 
 def is_flag_reverse_complemented(flag):
-    if not flag.isdigit():
-        # hex-representation to int
-        flag = int(flag, 16)
-    else:
-        flag = int(flag)
     # 5th bit indicates reverse complement
     fifth_bit = get_kth_bit(flag, 5)
     return fifth_bit == 1
 
 def is_flag_duplicate(flag):
-    if not flag.isdigit():
-        # hex-representation to int
-        flag = int(flag, 16)
-    else:
-        flag = int(flag)
     # 11th bit indicates a duplicate
     eleventh_bit = get_kth_bit(flag, 11)
     return eleventh_bit == 1
@@ -247,7 +237,7 @@ def main():
     b1 = inputs[0]
     b2 = inputs[1]
 
-    basename = "{}____{}".format(b1.split(".")[0], b2.split(".")[0])
+    basename = "{}____{}".format(b1.split("/")[-1].split(".")[0], b2.split("/")[-1].split(".")[0])
     output_file = "{}___bam_differences.csv".format(basename)
 
     print("%s=%s\n%s=%s\nOUTPUT=%s" % (CONTROL_BAM, b1, TARGET_BAM, b2, output_file))
