@@ -2,6 +2,8 @@
 
 import sys
 import os
+import pysam
+
 USAGE="python bam_util_to_csv.py /PATH/TO/bam_util_output"
 
 ERRORS = []
@@ -13,6 +15,9 @@ DUP_RC_FLAG = 'dup_rc'
 
 V1 = 'v1'
 V2 = 'v2'
+
+CONTROL_BAM = 'CONTROL_BAM'
+TARGET_BAM = 'TARGET_BAM'
 
 total_missing_reads = 0
 
@@ -42,17 +47,11 @@ class Entry:
             val_dic[V2] = []
 
     def add_v1(self, flag, v1):
-        if not v1.isdigit():
-            print("Read %s v1 not numeric: %s" % (self.read, v1))
-            sys.exit(1)
         int_v1 = int(v1)
         self.add_flag_paths(flag)
         self.flag_to_val_dic[flag][V1].append(int_v1)
 
     def add_v2(self, flag, v2):
-        if not v2.isdigit():
-            print("Read %s v2 not numeric: %s" % (self.read, v2))
-            sys.exit(1)
         int_v2 = int(v2)
         self.add_flag_paths(flag)
         self.flag_to_val_dic[flag][V2].append(int_v2)
@@ -190,33 +189,31 @@ def get_flag_entry(flag):
     is_rc = is_flag_reverse_complemented(flag)
     is_dup = is_flag_duplicate(flag)
 
-def parse_entries(bam_util_output):
-    lines = open(bam_util_output, "r")
-    curr_read_id=None
+
+def extract_bam_entries(bam_file, entry_map, type):
+    samfile = pysam.AlignmentFile(bam_file, "rb")
+    aln_segments = samfile.fetch()
+    for aln_seg in aln_segments:
+        #aln_seg.is_reverse
+        read_id = aln_seg.query_name
+        flag = aln_seg.flag
+        score = aln_seg.mapping_quality
+        if read_id not in entry_map:
+            entry_map[read_id] = Entry(read_id)
+        entry = entry_map[read_id]
+
+        if type == CONTROL_BAM:
+            entry.add_v1(flag, score)
+        elif type == TARGET_BAM:
+            entry.add_v2(flag, score)
+
+    return entry_map
+
+def parse_entries(b1, b2):
     entry_map = {}
-    for line in lines:
-        lead_char = line[0]
+    entry_map = extract_bam_entries(b1, entry_map, CONTROL_BAM)
+    entry_map = extract_bam_entries(b2, entry_map, TARGET_BAM)
 
-        if lead_char != "<" and lead_char != ">":
-            # READ_ID LINE - first line of any entry
-            curr_read_id = line.strip()
-        else:
-            # Populate score entry for curr_read_id & flag
-            score = line.split()[-1]
-            flag = line.split()[1]
-
-            if curr_read_id not in entry_map:
-                entry_map[curr_read_id] = Entry(curr_read_id)
-            entry = entry_map[curr_read_id]
-
-            # Populate score for entry
-            if lead_char == "<":
-                entry.add_v1(flag, score)
-            elif lead_char == ">":
-                entry.add_v2(flag, score)
-            else:
-                print("This shouldn't happen...: %s" % line)
-                sys.exit(1)
 
     entries = ["template,flag,v1,v2,v1-v2,v2-v1"]
     added = []
@@ -239,22 +236,23 @@ def parse_entries(bam_util_output):
     return entries
 
 def main():
-    if len(sys.argv) != 2:
-        fail("Please specify the bam_util_output")
+    if len(sys.argv) != 3:
+        fail("Please specify two bam files")
 
     inputs = sys.argv[1:]
     for input in inputs:
         if not os.path.isfile(input):
             fail("%s is not a valid file" % input)
 
-    bam_util_output = inputs[0]
+    b1 = inputs[0]
+    b2 = inputs[1]
 
-    basename = bam_util_output.split(".")[0]
-
+    basename = "{}____{}".format(b1.split(".")[0], b2.split(".")[0])
     output_file = "{}___bam_differences.csv".format(basename)
 
-    print("INPUT=%s OUTPUT=%s" % (bam_util_output, output_file))
-    entries = parse_entries(bam_util_output)
+    print("%s=%s\n%s=%s\nOUTPUT=%s" % (CONTROL_BAM, b1, TARGET_BAM, b2, output_file))
+    entries = parse_entries(b1, b2)
+
     print("WRITING %s" % output_file)
     write_file(output_file, entries)
     print("ERRORS")
