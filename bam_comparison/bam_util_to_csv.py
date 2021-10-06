@@ -126,15 +126,19 @@ class Entry:
 
         if len(rc_v1_vals) > 0 or len(rc_v2_vals) > 0:
             total_missing_reads += (len(rc_v2_vals) + len(rc_v1_vals))
-            ERRORS.append("UNPAIRED_RC,{},{},{}".format(
+            t_or_c = CONTROL_BAM if len(rc_v1_vals) > 0 else TARGET_BAM
+            ERRORS.append("UNPAIRED_RC,{},{},{},{}".format(
                 self.read,
+                t_or_c,
                 ",".join([str(f[0]) + ":" + str(f[1]) for f in rc_v1_vals]),
                 ",".join([str(f[0]) + ":" + str(f[1]) for f in rc_v2_vals])
             ))
         if len(fw_v1_vals) > 0 or len(fw_v2_vals) > 0:
             total_missing_reads += (len(fw_v1_vals) + len(fw_v2_vals))
-            ERRORS.append("UNPAIRED_FW,{},{},{}".format(
+            t_or_c = CONTROL_BAM if len(fw_v1_vals) > 0 else TARGET_BAM
+            ERRORS.append("UNPAIRED_FW,{},{},{},{}".format(
                 self.read,
+                t_or_c,
                 ",".join([str(f[0]) + ":" + str(f[1]) for f in fw_v1_vals]),
                 ",".join([str(f[0]) + ":" + str(f[1]) for f in fw_v2_vals])
             ))
