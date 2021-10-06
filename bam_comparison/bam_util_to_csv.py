@@ -4,18 +4,24 @@ import sys
 import os
 import pysam
 
-USAGE="python bam_util_to_csv.py /PATH/TO/bam_util_output"
+USAGE="python bam_util_to_csv.py control.bam experimental.bam"
 
 # Save all errors until end and then log
 ERRORS = []
+TOTAL_MISSING_READS = 0
 
-# Constants to track 
+# Constants to track value differences between the two BAMs
 CONTROL_BAM = 'CONTROL_BAM'
 TARGET_BAM = 'TARGET_BAM'
 
-total_missing_reads = 0
-
 def combine_flag_vals(dic, flag_list, val_type):
+    """Extends all the values across all flags of an Entry:flag_to_val_dic field
+
+    :param Entry:flag_to_val_dic dic:   flag-to-entries dictionary
+    :param int[] flag_list:             list of flags, e.g. [ 63, 1023,... ]
+    :param string, val_type:            CONTROL_BAM/TARGET_BAM
+    :return: int[ int[] ]               list of [flag, value] pairs
+    """
     flag_vals = []
     for f in flag_list:
          for val in dic[f][val_type]:
@@ -24,6 +30,11 @@ def combine_flag_vals(dic, flag_list, val_type):
     return flag_vals
 
 class Entry:
+    """ Tracks all the records for an input read name (SAM QNAME)
+
+    :field read:                        QNAME of SAM record
+    :field flag_to_val_dic:             flag -> { CONTROL/TARGET -> [ MAPQ_values ] }
+    """
     read = None
     flag_to_val_dic = {}
 
@@ -32,6 +43,8 @@ class Entry:
         self.flag_to_val_dic = {}
 
     def add_flag_paths(self, flag):
+        """ Safely adds path for a flag (populates if the path in the dictionary doesn't exist)
+        """
         if flag not in self.flag_to_val_dic:
              self.flag_to_val_dic[flag] = {}
         val_dic = self.flag_to_val_dic[flag]
@@ -41,17 +54,21 @@ class Entry:
             val_dic[TARGET_BAM] = []
 
     def add_v1(self, flag, v1):
+        """ Adds the CONTROL_BAM flag-MAPQ_value pair
+        """
         int_v1 = int(v1)
         self.add_flag_paths(flag)
         self.flag_to_val_dic[flag][CONTROL_BAM].append(int_v1)
 
     def add_v2(self, flag, v2):
+        """ Adds the TARGET flag-MAPQ_value pair
+        """
         int_v2 = int(v2)
         self.add_flag_paths(flag)
         self.flag_to_val_dic[flag][TARGET_BAM].append(int_v2)
 
     def return_flag_val_pairs(self):
-        global total_missing_reads
+        global TOTAL_MISSING_READS
 
         # Note - this permanently modifies the flag_to_val_dic field
         pairs = []
@@ -124,7 +141,7 @@ class Entry:
             pairs.append([fw_v1_entry[0], fw_v2_entry[0], fw_v1_entry[1], fw_v2_entry[1]])
 
         if len(rc_v1_vals) > 0 or len(rc_v2_vals) > 0:
-            total_missing_reads += (len(rc_v2_vals) + len(rc_v1_vals))
+            TOTAL_MISSING_READS += (len(rc_v2_vals) + len(rc_v1_vals))
             t_or_c = CONTROL_BAM if len(rc_v1_vals) > 0 else TARGET_BAM
             ERRORS.append("UNPAIRED_RC,{},{},{},{}".format(
                 self.read,
@@ -133,7 +150,7 @@ class Entry:
                 ",".join([str(f[0]) + ":" + str(f[1]) for f in rc_v2_vals])
             ))
         if len(fw_v1_vals) > 0 or len(fw_v2_vals) > 0:
-            total_missing_reads += (len(fw_v1_vals) + len(fw_v2_vals))
+            TOTAL_MISSING_READS += (len(fw_v1_vals) + len(fw_v2_vals))
             t_or_c = CONTROL_BAM if len(fw_v1_vals) > 0 else TARGET_BAM
             ERRORS.append("UNPAIRED_FW,{},{},{},{}".format(
                 self.read,
@@ -223,8 +240,8 @@ def parse_entries(b1, b2):
             line = "{},{},{},{},{},{},{}".format(read_id,f1,f2,v1,v2,d1,d2)
             entries.append(line)
 
-    if total_missing_reads > 0:
-        print("Missing %d read(s)" % total_missing_reads)
+    if TOTAL_MISSING_READS > 0:
+        print("Missing %d read(s)" % TOTAL_MISSING_READS)
 
     return entries
 
