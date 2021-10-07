@@ -209,11 +209,11 @@ class Read_Info():
         self.refr = refr
         self.read = read
 
-    def get_flag(self):
-        return self.flag
-
     def get_mapq(self):
         return self.score
+
+    def get_flag(self):
+        return self.flag
 
     def get_refr(self):
         return self.refr
@@ -267,7 +267,7 @@ def extract_bam_entries(bam_file, entry_map, type):
             entry_map[read_id] = Entry(read_id)
         entry = entry_map[read_id]
 
-        ri_entry = Read_Info(flag, score, refr, read_id)
+        ri_entry = Read_Info(score, flag, refr, read_id)
         if type == CONTROL_BAM:
             entry.add_v1(ri_entry)
         elif type == TARGET_BAM:
