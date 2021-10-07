@@ -256,7 +256,7 @@ def write_file(file_name, entry_list):
 
 def extract_bam_entries(bam_file, entry_map, type):
     samfile = pysam.AlignmentFile(bam_file, "rb")
-    aln_segments = samfile.fetch('1')
+    aln_segments = samfile.fetch()
     for aln_seg in aln_segments:
         read_id = aln_seg.query_name
         flag = aln_seg.flag
