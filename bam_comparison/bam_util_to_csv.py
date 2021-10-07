@@ -47,13 +47,13 @@ def record_unpaired_read(read_info_list, read_info_type, bam_type):
 
     for read_info_entry in read_info_list:
         TOTAL_MISSING_READS += 1
-        ERRORS.append("{},{},{},{},{}".format(
+        ERRORS.append("{},{},{},{},{},{}".format(
             read_info_type,
             bam_type,
-            self.read,
-            rc_control_read_info.get_refr(),
-            str(rc_control_read_info.get_flag()),
-            str(rc_control_read_info.get_mapq())
+            read_info_entry.get_read(),
+            read_info_entry.get_refr(),
+            str(read_info_entry.get_flag()),
+            str(read_info_entry.get_mapq())
         ))
 
 class Entry:
@@ -87,7 +87,7 @@ class Entry:
         self.add_flag_paths(flag)
         self.flag_to_val_dic[flag][CONTROL_BAM].append(read_info)
 
-    def add_v2(self, flag, v2):
+    def add_v2(self, read_info):
         """ Adds the TARGET flag-MAPQ_value pair
         """
         flag = read_info.get_flag()
@@ -105,7 +105,8 @@ class Entry:
             control_reads = val_dic[CONTROL_BAM]
             target_reads = val_dic[TARGET_BAM]
 
-            # Dictionary for the given (read_id, flag) pair that maps control_bam MAPQ scores to their count
+            # Dic, { mapq -> Read_Info[] }, for (read_id, flag) pair that maps CONTROL MAPQ scores to their read info
+            # Later, the TARGET read_info instances will be mapped based on matching mapq scores
             read_info_pairing_dic = {}
             while len(control_reads) > 0:
                 control_read_info = control_reads.pop()
@@ -113,7 +114,7 @@ class Entry:
                 if control_mapq in read_info_pairing_dic:
                     read_info_pairing_dic[control_mapq].append(control_read_info)
                 else:
-                    read_info_pairing_dic[control_mapq] = []
+                    read_info_pairing_dic[control_mapq] = [ control_read_info ]
 
             unpaired_target_reads = []
             while len(target_reads) > 0:
@@ -126,15 +127,14 @@ class Entry:
 
                     # Remove if entry for mapq if all control_bams of that (read_id, flag) pair have been matched
                     if len(read_info_pairing_dic[target_mapq]) == 0:
-                        del read_info_pairing_dic[target_read_info]
-
-                    print("[ADDING] CONTROL={} TARGET{}" % (matched_control_read_info.to_string(), target_read_info.to_string()))
-
+                        del read_info_pairing_dic[target_mapq]
                 else:
                     unpaired_target_reads.append(target_read_info)
 
             # Extract all unpaired control Read_Info's to a list
-            unpaired_control_reads = list(read_info_pairing_dic.keys())
+            unpaired_control_reads = []
+            for mapq, read_info_list in read_info_pairing_dic.items():
+                 unpaired_control_reads.extend(read_info_list)
 
             # Pair up any remaining reads between target & control
             # TODO - We would probably want to pair reads that have the closest scores b/c the MAPQ differences could
@@ -202,11 +202,12 @@ class Read_Info():
     score = None
     flag = None
     refr = None
-
-    def __init__(self, score, flag, refr):
+    read = None
+    def __init__(self, score, flag, refr, read):
         self.score = score
         self.flag = flag
         self.refr = refr
+        self.read = read
 
     def get_flag(self):
         return self.flag
@@ -217,6 +218,9 @@ class Read_Info():
     def get_refr(self):
         return self.refr
 
+    def get_read(self):
+        return self.read
+
     def to_string(self):
         return "{},{},{}" % (self.read, int(self.flag), self.refr)
 
@@ -224,11 +228,6 @@ def is_flag_reverse_complemented(flag):
     # 5th bit indicates reverse complement
     fifth_bit = get_kth_bit(flag, 5)
     return fifth_bit == 1
-
-def is_flag_duplicate(flag):
-    # 11th bit indicates a duplicate
-    eleventh_bit = get_kth_bit(flag, 11)
-    return eleventh_bit == 1
 
 def get_kth_bit(n, k):
     """ Returns kth bit of an int
@@ -255,13 +254,9 @@ def write_file(file_name, entry_list):
     merge_commands_file.write("\n".join(entry_list))
     merge_commands_file.close()
 
-def get_flag_entry(flag):
-    is_rc = is_flag_reverse_complemented(flag)
-    is_dup = is_flag_duplicate(flag)
-
 def extract_bam_entries(bam_file, entry_map, type):
     samfile = pysam.AlignmentFile(bam_file, "rb")
-    aln_segments = samfile.fetch()
+    aln_segments = samfile.fetch('1')
     for aln_seg in aln_segments:
         read_id = aln_seg.query_name
         flag = aln_seg.flag
@@ -272,7 +267,7 @@ def extract_bam_entries(bam_file, entry_map, type):
             entry_map[read_id] = Entry(read_id)
         entry = entry_map[read_id]
 
-        ri_entry = Read_Info(flag, score, refr)
+        ri_entry = Read_Info(flag, score, refr, read_id)
         if type == CONTROL_BAM:
             entry.add_v1(ri_entry)
         elif type == TARGET_BAM:
@@ -318,8 +313,14 @@ def parse_entries(b1, b2):
 
     return entries
 
-def summarize():
+def summarize(paired_reads):
+    high_confidence = [ line for line in paired_reads if ",{},".format(CONFIDENCE_HIGH) in line ]
+    med_confidence = [ line for line in paired_reads if ",{},".format(CONFIDENCE_MEDIUM) in line ]
+    low_confidence = [ line for line in paired_reads if ",{},".format(CONFIDENCE_LOW) in line ]
     print("Number Pair(s): %d" % len(paired_reads))
+    print("\t High-Confidence Pair(s): %d" % len(high_confidence))
+    print("\t Medium-Confidence Pair(s): %d" % len(med_confidence))
+    print("\t Low-Confidence Pair(s): %d" % len(low_confidence))
     print("Unpaired Read(s): %d" % TOTAL_MISSING_READS)
 
 def main():
