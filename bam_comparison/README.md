@@ -36,8 +36,9 @@ TARGET_BAM=...
 
 4. **Graph** 
 ```
-
 (bam_compare)$ python graph.py
+```
+
  ___Other Graphs___
 
 BAR
