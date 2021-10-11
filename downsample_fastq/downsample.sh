@@ -30,9 +30,8 @@ FASTQ_FILE=$(basename ${INPUT_FASTQ})
 FASTQ_BASE=$(echo ${FASTQ_FILE} | cut -d'.' -f1)
 DOWNSAMPLED_BAM="DOWNSAMPLED_${FASTQ_BASE}.fastq"
 
-echo "Input=${FASTQ_FILE} Output=${DOWNSAMPLED_BAM} Reads=${NUM_READS}"
-exit 0
-
+# -2 uses "two-pass" mode, which consumes much less memory
+#   Ref: https://github.com/lh3/seqtk/issues/140
 seqtk sample -2 -s100 \
   ${INPUT_FASTQ} \
   ${NUM_READS} >> ${DOWNSAMPLED_BAM}
