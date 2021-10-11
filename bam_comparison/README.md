@@ -41,10 +41,8 @@ TARGET_BAM=...
 
  ___Other Graphs___
 
-
 BAR
 
-    ```
     import pandas as pd
     import matplotlib.pyplot as plt
     import numpy as np
@@ -63,10 +61,9 @@ BAR
     plt.xlim([-2, 62])                          # Helpful for plotting MAPQ, which has range [1-60]
     
     plt.savefig("bam1_v_diff.pdf")
-    ```
     
 SCATTER (v1 v. v2)
-    ```
+
     import pandas as pd
     import matplotlib.pyplot as plt
     import numpy as np
@@ -78,10 +75,9 @@ SCATTER (v1 v. v2)
     plt.title("BAM1 Score vs BAM2 Score")
     plt.xlabel("BAM1 Score")
     plt.ylabel("BAM2 Score")
-    ```
     
 SCATTER (v1 v. diff)
-    ```
+
     import pandas as pd
     import matplotlib.pyplot as plt
     import numpy as np
@@ -93,4 +89,3 @@ SCATTER (v1 v. diff)
     plt.title("BAM1 Score vs (BAM1-BAM2)")
     plt.xlabel("BAM1 Score")
     plt.ylabel("(BAM1-BAM2)")
-    ```
