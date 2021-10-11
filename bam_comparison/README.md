@@ -12,16 +12,7 @@ $ conda activate bam_compare
 (bam_compare)$ 
 ```
 
-1. **Sort BAM**
-```
-CONTROL_BAM=...
-TARGET_BAM=...
-
-(bam_compare)$ samtools sort b1.bam -o ${CONTROL_BAM}
-(bam_compare)$ samtools sort b2.bam -o ${TARGET_BAM}
-```
-
-2. Run compare
+1. Run compare
 ```
 CONTROL_BAM=...
 TARGET_BAM=...
@@ -29,12 +20,12 @@ TARGET_BAM=...
 (bam_compare)$ python bam_util_to_csv.py ${CONTROL_BAM} ${TARGET_BAM}
 ``` 
 
-3. **Parse `bam diff` output**
+2. **Parse `bam diff` output**
 ```
 (bam_compare)$ python bam_util_to_csv.py bam_diff.out      # outputs bam_differences.csv
 ``` 
 
-4. **Graph** 
+3. **Graph** 
 ```
 (bam_compare)$ python graph.py
 ```
