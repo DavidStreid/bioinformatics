@@ -38,9 +38,9 @@ TARGET_BAM=...
 ```
 
 (bam_compare)$ python graph.py
-```
  ___Other Graphs___
-    BAR
+
+BAR
     ```
     import pandas as pd
     import matplotlib.pyplot as plt
@@ -62,7 +62,7 @@ TARGET_BAM=...
     plt.savefig("bam1_v_diff.pdf")
     ```
     
-    Scatter (v1 v. v2)
+SCATTER (v1 v. v2)
     ```
     import pandas as pd
     import matplotlib.pyplot as plt
@@ -77,7 +77,7 @@ TARGET_BAM=...
     plt.ylabel("BAM2 Score")
     ```
     
-    Scatter (v1 v. diff)
+SCATTER (v1 v. diff)
     ```
     import pandas as pd
     import matplotlib.pyplot as plt
