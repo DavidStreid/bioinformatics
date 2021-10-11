@@ -5,34 +5,44 @@ Tools:
 * [BamUtil](https://genome.sph.umich.edu/wiki/BamUtil:_diff)
 
 ## Steps
+0. **Install python environment**
+```
+$ conda create --name bam_compare --file requirements.txt
+$ conda activate bam_compare
+(bam_compare)$ 
+```
 
 1. **Sort BAM**
 ```
-samtools sort b1.bam -o b1_sorted.bam
-samtools sort b2.bam -o b2_sorted.bam 
+CONTROL_BAM=...
+TARGET_BAM=...
+
+(bam_compare)$ samtools sort b1.bam -o ${CONTROL_BAM}
+(bam_compare)$ samtools sort b2.bam -o ${TARGET_BAM}
 ```
 
-2. **Run bam diff**
+2. Run compare
 ```
-bam diff --in1 b1_sorted.bam --in2 b2_sorted.bam --mapQual >> bam_diff.csv
-```
-* Note - `--mapQual` can be replaced w/ other metric to compare
+CONTROL_BAM=...
+TARGET_BAM=...
+
+(bam_compare)$ python bam_util_to_csv.py ${CONTROL_BAM} ${TARGET_BAM}
+``` 
 
 3. **Parse `bam diff` output**
 ```
-python bam_util_to_csv.py bam_diff.out      # outputs bam_differences.csv
+(bam_compare)$ python bam_util_to_csv.py bam_diff.out      # outputs bam_differences.csv
 ``` 
 
 4. **Graph** 
 ```
-$ conda create --name grapher --file requirements.txt
-$ conda activate grapher
-(grapher)$ python graph.py
+(bam_compare)$ python graph.py
 ```
 
+ ___Other Graphs___
 
-    BAR
-    ```
+BAR
+
     import pandas as pd
     import matplotlib.pyplot as plt
     import numpy as np
@@ -51,10 +61,9 @@ $ conda activate grapher
     plt.xlim([-2, 62])                          # Helpful for plotting MAPQ, which has range [1-60]
     
     plt.savefig("bam1_v_diff.pdf")
-    ```
     
-    Scatter (v1 v. v2)
-    ```
+SCATTER (v1 v. v2)
+
     import pandas as pd
     import matplotlib.pyplot as plt
     import numpy as np
@@ -66,10 +75,9 @@ $ conda activate grapher
     plt.title("BAM1 Score vs BAM2 Score")
     plt.xlabel("BAM1 Score")
     plt.ylabel("BAM2 Score")
-    ```
     
-    Scatter (v1 v. diff)
-    ```
+SCATTER (v1 v. diff)
+
     import pandas as pd
     import matplotlib.pyplot as plt
     import numpy as np
@@ -81,4 +89,3 @@ $ conda activate grapher
     plt.title("BAM1 Score vs (BAM1-BAM2)")
     plt.xlabel("BAM1 Score")
     plt.ylabel("(BAM1-BAM2)")
-    ```
