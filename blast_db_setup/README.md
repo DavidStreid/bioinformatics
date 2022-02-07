@@ -7,7 +7,7 @@ Inlcudes script that (hopefully) automates this process (`setup_blast.sh`)
 
 ## Run
 ### Inputs
-* `version`: `string` (optional), blast+ version to download. See ftp.ncbi.nlm.nih.gov/blast/executables/blast+
+* `version`: `string` (optional), blast+ version to download. See ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+
   > `2.2.18` to `2.12.0`
 * `os`: `string` (optional) - OS version for blast+ scripts
   > `win64`, `x64-linux`, `x64-macosx`, `x64-win64`
