@@ -33,13 +33,13 @@ db_name=ref_euk_rep_genomes
 ## Run (w/o `setup_blast.sh`)
 1. Determine desired blast version & os (e.g. "2.12.0" and "linux-64" respectively)
 2. Download NCBI's tar file from the appropriate FTP folder at ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast%2B (e.g. `curl ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.12.0/ncbi-blast-2.12.0+-x64-linux.tar.gz -o ncbi-blast-2.12.0+-x64-linux.tar.gz`)
-```
-version=2.12.0
-os=linux-64
-curl ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/${version}/ncbi-blast-${version}+-${os}.tar.gz
-```
+    ```
+    version=2.12.0
+    os=linux-64
+    curl ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/${version}/ncbi-blast-${version}+-${os}.tar.gz
+    ```
 3. Extract tar
 4. Run the `update_blastdb.pl` w/ the prefix of the FASTA files you want
-```
-perl ncbi-blast-2.12.0+/bin/update_blastdb.pl ref_euk_rep_genomes
-```
+    ```
+    perl ncbi-blast-2.12.0+/bin/update_blastdb.pl ref_euk_rep_genomes
+    ```
