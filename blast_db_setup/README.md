@@ -7,11 +7,12 @@ Inlcudes script that (hopefully) automates this process (`setup_blast.sh`)
 
 ## Run
 ### Inputs
-* `version`: `string` (optional), blast+ version to download. See [ftp_link](ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+) for more details
+* `version`: `string` (optional), blast+ version to download. See ftp.ncbi.nlm.nih.gov/blast/executables/blast+
   > `2.2.18` to `2.12.0`
 * `os`: `string` (optional) - OS version for blast+ scripts
   > `win64`, `x64-linux`, `x64-macosx`, `x64-win64`
-* `dbname`: `string` (optional) - `update_blastdb.pl` downloads all `*tar.gz` w/ this prefix in [blast/db](ftp://ftp.ncbi.nlm.nih.gov/blast/db)
+* `dbname`: `string` (optional) - `update_blastdb.pl` downloads all `*tar.gz` w/ this prefix in ftp://ftp.ncbi.nlm.nih.gov/blast/db. For a full list, see [blastdb README](https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html)
+  > `ref_euk_rep_genomes`, `nt`, `nr`
 
 ### Download script, then download DB later
 ```
