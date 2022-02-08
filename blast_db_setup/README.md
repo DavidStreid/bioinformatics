@@ -1,9 +1,15 @@
 # Blast Server Setup
 
 ## Description
-Notes for downloading/updating a BLAST database locally. Most important thing is getting the `update_blastdb.pl`
+Automates downloading of blast DB databases from scratch. The process is already made very simple by [NCBI](https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html), but `setup_blast.sh` is meant to set everything up in a single command.
 
-Inlcudes script that (hopefully) automates this process (`setup_blast.sh`)
+### NCBI
+NCBI already has pre-formatted databases and a convenient downloadable script, `update_blastdb.pl`, available via FTP. But, to avoid navigating the FTP repo ,`ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+`, and all its versions for this (which is just downloading the right `*tar.gz` for the OS and picking a version), I plan to use `setup_blast.sh` in the future to make my life easier.
+
+If not using the script, here are some notes paraphrased from the `blastdb` [README](https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html).
+* Use the pre-formatted databases, or follow the README to create your own
+* "Pre-formatted databases must be downloaded using the update_blastdb.pl script or via FTP in binary mode" [REF](https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html)
+* If using the pre-formatted databases, they must be untarred (`tar -zxvf *.tar.gz`) before use. As a note, I found that the extracted DBs are not much larger than their tar'd versions. For instance, when I downloaded `ref_euk_rep_genomes`, the tar'd was ~240GB and the untar'd was ~250GB.
 
 ## Run
 ### Inputs
