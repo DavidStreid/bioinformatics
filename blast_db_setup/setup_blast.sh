@@ -1,8 +1,16 @@
 #!/bin/bash
 
-version=$1
-os_input=$2
-db_name=$3
+
+while getopts ":v:o:d:" opt; do
+    case $opt in
+        v) version=${OPTARG}
+        ;;
+        o) os_input=${OPTARG}
+        ;;
+        d) db_name=${OPTARG}
+        ;;
+    esac 
+done
 
 if [[ -z ${version} || ${version} == "l" ]]; then
   download_version=$(curl ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/ 2> /dev/null | grep LATEST | sed 's/.*-> //g')
@@ -20,7 +28,9 @@ untarred_file="ncbi-blast-${download_version}+"
 tar_file="${untarred_file}-${os}.tar.gz"
 echo "blast+ Version: ${download_version}"
 echo "TAR file: ${tar_file}"
-echo "os=${os_input}"
+echo "version=${version}"
+echo "os_input=${os}"
+echo "db_name=${db_name}"
 echo ""
 
 if [[ -f ${tar_file} ]]; then
@@ -32,7 +42,7 @@ else
   echo ${CMD}
   eval ${CMD}
   if [[ $? -ne 0 ]]; then
-    printf "\nDownload failed. Exiting...\n"
+    printf "\nDownload failed. Check that version (-v) and os (-o) are valid, or don't specify them to use defaults\n\tReceived version=${download_version} os=${os}\nExiting...\n"
     exit 1
   else
     echo "\nDownload complete.\n"
@@ -53,11 +63,9 @@ fi
 
 download_script=$(realpath ncbi-blast-2.12.0+/bin/update_blastdb.pl)
 
-
-
 if [[ ! -z ${db_name} ]]; then
-  echo "Downloading files for '${db_name}'"
-  CMD="perl ${download_script} ${db_name}"
+  echo "Downloading & extracting files for database='${db_name}'"
+  CMD="perl ${download_script} --decompress ${db_name}"
   echo ${CMD}
   eval ${CMD}
 else
@@ -108,7 +116,7 @@ else
   echo "For more info, see https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html"
   echo ""
   echo "Use this script to download databases"
-  echo "perl ${download_script} <DB_NAME>"
+  echo "perl ${download_script} --decompress <DB_NAME>"
   echo "  e.g."
-  echo "    perl ${download_script} ref_euk_rep_genomes 	# Downloads all eukaryotic genomes"
+  echo "    perl ${download_script} --decompress ref_euk_rep_genomes 	# Downloads all eukaryotic genomes"
 fi
