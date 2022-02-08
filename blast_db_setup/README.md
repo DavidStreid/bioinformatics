@@ -16,6 +16,7 @@ If not using the script, here are some notes paraphrased from the [blastdb READM
 * Use the pre-formatted databases, or follow the README to create your own
 * "Pre-formatted databases must be downloaded using the update_blastdb.pl script or via FTP in binary mode" ([REF])(https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html)
 * If using the pre-formatted databases, they must be untarred (`tar -zxvf *.tar.gz`) before use. As a note, I found that the extracted DBs are not much larger than their tar'd versions. For instance, when I downloaded `ref_euk_rep_genomes`, the tar'd was ~240GB and the untar'd was ~250GB.
+* Use the `--decompress` option w/ `update_blastdb.pl` to delete the `*.tar.gz` file after extracting them. NOTE - **All the tar files are downlaoded** before any are deleted.
 
 ## Run
 ### Inputs
