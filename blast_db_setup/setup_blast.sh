@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-while getopts ":v:o:d:" opt; do
+while getopts ":v:o:d:p:" opt; do
     case $opt in
         v) version=${OPTARG}
         ;;
@@ -9,6 +9,7 @@ while getopts ":v:o:d:" opt; do
         ;;
         d) db_name=${OPTARG}
         ;;
+        p) out_path=${OPTARG}
     esac 
 done
 
@@ -24,6 +25,10 @@ else
   os=${os_input}
 fi
 
+if [[ -z ${out_path} ]]; then
+  out_path="./"
+fi
+
 untarred_file="ncbi-blast-${download_version}+"
 tar_file="${untarred_file}-${os}.tar.gz"
 echo "blast+ Version: ${download_version}"
@@ -31,6 +36,7 @@ echo "TAR file: ${tar_file}"
 echo "version=${version}"
 echo "os_input=${os}"
 echo "db_name=${db_name}"
+echo "out_path=${out_path}"
 echo ""
 
 if [[ -f ${tar_file} ]]; then
@@ -65,9 +71,12 @@ download_script=$(realpath ncbi-blast-2.12.0+/bin/update_blastdb.pl)
 
 if [[ ! -z ${db_name} ]]; then
   echo "Downloading & extracting files for database='${db_name}'"
+  echo "Writing to ${out_path}"
   CMD="perl ${download_script} --decompress ${db_name}"
   echo ${CMD}
+  cd ${out_path}
   eval ${CMD}
+  cd -
 else
   echo "+-----------------------------+------------------------------------------------+"
   echo " File Name                    | Content Description                           "
