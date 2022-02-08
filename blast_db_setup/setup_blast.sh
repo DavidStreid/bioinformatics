@@ -28,9 +28,13 @@ untarred_file="ncbi-blast-${download_version}+"
 tar_file="${untarred_file}-${os}.tar.gz"
 echo "blast+ Version: ${download_version}"
 echo "TAR file: ${tar_file}"
+<<<<<<< HEAD
 echo "version=${version}"
 echo "os_input=${os}"
 echo "db_name=${db_name}"
+=======
+echo "os=${os}"
+>>>>>>> 7f6375a9c0058b8021cb45887a9f27b0f8d61519
 echo ""
 
 if [[ -f ${tar_file} ]]; then
