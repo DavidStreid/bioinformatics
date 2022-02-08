@@ -12,9 +12,9 @@ NCBI already has pre-formatted databases and a convenient downloadable script, `
 
 But, to avoid navigating the FTP repo ,`ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+`, and all its versions (and mainly as a learning exercise), there's `setup_blast.sh` that does steps 1 & 2.
 
-If not using the script, here are some notes paraphrased from the `blastdb` [README](https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html).
+If not using the script, here are some notes paraphrased from the [blastdb README](https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html).
 * Use the pre-formatted databases, or follow the README to create your own
-* "Pre-formatted databases must be downloaded using the update_blastdb.pl script or via FTP in binary mode" [REF](https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html)
+* "Pre-formatted databases must be downloaded using the update_blastdb.pl script or via FTP in binary mode" ([REF])(https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html)
 * If using the pre-formatted databases, they must be untarred (`tar -zxvf *.tar.gz`) before use. As a note, I found that the extracted DBs are not much larger than their tar'd versions. For instance, when I downloaded `ref_euk_rep_genomes`, the tar'd was ~240GB and the untar'd was ~250GB.
 
 ## Run
