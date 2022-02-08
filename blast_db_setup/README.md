@@ -36,8 +36,6 @@ db_name=ref_euk_rep_genomes
 ./setup_blast.sh -v ${version} -o ${x64-linux} -d ${db_name}
 ```
 
-
-
 ## Run (w/o `setup_blast.sh`)
 1. Determine desired blast version & os (e.g. "2.12.0" and "linux-64" respectively)
 2. Download NCBI's tar file from the appropriate FTP folder at ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast%2B (e.g. `curl ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.12.0/ncbi-blast-2.12.0+-x64-linux.tar.gz -o ncbi-blast-2.12.0+-x64-linux.tar.gz`)
@@ -51,3 +49,14 @@ db_name=ref_euk_rep_genomes
     ```
     perl ncbi-blast-2.12.0+/bin/update_blastdb.pl ref_euk_rep_genomes
     ```
+
+## Run blast
+```
+# Assign this environment variable to the directory w/ the db files that have been extracted,
+#  i.e. directory w/ `*.nhr`, `*.nin`, `*.nnd`, `*.nnd`, `*.nni`, `*.nog`, `*.nsq`
+BLASTDB=...       
+DB_NAME=ref_euk_rep_genomes          # Name of the database to use (prefix of the DB file names)
+./ncbi-blast-2.12.0+/bin/blastn -db ${DB_NAME} -query sample.fa -out results.out
+
+## Troubleshooting
+* `Error: mdb_env_open` - Not sure, but redownloading & extracting the databases worked for me
