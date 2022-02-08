@@ -14,7 +14,7 @@ If not using the script, here are some notes paraphrased from the `blastdb` [REA
 ## Run
 ### Inputs
 * `-v`: `string` (optional), blast+ version to download. See ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+ for more details
-  > `2.2.18` to `2.12.0`
+  > `2.2.18`-`2.12.0`, `l` (for latest)
 * `-o`: `string` (optional) - OS version for blast+ scripts
   > `win64`, `x64-linux`, `x64-macosx`, `x64-win64`
 * `-d`: `string` (optional) -  `update_blastdb.pl` downloads all `*tar.gz` w/ this prefix in ftp://ftp.ncbi.nlm.nih.gov/blast/db. For a full list, see [blastdb README](https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html)
