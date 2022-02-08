@@ -4,7 +4,13 @@
 Automates downloading of blast DB databases from scratch. The process is already made very simple by [NCBI](https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html), but `setup_blast.sh` is meant to set everything up in a single command.
 
 ### NCBI
-NCBI already has pre-formatted databases and a convenient downloadable script, `update_blastdb.pl`, available via FTP. But, to avoid navigating the FTP repo ,`ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+`, and all its versions for this (which is just downloading the right `*tar.gz` for the OS and picking a version), I plan to use `setup_blast.sh` in the future to make my life easier.
+NCBI already has pre-formatted databases and a convenient downloadable script, `update_blastdb.pl`, available via FTP.
+  1. Download all preformatted databases with the same prefix (or make own) 
+  2. Download a compatible executable of the desired blast
+  3. Run blast specifying that prefix as the database to blast against
+  4. Done.
+
+But, to avoid navigating the FTP repo ,`ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+`, and all its versions (and mainly as a learning exercise), there's `setup_blast.sh` that does steps 1 & 2.
 
 If not using the script, here are some notes paraphrased from the `blastdb` [README](https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html).
 * Use the pre-formatted databases, or follow the README to create your own
@@ -51,16 +57,25 @@ db_name=ref_euk_rep_genomes
     ```
 
 ## Run blast
+Once the `bin` of all the bash executables for whatever version was specified and the pre-formatted database files are downloaded, blast is very simple to run,
+1. Export `BLASTDB` to be the directory w/ the downloaded database files. See [Configuring BLAST](https://www.ncbi.nlm.nih.gov/books/NBK569858/) for more information. This is the directory w/ the db files that have been extracted, i.e. directory w/ `*.nhr`, `*.nin`, `*.nnd`, `*.nnd`, `*.nni`, `*.nog`, `*.nsq`
+    ```
+    $ export BLASTDB=...
+    ```
+2. Run the blast executable of choice, specifying the desired database to try to map to
+    ```
+    $ ./ncbi-blast-2.12.0+/bin/blastn -db ref_euk_rep_genomes -query sample.fa -out results.out
+    ```
+
+**Example**
 ```
-# Assign this environment variable to the directory w/ the db files that have been extracted,
-#  i.e. directory w/ `*.nhr`, `*.nin`, `*.nnd`, `*.nnd`, `*.nni`, `*.nog`, `*.nsq`
-BLASTDB=...       
+export BLASTDB==path/to/formatted_db_files
 DB_NAME=ref_euk_rep_genomes          # Name of the database to use (prefix of the DB file names)
 ./ncbi-blast-2.12.0+/bin/blastn -db ${DB_NAME} -query sample.fa -out results.out
 ```
 
 ### Troubleshooting
 * `Error: mdb_env_open` - Re-download and extract preformatted databases
-
+* `BLAST Database error: Cannot memory map` - Memory issue, need to run on a server w/ more memory
 ### References
 * [blastn documentation](https://www.ncbi.nlm.nih.gov/books/NBK569856/)
