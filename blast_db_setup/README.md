@@ -61,3 +61,6 @@ DB_NAME=ref_euk_rep_genomes          # Name of the database to use (prefix of th
 
 ### Troubleshooting
 * `Error: mdb_env_open` - Re-download and extract preformatted databases
+
+### References
+* [blastn documentation](https://www.ncbi.nlm.nih.gov/books/NBK569856/)
