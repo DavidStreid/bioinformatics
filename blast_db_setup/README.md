@@ -60,4 +60,4 @@ DB_NAME=ref_euk_rep_genomes          # Name of the database to use (prefix of th
 ```
 
 ### Troubleshooting
-* `Error: mdb_env_open` - Not sure, but redownloading & extracting the databases worked for me
+* `Error: mdb_env_open` - Re-download and extract preformatted databases
