@@ -76,6 +76,18 @@ if [[ ! -z ${db_name} ]]; then
   echo ${CMD}
   cd ${out_path}
   eval ${CMD}
+  # TODO - does --decompress work?
+  # files=$(find compressed/ -type f -name "*.tar.gz" | sort)
+  # for f in ${files}; do
+  #   index=$(echo ${f} | xargs basename | cut -d'.' -f2)
+  #   tar -zxvf ${f} -C .
+  #   if [[ $? -ne 0 ]]; then
+  #     echo "Failed to extract ${f}"
+  #     exit 1
+  #   fi
+  #   echo "Successfully extracted ${f} to ${index}"
+  #   rm ${f}
+  # done
   cd -
 else
   echo "+-----------------------------+------------------------------------------------+"
