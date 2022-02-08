@@ -18,7 +18,7 @@ If not using the script, here are some notes paraphrased from the `blastdb` [REA
 * `-o`: `string` (optional) - OS version for blast+ scripts
   > `win64`, `x64-linux`, `x64-macosx`, `x64-win64`
 * `-d`: `string` (optional) -  `update_blastdb.pl` downloads all `*tar.gz` w/ this prefix in ftp://ftp.ncbi.nlm.nih.gov/blast/db. For a full list, see [blastdb README](https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html)
-  > `ref_euk_rep_genomes`, `nt`, `nr`
+  > `ref_euk_rep_genomes`, `nt`, `nr`, `ref_prok_rep_genomes`, `ref_viruses_rep_genomes`, `ref_viroids_rep_genomes`, `refseq_protein`, `refseq_rna`
 * `-p`: `string` (optional, default: current working directory) - If specifying a database to download, `-p` specifies the path to write those files to. Note - this will later be the directory pointed to by the environment variable, `BLASTDB`, when running blast. See [Configuring BLAST](https://www.ncbi.nlm.nih.gov/books/NBK569858/)
   > `-p ~/blast_db/preformatted_dbs`
 
