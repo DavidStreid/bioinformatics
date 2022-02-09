@@ -4,7 +4,7 @@
 Automates downloading of blast DB databases from scratch. The process is already made very simple by [NCBI](https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html), but `setup_blast.sh` is meant to set everything up in a single command.
 
 ### NCBI
-NCBI already has pre-formatted databases and a convenient downloadable script, `update_blastdb.pl`, available via FTP.
+NCBI already has pre-formatted databases and a convenient downloadable script, `update_blastdb.pl`, available via FTP. In general, the steps are - 
   1. Download all preformatted databases with the same prefix (or make own) 
   2. Download a compatible executable of the desired blast
   3. Run blast specifying that prefix as the database to blast against
