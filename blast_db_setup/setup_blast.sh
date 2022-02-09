@@ -85,6 +85,8 @@ if [[ ! -z ${db_name} ]]; then
     tar -zxvf ${f} -C . >> ${log_dir}/extract.out 2>&1
     if [[ $? -ne 0 ]]; then
       echo "Failed to extract ${f}"
+      echo "Extract ${f} manually and all remaining '*.tar.gz' files"
+      echo "[WARN] DO NOT RE-RUN THIS SCRIPT"
       exit 1
     fi
     printf "\t[SUCCESS] Removing ${f}\n"
