@@ -79,11 +79,13 @@ if [[ ! -z ${db_name} ]]; then
   mkdir ${log_dir}
   eval ${CMD} > ${log_dir}/download_${db_name}.out 2>&1
   files=$(find . -type f -name "*.tar.gz" | sort)
+  total=$(echo ${files} | cut ' ' '\n' | wc -l | grep -oE [0-9])
   for f in ${files}; do
     index=$(echo ${f} | xargs basename | cut -d'.' -f2)
     echo "[${index}] Extracting ${f}"
     tar -zxvf ${f} -C . >> ${log_dir}/extract.out 2>&1
     if [[ $? -ne 0 ]]; then
+      echo "Extracted ${index}/${total}"
       echo "Failed to extract ${f}"
       echo "Extract ${f} manually and all remaining '*.tar.gz' files"
       echo "[WARN] DO NOT RE-RUN THIS SCRIPT"
@@ -93,6 +95,10 @@ if [[ ! -z ${db_name} ]]; then
     rm ${f}
   done
   cd -
+  echo "Successful download & extraction"
+  echo "Export directory of db files as BLASTDB and run blast executables"
+  echo "Blast executables: $(realpath ncbi-blast-2.12.0+/bin)"
+  echo "EXPORT BLASTDB=$(realpath ${out_dir}"
 else
   echo "+-----------------------------+------------------------------------------------+"
   echo " File Name                    | Content Description                           "
