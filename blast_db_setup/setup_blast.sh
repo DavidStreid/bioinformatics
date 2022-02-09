@@ -87,8 +87,7 @@ if [[ ! -z ${db_name} ]]; then
       echo "Failed to extract ${f}"
       exit 1
     fi
-    printf "\tSuccessfully extracted ${f}.\n"
-    printf "\tRemoving ${f}"
+    printf "\t[SUCCESS] Removing ${f}\n"
     rm ${f}
   done
   cd -
