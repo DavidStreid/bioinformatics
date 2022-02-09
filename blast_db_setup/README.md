@@ -13,15 +13,17 @@ NCBI already has pre-formatted databases and a convenient downloadable script, `
 But, to avoid navigating the FTP repo ,`ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+`, and all its versions (and mainly as a learning exercise), there's `setup_blast.sh` that does steps 1 & 2.
 
 If not using the script, here are some notes paraphrased from the [blastdb README](https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html).
-* Use the pre-formatted databases, or follow the README to create your own
-* "Pre-formatted databases must be downloaded using the update_blastdb.pl script or via FTP in binary mode" ([REF])(https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html)
-* If using the pre-formatted databases, they must be untarred (`tar -zxvf *.tar.gz`) before use. As a note, I found that the extracted DBs are not much larger than their tar'd versions. For instance, when I downloaded `ref_euk_rep_genomes`, the tar'd was ~240GB and the untar'd was ~250GB.
-* I've experimented w/ the `--decompress` option w/ `update_blastdb.pl` to delete the `*.tar.gz` file after extracting them. I always receive the error below so I removed it and added a way to decompress them after downloading them. It seems this is what the `--decompress` option would have done anyway because **all the tar files are downlaoded** before any extraction lines are logged. I assume each `*.tar.gz` file will be extracted and deleted individually (rather than save all deletions until the end), which i swhat this script does.
+* **Pre-formatted Databases** Use the pre-formatted databases, or follow the README to create your own
+  * "Pre-formatted databases must be downloaded using the update_blastdb.pl script or via FTP in binary mode" ([REF])(https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html)
+* **Extraction** If using the pre-formatted databases, they must be untarred (`tar -zxvf *.tar.gz`) before use.
+  * As a note, I found that the extracted DBs are not much larger than their tar'd versions. For instance, when I downloaded `ref_euk_rep_genomes`, the tar'd was ~240GB and the untar'd was ~250GB.
+  * **Issue with `--decompress` option** The `--decompress` option for `update_blastdb.pl` is intended to "decompresses the archives in the current working directory...and delete(s) the downloaded archive to save disk space" ([REF](https://www.ncbi.nlm.nih.gov/books/NBK62345/)). However I always receive the error below so I removed it and added a way to decompress them after downloading them. It seems this is what the `--decompress` option would have done anyway because **all the tar files are downlaoded** before any extraction lines are logged. I assume each `*.tar.gz` file will be extracted and deleted individually (rather than save all deletions until the end), which is what `setup_blast.sh` does.
 
-   ```
-   Could not write data to './preformatted_dbs/ref_euk_rep_genomes.00.nsq' at ./ncbi-blast-2.12.0+/bin/update_blastdb.pl line 496.
-   Failed to decompress ref_euk_rep_genomes.00.tar.gz (Could not write data to './preformatted_dbs/ref_euk_rep_genomes.00.nsq'), please do so manually.
-   ```
+      *Error for `--decompress` option*
+      ```
+      Could not write data to './preformatted_dbs/ref_euk_rep_genomes.00.nsq' at ./ncbi-blast-2.12.0+/bin/update_blastdb.pl line 496.
+      Failed to decompress ref_euk_rep_genomes.00.tar.gz (Could not write data to './preformatted_dbs/ref_euk_rep_genomes.00.nsq'), please do so manually.
+      ```
 
 ## Run
 ### Inputs
