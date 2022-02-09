@@ -1,7 +1,9 @@
 #!/bin/bash
 
+available_versions=$(curl ftp://ftp.ncbi.nih.gov/blast/executables/blast+/ 2>/dev/null | rev | cut -d' ' -f1 | rev | grep -oE "[0-9]+.[0-9]+.[0-9]+")
+latest_version=$(curl ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/ 2> /dev/null | grep LATEST | sed 's/.*-> //g')
 
-while getopts ":v:o:d:p:" opt; do
+while getopts ":v:o:d:p:h" opt; do
     case $opt in
         v) version=${OPTARG}
         ;;
@@ -10,21 +12,16 @@ while getopts ":v:o:d:p:" opt; do
         d) db_name=${OPTARG}
         ;;
         p) out_path=${OPTARG}
+        ;;
+        h) printf "Available blast+ Versions: $(echo ${available_versions})\n\tLatest: ${latest_version}\n\tTry './setup_blast.sh' to get the latest executables and take it from there\n"; exit 0
+        ;;
     esac 
 done
 
-available_versions=$(curl ftp://ftp.ncbi.nih.gov/blast/executables/blast+/ 2>/dev/null | rev | cut -d' ' -f1 | rev | grep -oE "[0-9]+.[0-9]+.[0-9]+")
-
-echo "Available Versions: $(echo ${available_versions})"
-
 if [[ -z ${version} || ${version} == "l" ]]; then
-  download_version=$(curl ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/ 2> /dev/null | grep LATEST | sed 's/.*-> //g')
+  download_version=${latest_version}
 else
   download_version=${version}
-  if [[ -z $(echo ${available_versions} | grep -oE " ${download_version} ") ]]; then
-    echo "[ERROR] Invalid version: ${download_version}"
-    exit 1
-  fi
 fi
 
 if [[ -z ${os_input} ]]; then
@@ -37,11 +34,17 @@ if [[ -z ${out_path} ]]; then
   out_path="./"
 fi
 
+if [[ -z $(echo ${available_versions} | grep -oE " ${download_version} ") ]]; then
+  echo "[ERROR] Invalid version: ${download_version}"
+  printf "\tAvailable Versions: $(echo ${available_versions})\n"
+  printf "\tLatest: ${latest_version}\n"
+  exit 1
+fi 
 untarred_file="ncbi-blast-${download_version}+"
 tar_file="${untarred_file}-${os}.tar.gz"
 echo "blast+ Version: ${download_version}"
 echo "TAR file: ${tar_file}"
-echo "version=${version}"
+echo "version=${version} (latest: ${latest_version})"
 echo "os_input=${os}"
 echo "db_name=${db_name}"
 echo "out_path=${out_path}"
