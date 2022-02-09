@@ -72,22 +72,25 @@ download_script=$(realpath ncbi-blast-2.12.0+/bin/update_blastdb.pl)
 if [[ ! -z ${db_name} ]]; then
   echo "Downloading & extracting files for database='${db_name}'"
   echo "Writing to ${out_path}"
-  CMD="perl ${download_script} --decompress ${db_name}"
+  CMD="perl ${download_script} ${db_name}"
   echo ${CMD}
   cd ${out_path}
-  eval ${CMD}
-  # TODO - does --decompress work?
-  # files=$(find compressed/ -type f -name "*.tar.gz" | sort)
-  # for f in ${files}; do
-  #   index=$(echo ${f} | xargs basename | cut -d'.' -f2)
-  #   tar -zxvf ${f} -C .
-  #   if [[ $? -ne 0 ]]; then
-  #     echo "Failed to extract ${f}"
-  #     exit 1
-  #   fi
-  #   echo "Successfully extracted ${f} to ${index}"
-  #   rm ${f}
-  # done
+  log_dir=logs
+  mkdir ${log_dir}
+  eval ${CMD} > ${log_dir}/download_${db_name}.out 2>&1
+  files=$(find . -type f -name "*.tar.gz" | sort)
+  for f in ${files}; do
+    index=$(echo ${f} | xargs basename | cut -d'.' -f2)
+    echo "[${index}] Extracting ${f}"
+    tar -zxvf ${f} -C . >> ${log_dir}/extract.out 2>&1
+    if [[ $? -ne 0 ]]; then
+      echo "Failed to extract ${f}"
+      exit 1
+    fi
+    printf "\tSuccessfully extracted ${f}.\n"
+    printf "\tRemoving ${f}"
+    rm ${f}
+  done
   cd -
 else
   echo "+-----------------------------+------------------------------------------------+"
@@ -137,7 +140,7 @@ else
   echo "For more info, see https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html"
   echo ""
   echo "Use this script to download databases"
-  echo "perl ${download_script} --decompress <DB_NAME>"
+  echo "perl ${download_script} <DB_NAME>"
   echo "  e.g."
-  echo "    perl ${download_script} --decompress ref_euk_rep_genomes 	# Downloads all eukaryotic genomes"
+  echo "    perl ${download_script} ref_euk_rep_genomes 	# Downloads all eukaryotic genomes"
 fi

@@ -16,7 +16,12 @@ If not using the script, here are some notes paraphrased from the [blastdb READM
 * Use the pre-formatted databases, or follow the README to create your own
 * "Pre-formatted databases must be downloaded using the update_blastdb.pl script or via FTP in binary mode" ([REF])(https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html)
 * If using the pre-formatted databases, they must be untarred (`tar -zxvf *.tar.gz`) before use. As a note, I found that the extracted DBs are not much larger than their tar'd versions. For instance, when I downloaded `ref_euk_rep_genomes`, the tar'd was ~240GB and the untar'd was ~250GB.
-* Use the `--decompress` option w/ `update_blastdb.pl` to delete the `*.tar.gz` file after extracting them. NOTE - **All the tar files are downlaoded** before any are deleted.
+* I've experimented w/ the `--decompress` option w/ `update_blastdb.pl` to delete the `*.tar.gz` file after extracting them. I always receive the error below so I removed it and added a way to decompress them after downloading them. It seems this is what the `--decompress` option would have done anyway because **all the tar files are downlaoded** before any extraction lines are logged. I assume each `*.tar.gz` file will be extracted and deleted individually (rather than save all deletions until the end), which i swhat this script does.
+
+   ```
+   Could not write data to './preformatted_dbs/ref_euk_rep_genomes.00.nsq' at ./ncbi-blast-2.12.0+/bin/update_blastdb.pl line 496.
+   Failed to decompress ref_euk_rep_genomes.00.tar.gz (Could not write data to './preformatted_dbs/ref_euk_rep_genomes.00.nsq'), please do so manually.
+   ```
 
 ## Run
 ### Inputs
@@ -80,3 +85,4 @@ DB_NAME=ref_euk_rep_genomes          # Name of the database to use (prefix of th
 * `BLAST Database error: Cannot memory map` - Memory issue, need to run on a server w/ more memory
 ### References
 * [blastn documentation](https://www.ncbi.nlm.nih.gov/books/NBK569856/)
+
