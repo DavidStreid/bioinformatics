@@ -166,7 +166,7 @@ if [[ ! -z ${db_name} ]]; then
   echo "Successful download & extraction"
   echo "Export directory of db files as BLASTDB and run blast executables"
   echo "Blast executables: $(realpath ncbi-blast-2.12.0+/bin)"
-  echo "EXPORT BLASTDB=$(realpath ${out_dir})"
+  echo "EXPORT BLASTDB=$(realpath ${out_path})"
 else
   echo ""
   echo "For more info, see https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html"
