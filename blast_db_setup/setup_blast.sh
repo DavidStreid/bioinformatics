@@ -34,7 +34,9 @@ if [[ -z ${out_path} ]]; then
   out_path="./"
 fi
 
-if [[ -z $(echo ${available_versions} | grep -oE " ${download_version} ") ]]; then
+has_version=$(echo "${available_versions}" | grep -oE "^${download_version}$")
+
+if [[ -z ${has_version} ]]; then
   echo "[ERROR] Invalid version: ${download_version}"
   printf "\tAvailable Versions: $(echo ${available_versions})\n"
   printf "\tLatest: ${latest_version}\n"
@@ -55,14 +57,16 @@ if [[ -f ${tar_file} ]]; then
 elif [[ -f ${untarred_file} ]]; then
   echo "Detected extracted file... skipping download"
 else
-  CMD="curl ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/${download_version}/${tar_file} -o ${tar_file}"
+  CMD="curl ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/${download_version}/${tar_file} -o ${tar_file} 2> /dev/null"
   echo ${CMD}
   eval ${CMD}
   if [[ $? -ne 0 ]]; then
-    printf "\nDownload failed. Check that version (-v) and os (-o) are valid, or don't specify them to use defaults\n\tReceived version=${download_version} os=${os}\nExiting...\n"
+    printf "\nDownload failed. Check that version (-v) and os (-o) are valid, or don't specify them to use defaults\n\tReceived version=${download_version} os=${os}\n"
+    printf "\tNote - older version don't have all version, e.g. x64-macosx is not present in 2.2.* versions\n"
+    echo "Exiting..."
     exit 1
   else
-    echo "\nDownload complete.\n"
+    echo "Download complete."
   fi
 fi
 
