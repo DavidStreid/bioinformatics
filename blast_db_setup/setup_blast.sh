@@ -13,10 +13,18 @@ while getopts ":v:o:d:p:" opt; do
     esac 
 done
 
+available_versions=$(curl ftp://ftp.ncbi.nih.gov/blast/executables/blast+/ 2>/dev/null | rev | cut -d' ' -f1 | rev | grep -oE "[0-9]+.[0-9]+.[0-9]+")
+
+echo "Available Versions: $(echo ${available_versions})"
+
 if [[ -z ${version} || ${version} == "l" ]]; then
   download_version=$(curl ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/ 2> /dev/null | grep LATEST | sed 's/.*-> //g')
 else
   download_version=${version}
+  if [[ -z $(echo ${available_versions} | grep -oE " ${download_version} ") ]]; then
+    echo "[ERROR] Invalid version: ${download_version}"
+    exit 1
+  fi
 fi
 
 if [[ -z ${os_input} ]]; then
@@ -98,7 +106,7 @@ if [[ ! -z ${db_name} ]]; then
   echo "Successful download & extraction"
   echo "Export directory of db files as BLASTDB and run blast executables"
   echo "Blast executables: $(realpath ncbi-blast-2.12.0+/bin)"
-  echo "EXPORT BLASTDB=$(realpath ${out_dir}"
+  echo "EXPORT BLASTDB=$(realpath ${out_dir})"
 else
   echo "+-----------------------------+------------------------------------------------+"
   echo " File Name                    | Content Description                           "
