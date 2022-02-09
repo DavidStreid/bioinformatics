@@ -31,6 +31,7 @@ db_name=ref_euk_rep_genomes
 blastdb=./preformatted_db
 
 ./setup_blast.sh -d ${db_name} -p ${blastdb}      # Could specify different version & os w/ -v & -o 
+# ... come back in a few hours
 ```
 
 ### Inputs
