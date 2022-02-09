@@ -12,6 +12,27 @@ NCBI already has pre-formatted databases and a convenient downloadable script, `
 See [Manual Download Guide](#manual-download-guide) for more details. But, to avoid navigating the FTP repo ,`ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+`, and all its versions, there's `setup_blast.sh` that does steps 1 & 2.
 
 ## Run
+### Download executables with defaults
+```
+./setup_blast.sh
+```
+
+### Download executables specifying version
+```
+version=2.11.0
+os=x64-macosx
+
+./setup_blast.sh -v ${version} -o ${os}
+```
+
+### Download executables and preformatted db files with defaults
+```
+db_name=ref_euk_rep_genomes
+blastdb=./preformatted_db
+
+./setup_blast.sh -d ${db_name} -p ${blastdb}      # Could specify different version & os w/ -v & -o 
+```
+
 ### Inputs
 * `-v`: `string` (optional), blast+ version to download. See ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+ for more details, *Default: Latest available*
   > `2.2.18`-`2.12.0`, `l` (for latest)
@@ -22,26 +43,6 @@ See [Manual Download Guide](#manual-download-guide) for more details. But, to av
 * `-p`: `string` (optional, default: current working directory) - If specifying a database to download, `-p` specifies the path to write those files to. Note - this will later be the directory pointed to by the environment variable, `BLASTDB`, when running blast. See [Configuring BLAST](https://www.ncbi.nlm.nih.gov/books/NBK569858/)
   > `-p ~/blast_db/preformatted_dbs`
 
-### Download blast executables and update_blastdb.pl, then download DB later
-```
-./setup_blast.sh
-```
-
-### Download blast executables and update_blastdb.pl (only), specifying mac-os and different version
-```
-version=2.11.0
-os=x64-macosx
-
-./setup_blast.sh -v ${version} -o ${os}
-```
-
-### Download everything including DB, defaulting to x64-linux executables and latest version 
-```
-db_name=ref_euk_rep_genomes
-blastdb=./preformatted_db
-
-./setup_blast.sh -d ${db_name} -p ${blastdb}      # Could specify different version & os w/ -v & -o 
-```
 
 ## Manual Download Guide
 1. Determine desired blast version & os (e.g. "2.12.0" and "linux-64" respectively)
