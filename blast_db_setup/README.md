@@ -5,7 +5,7 @@ Automates downloading of blast DB databases from scratch. The process is already
 
 ### NCBI
 NCBI already has pre-formatted databases and a convenient downloadable script, `update_blastdb.pl`, available via FTP. In general, the steps are - 
-  1. Download and extract all preformatted databases with the same prefix from NCBI's FTP server (or make own) - *Note - this usually takes hours*
+  1. Download and extract all preformatted databases with the same prefix from NCBI's FTP server (or make own) - *Note - this can take hours*
   2. Download a compatible executable of the desired blast from NCBI 
   3. Run blast specifying the prefix of the downloaded files of step 1 as the database to blast against
 
@@ -53,6 +53,8 @@ blastdb=./preformatted_db
     os=linux-64
     curl ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/${version}/ncbi-blast-${version}+-${os}.tar.gz
     ```
+  * NOTE - Large databases, which "[are formatted in multiple one-gigabyte volumes](https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html)",  can take hours. E.g. ref_euk_rep_genomes is 90 files, each about 3GB, and can take about 3-4 hours at 20 MBPS download 
+   
 3. Extract tar
 4. Run the `update_blastdb.pl` w/ the prefix of the FASTA files you want
     ```
