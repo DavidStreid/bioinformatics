@@ -95,6 +95,7 @@ DB_NAME=ref_euk_rep_genomes          # Name of the database to use (prefix of th
 ```
 
 ### Troubleshooting
+* `blastdbcheck` - In the ncbi executable download, there is a script that checks the preformatted databses (`./ncbi-blast-2.12.0+/bin/blastdbcheck`). Run this and verify there are no errors
 * `Error: mdb_env_open` - Re-download and extract preformatted databases
 * `BLAST Database error: Cannot memory map` - Most likely a resource issue. If there is a line, stating `Number of files opened: ###` and that number is less than the total files in the `BLASTDB` directory, it might be either a disk space or memory issue.
 * `Critical: Failed to initialize SSL provider MBEDTLS: Unknown` - Not sure, but maybe related to fire wall. See below,
