@@ -5,7 +5,7 @@ Automates downloading of blast DB databases from scratch. The process is already
 
 ### NCBI
 NCBI already has pre-formatted databases and a convenient downloadable script, `update_blastdb.pl`, available via FTP. In general, the steps are - 
-  1. Download and extract all preformatted databases with the same prefix from NCBI's FTP server (or make own) - *Note - this usually takes hours*
+  1. Download and extract all preformatted databases with the same prefix from NCBI's FTP server (or make own) - *Note - this can take hours*
   2. Download a compatible executable of the desired blast from NCBI 
   3. Run blast specifying the prefix of the downloaded files of step 1 as the database to blast against
 
@@ -53,6 +53,8 @@ blastdb=./preformatted_db
     os=linux-64
     curl ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/${version}/ncbi-blast-${version}+-${os}.tar.gz
     ```
+  * NOTE - Large databases, which "[are formatted in multiple one-gigabyte volumes](https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html)",  can take hours. E.g. ref_euk_rep_genomes is 90 files, each about 3GB, and can take about 3-4 hours at 20 MBPS download 
+   
 3. Extract tar
 4. Run the `update_blastdb.pl` w/ the prefix of the FASTA files you want
     ```
@@ -62,7 +64,7 @@ blastdb=./preformatted_db
 ### FTP Notes for Manual Download
 These are paraphrased from the [blastdb README](https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html).
 * **Pre-formatted Databases** Use the pre-formatted databases, or follow the README to create your own
-  * "Pre-formatted databases must be downloaded using the update_blastdb.pl script or via FTP in binary mode" ([REF])(https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html)
+  * "Pre-formatted databases must be downloaded using the update_blastdb.pl script or via FTP in binary mode" ([REF](https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html))
 * **Extraction** If using the pre-formatted databases, they must be untarred (`tar -zxvf *.tar.gz`) before use.
   * As a note, I found that the extracted DBs are not much larger than their tar'd versions. For instance, when I downloaded `ref_euk_rep_genomes`, the tar'd was ~240GB and the untar'd was ~250GB.
   * **Issue with `--decompress` option** The `--decompress` option for `update_blastdb.pl` is intended to "decompresses the archives in the current working directory...and delete(s) the downloaded archive to save disk space" ([REF](https://www.ncbi.nlm.nih.gov/books/NBK62345/)). However I always receive the error below *with at least 35 GB of disk space left* so I removed this option and manually added extraction and deletion of each file in. `setup_blast.sh`. It seems this is what the `--decompress` option would have done anyway because **all the tar files are downlaoded** before any extraction lines are logged. I assume each `*.tar.gz` file will be extracted and deleted individually (rather than save all deletions until the end), which is what `setup_blast.sh` does.
@@ -93,8 +95,9 @@ DB_NAME=ref_euk_rep_genomes          # Name of the database to use (prefix of th
 ```
 
 ### Troubleshooting
+* `blastdbcheck` - In the ncbi executable download, there is a script that checks the preformatted databses (`./ncbi-blast-2.12.0+/bin/blastdbcheck`). Run this and verify there are no errors
 * `Error: mdb_env_open` - Re-download and extract preformatted databases
-* `BLAST Database error: Cannot memory map` - Not sure...
+* `BLAST Database error: Cannot memory map` - Not sure, but most likely a resource issue. If there is a line, stating `Number of files opened: ###` and that number is less than the total files in the `BLASTDB` directory, it might be either a disk space or memory issue.
 * `Critical: Failed to initialize SSL provider MBEDTLS: Unknown` - Not sure, but maybe related to fire wall. See below,
   * [NCBI Firewall Info](https://www.ncbi.nlm.nih.gov/IEB/ToolBox/NETWORK/firewall.html)
   * [Check firewall ports](https://www.ncbi.nlm.nih.gov/IEB/ToolBox/NETWORK/fwd_check.cgi) - Sometimes blast needs to query NCBI even when running locally, e.g. when running w/ `-remote`
