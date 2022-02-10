@@ -94,7 +94,7 @@ DB_NAME=ref_euk_rep_genomes          # Name of the database to use (prefix of th
 
 ### Troubleshooting
 * `Error: mdb_env_open` - Re-download and extract preformatted databases
-* `BLAST Database error: Cannot memory map` - Not sure...
+* `BLAST Database error: Cannot memory map` - Most likely a resource issue. If there is a line, stating `Number of files opened: ###` and that number is less than the total files in the `BLASTDB` directory, it might be either a disk space or memory issue.
 * `Critical: Failed to initialize SSL provider MBEDTLS: Unknown` - Not sure, but maybe related to fire wall. See below,
   * [NCBI Firewall Info](https://www.ncbi.nlm.nih.gov/IEB/ToolBox/NETWORK/firewall.html)
   * [Check firewall ports](https://www.ncbi.nlm.nih.gov/IEB/ToolBox/NETWORK/fwd_check.cgi) - Sometimes blast needs to query NCBI even when running locally, e.g. when running w/ `-remote`
