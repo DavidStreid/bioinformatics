@@ -95,7 +95,10 @@ DB_NAME=ref_euk_rep_genomes          # Name of the database to use (prefix of th
 ```
 
 ### Troubleshooting
-* `blastdbcheck` - In the ncbi executable download, there is a script that checks the preformatted databses (`./ncbi-blast-2.12.0+/bin/blastdbcheck`). Run this and verify there are no errors
+**STEP 0** - `blastdbcheck`
+* In the ncbi executable download, there is a script that checks the preformatted databses (`./ncbi-blast-2.12.0+/bin/blastdbcheck`). Run this and verify there are no errors
+
+#### Note son Specific Errors
 * `Error: mdb_env_open` - Re-download and extract preformatted databases
 * `BLAST Database error: Cannot memory map` - Not sure, but most likely a resource issue. If there is a line, stating `Number of files opened: ###` and that number is less than the total files in the `BLASTDB` directory, it might be that your system has a limit on the number of open files. See below,
 
