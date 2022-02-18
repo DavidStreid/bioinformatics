@@ -100,7 +100,7 @@ DB_NAME=ref_euk_rep_genomes          # Name of the database to use (prefix of th
 
 #### Note son Specific Errors
 * `Error: mdb_env_open` - Re-download and extract preformatted databases
-* `BLAST Database error: Cannot memory map` - Not sure, but most likely a resource issue. If there is a line, stating `Number of files opened: ###` and that number is less than the total files in the `BLASTDB` directory, it might be that your system has a limit on the number of open files. See below,
+* `BLAST Database error: Cannot memory map` - Not sure, but most likely a resource issue. If there is a line, stating `Number of files opened: ###` and that number is less than the total files in the `BLASTDB` directory for the DB you're using, it might be that your system has a limit on the number of open files. See below,
 
   ```
   $ ulimit -f -n    # I
