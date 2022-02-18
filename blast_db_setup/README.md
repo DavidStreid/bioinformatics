@@ -107,8 +107,12 @@ DB_NAME=ref_euk_rep_genomes          # Name of the database to use (prefix of th
   Check if "open files" is less than the total files in the untarred database, if it is, this needs to be changed. Look up "modify limit of file descriptors" for your OS and change it to a 2^x greater than the number of files (e.g. 8192). e.g. For macOS,
   ```
   $ sudo launchctl limit maxfiles 8192 unlimited  # CHANGE
+  $ ulimit -n 8192
   $ launchctl limit maxfiles                      # VERIFY
   	maxfiles    8192           10240
+  $ ulimit -f -n
+    file size               (blocks, -f) unlimited
+    open files                      (-n) 8192
   # NOTE - this is a temporary change until the MAC is rebooted or you log out
   ```
 * `Critical: Failed to initialize SSL provider MBEDTLS: Unknown` - Not sure, but maybe related to fire wall. See below,
