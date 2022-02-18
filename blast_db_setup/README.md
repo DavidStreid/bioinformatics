@@ -95,9 +95,29 @@ DB_NAME=ref_euk_rep_genomes          # Name of the database to use (prefix of th
 ```
 
 ### Troubleshooting
-* `blastdbcheck` - In the ncbi executable download, there is a script that checks the preformatted databses (`./ncbi-blast-2.12.0+/bin/blastdbcheck`). Run this and verify there are no errors
+**STEP 0** - `blastdbcheck`
+* In the ncbi executable download, there is a script that checks the preformatted databses (`./ncbi-blast-2.12.0+/bin/blastdbcheck`). Run this and verify there are no errors
+
+#### Note son Specific Errors
 * `Error: mdb_env_open` - Re-download and extract preformatted databases
-* `BLAST Database error: Cannot memory map` - Not sure, but most likely a resource issue. If there is a line, stating `Number of files opened: ###` and that number is less than the total files in the `BLASTDB` directory, it might be either a disk space or memory issue.
+* `BLAST Database error: Cannot memory map` - Not sure, but most likely a resource issue. If there is a line, stating `Number of files opened: ###` and that number is less than the total files in the `BLASTDB` directory for the DB you're using, it might be that your system has a limit on the number of open files. See below,
+
+  ```
+  $ ulimit -f -n
+  file size               (blocks, -f) unlimited
+  open files                      (-n) 256
+  ```
+  Check if "open files" is less than the total files in the untarred database, if it is, this needs to be changed. Look up "modify limit of file descriptors" for your OS and change it to a 2^x greater than the number of files (e.g. 8192). e.g. For macOS,
+  ```
+  $ sudo launchctl limit maxfiles 8192 unlimited  # CHANGE
+  $ ulimit -n 8192
+  $ launchctl limit maxfiles                      # VERIFY
+  	maxfiles    8192           10240
+  $ ulimit -f -n
+    file size               (blocks, -f) unlimited
+    open files                      (-n) 8192
+  # NOTE - this is a temporary change until the MAC is rebooted or you log out
+  ```
 * `Critical: Failed to initialize SSL provider MBEDTLS: Unknown` - Not sure, but maybe related to fire wall. See below,
   * [NCBI Firewall Info](https://www.ncbi.nlm.nih.gov/IEB/ToolBox/NETWORK/firewall.html)
   * [Check firewall ports](https://www.ncbi.nlm.nih.gov/IEB/ToolBox/NETWORK/fwd_check.cgi) - Sometimes blast needs to query NCBI even when running locally, e.g. when running w/ `-remote`
