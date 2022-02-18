@@ -109,7 +109,7 @@ DB_NAME=ref_euk_rep_genomes          # Name of the database to use (prefix of th
   $ sudo launchctl limit maxfiles 8192 unlimited  # CHANGE
   $ launchctl limit maxfiles                      # VERIFY
   	maxfiles    8192           10240
-  # Restart computer
+  # NOTE - this is a temporary change until the MAC is rebooted or you log out
   ```
 * `Critical: Failed to initialize SSL provider MBEDTLS: Unknown` - Not sure, but maybe related to fire wall. See below,
   * [NCBI Firewall Info](https://www.ncbi.nlm.nih.gov/IEB/ToolBox/NETWORK/firewall.html)
