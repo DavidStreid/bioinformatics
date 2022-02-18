@@ -99,6 +99,8 @@ if [[ ! -z ${db_name} ]]; then
     echo ""
     exit 1
   fi
+  out_path=$(realpath ${out_path})
+
   echo "db_name=${db_name}"
   echo "out_path=${out_path}"
 fi
@@ -135,7 +137,8 @@ else
   exit 1
 fi
 
-download_script=$(realpath ncbi-blast-2.12.0+/bin/update_blastdb.pl)
+binary_dir=$(realpath ncbi-blast-2.12.0+/bin)
+download_script="${binary_dir}/update_blastdb.pl"
 
 if [[ ! -z ${db_name} ]]; then
   echo "Downloading & extracting files for database='${db_name}'"
@@ -155,7 +158,7 @@ if [[ ! -z ${db_name} ]]; then
     if [[ $? -ne 0 ]]; then
       echo "Extracted ${index}/${total}"
       echo "Failed to extract ${f}"
-      echo "Extract ${f} manually and all remaining '*.tar.gz' files"
+      echo "Download/Extract ${f} manually and all remaining '*.tar.gz' files"
       echo "[WARN] DO NOT RE-RUN THIS SCRIPT"
       exit 1
     fi
@@ -164,9 +167,15 @@ if [[ ! -z ${db_name} ]]; then
   done
   cd -
   echo "Successful download & extraction"
+  echo "Verifying DB"
+  ${binary_dir}/blastdbcheck -dir ${out_path}
+
   echo "Export directory of db files as BLASTDB and run blast executables"
-  echo "Blast executables: $(realpath ncbi-blast-2.12.0+/bin)"
+  echo "Blast executables: ${binary_dir}"
   echo "EXPORT BLASTDB=$(realpath ${out_path})"
+  echo "Test with -"
+  echo "printf '>test\ntgcaccaaacatgtctaaagctggaaccaaaattactttctt\n' > test.fa"
+  echo "${binary_dir}/blastn -db ${db_name} -query test.fa -out results.out"
 else
   echo ""
   echo "For more info, see https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html"
