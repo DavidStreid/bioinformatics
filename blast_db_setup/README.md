@@ -121,6 +121,16 @@ DB_NAME=ref_euk_rep_genomes          # Name of the database to use (prefix of th
 * `Critical: Failed to initialize SSL provider MBEDTLS: Unknown` - Not sure, but maybe related to fire wall. See below,
   * [NCBI Firewall Info](https://www.ncbi.nlm.nih.gov/IEB/ToolBox/NETWORK/firewall.html)
   * [Check firewall ports](https://www.ncbi.nlm.nih.gov/IEB/ToolBox/NETWORK/fwd_check.cgi) - Sometimes blast needs to query NCBI even when running locally, e.g. when running w/ `-remote`
+* **No error, and no results** - blast is a cpu/memory-intensive process. It is not uncommon to wait hours and even days for large queries. Try these debug steps - 
+
+  1. Check that it is still running
+    ```
+    $ ps -ef | grep blast   # Should get more than the `grep blast` command
+    502 41870 41867   0 11:03AM ttys002   13:21.40 ./ncbi-blast-2.12.0+/bin/blastn -db ref_euk_rep_genomes -num_threads 7 -outfmt 6 -query query.fa -out results.out
+    502 42597 35172   0 11:10AM ttys002    0:00.00 grep blast
+    ```
+  2. If multiple queries are being run in the query file, try one and increase the number of threads, `-num_threads` option. BLAST will [query pack](https://doctorlib.info/medical/blast/13.html) with a set of queries and only return results when ALL of them have been analyzed. 
+  3. Re-run w/ an optimized query
 ### References
 * [blastn documentation](https://www.ncbi.nlm.nih.gov/books/NBK569856/)
 
