@@ -118,6 +118,12 @@ DB_NAME=ref_euk_rep_genomes          # Name of the database to use (prefix of th
     open files                      (-n) 8192
   # NOTE - this is a temporary change until the MAC is rebooted or you log out
   ```
+* Nothing is printed in BLAST results
+  * Try temporarily changing the environment variable `BATCH_SIZE` to something small. This is the number of queries that will be concatenated to conserve memory. E.g.
+  ```
+  export BATCH_SIZE=10
+  ```
+  * As a note, there are also additional environment variables used by blast. See [Configuring BLAST via environment variables](https://www.ncbi.nlm.nih.gov/books/NBK569858/)
 * `Critical: Failed to initialize SSL provider MBEDTLS: Unknown` - Not sure, but maybe related to fire wall. See below,
   * [NCBI Firewall Info](https://www.ncbi.nlm.nih.gov/IEB/ToolBox/NETWORK/firewall.html)
   * [Check firewall ports](https://www.ncbi.nlm.nih.gov/IEB/ToolBox/NETWORK/fwd_check.cgi) - Sometimes blast needs to query NCBI even when running locally, e.g. when running w/ `-remote`
