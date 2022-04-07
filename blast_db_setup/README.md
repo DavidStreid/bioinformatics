@@ -98,7 +98,7 @@ DB_NAME=ref_euk_rep_genomes          # Name of the database to use (prefix of th
 **STEP 0** - `blastdbcheck`
 * In the ncbi executable download, there is a script that checks the preformatted databses (`./ncbi-blast-2.12.0+/bin/blastdbcheck`). Run this and verify there are no errors
 
-#### Note son Specific Errors
+#### Notes on Specific Errors
 * `Error: mdb_env_open` - Re-download and extract preformatted databases
 * `BLAST Database error: Cannot memory map` - Not sure, but most likely a resource issue. If there is a line, stating `Number of files opened: ###` and that number is less than the total files in the `BLASTDB` directory for the DB you're using, it might be that your system has a limit on the number of open files. See below,
 
@@ -119,7 +119,8 @@ DB_NAME=ref_euk_rep_genomes          # Name of the database to use (prefix of th
   # NOTE - this is a temporary change until the MAC is rebooted or you log out
   ```
 * Nothing is printed in BLAST results
-  * Try temporarily changing the environment variable `BATCH_SIZE` to something small. This is the number of queries that will be concatenated to conserve memory. E.g.
+  * Probably a memory issue
+  * Try to see if some results are printed by temporarily changing the environment variable `BATCH_SIZE` to something small. This is the number of queries that will be concatenated to conserve memory. E.g.
   ```
   export BATCH_SIZE=10
   ```
