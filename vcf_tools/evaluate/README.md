@@ -24,3 +24,10 @@ GQ [All]
         Min=0
 Done.
 ```
+
+## Notes
+### GQ
+* Reasonable GQ values should have an average around 70-99 w/ a std less than 30
+
+### AD
+* Not sure, but when defining suspect AD scores w/ `[0 < ad < 0.5]`, an `AVG ~ 0.35-0.4` & `STD ~ 0.01` was an indicator of  mostly valid entries
