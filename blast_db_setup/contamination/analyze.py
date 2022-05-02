@@ -1,11 +1,15 @@
-import os
 import argparse
+import collections
+import matplotlib.pyplot as plt
 
-from pandas import qcut
-
-EXPECTED_BLASTNAMES = set([]) # Add list of blastnames expected to be in results, e.g. "primates" if seaching human reads
+EXPECTED_BLASTNAMES = set()   # BLAST `sblastnames` that are ignored, e.g. if looking for contamination in human saliva, add "primates"
 OUTPUT_TSV = 'output.tsv'
 IDENTITY_TSV = 'query_identities.tsv'
+
+VALID_ID_PROPORTION = 0.5
+
+MAX_E_VALUE = 0.1                     # E-Values greater than this are filtered out, NOTE - "E=1" means 1 result expected by chance
+MAX_MAGNITUDE_DIFFERENCE_ALLOWED = 3  # E-Values more than 10^x the best hit are filtered out, e.g. "3" will filter out anything with E-value > (1000 * lowest E) 
 
 class blast_result:
   def __init__(self, qaccver, pident, evalue, bitscore, scomnames, sblastnames, sskingdoms):
@@ -23,10 +27,25 @@ class blast_result:
   def to_string(self):
     return '\t'.join([self.qaccver, str(self.pident), str(self.evalue), str(self.bitscore), self.scomnames, self.sblastnames, self.sskingdoms])
 
+  def is_the_best_match(self):
+    statistically_significant = self.evalue < 1e-50
+    evolutionarily_close = self.pident > 0.9
+
+
+def graph_pie(labels, sizes, fname):
+  # https://matplotlib.org/stable/gallery/pie_and_polar_charts/pie_features.html
+  plt.title('BLAST IDENTIFICATIONS')
+
+  fig1, ax1 = plt.subplots()
+  ax1.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
+  ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+  plt.savefig("%s.pdf" % fname)
+  plt.close()
+
 
 def output_relevant_results(query_dic):
   total = 0
-  num_filtered_queries = len(query_dic)
+  reads_with_valid_blast_results = len(query_dic)
   with open(OUTPUT_TSV, 'w') as out, open(IDENTITY_TSV, 'w') as identity_out:
     header = '\t'.join(['qaccver', 'pident', 'evalue', 'bitscore', 'scomnames', 'sblastnames', 'sskingdoms'])
     out.write(f"{header}\n")
@@ -61,15 +80,21 @@ def output_relevant_results(query_dic):
 
       # print(f"{qaccver} - {list(set([ br.sblastnames for br in blast_result_list ]))}")
 
-  
-  print(f"num_filtered_queries={num_filtered_queries}")
+  print("[OUT] BLAST RESULT SUMMARY")
+  print(f"\treads_with_valid_blast_results={reads_with_valid_blast_results}")
   print(f"\ttotal={total}")
 
 def get_query_dic(blast_results_tsv):
-  query_dic = {}
-  queries_with_expected_top_hit = set()
+  ''' Returns a dictionary of read IDs to their blast results
+  :return { 'read_id': blast_result[], ... }
+  '''
+  print("[IN] BLAST RESULT SUMMARY")
+  print(f"\tINPUT = {blast_results_tsv}")
+  
+  removed_reads = set()
 
-  total_queries = 0
+  total_reads = 0
+  filtered_reads_dic = {}
   with open(blast_results_tsv, 'r') as in_f:
     for line in in_f:
       # qaccver saccver pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames scomnames sblastnames sskingdoms
@@ -85,39 +110,90 @@ def get_query_dic(blast_results_tsv):
 
       br = blast_result(qaccver, pident, evalue, bitscore, scomnames, sblastnames, sskingdoms)
 
-      if qaccver in queries_with_expected_top_hit:
-        continue
-
-      if qaccver not in query_dic:
-        total_queries += 1  
-        if sblastnames in EXPECTED_BLASTNAMES:
-          # If the first hit for the qaccver is expected, skip all other blast results for the query
-          queries_with_expected_top_hit.add(qaccver)
-          # print(f"{qaccver} - {sblastnames}")
+      if qaccver not in filtered_reads_dic:
+        total_reads += 1  
         highest_value = evalue
 
-      if sblastnames not in EXPECTED_BLASTNAMES and evalue < 1e-4 and (evalue / highest_value) < 10:
-        # Ignore anything expected
-        # Ignore anything that's an order of magnitude lower than the first BLAST hit
-        if qaccver not in query_dic:
-          query_dic[qaccver] = []
-        query_dic[qaccver].append(br)
-      else:
-        pass
-        # print(f"{qaccver} - {sblastnames} - {evalue}")
+      low_evalue = evalue < MAX_E_VALUE                                                     # Less than one result expected by chance
+      similar_evalue = (evalue / highest_value) < (10 * MAX_MAGNITUDE_DIFFERENCE_ALLOWED)   # All results are within three orders of magnitude of the best result  
 
-  print(f"Total Queries = {float(total_queries)}")
-  print(f"\tQueries with expected blast hits = {len(queries_with_expected_top_hit)}")
+      if low_evalue and similar_evalue:
+        # Read ID has a valid E-Value and will be analyzed
+        if qaccver not in filtered_reads_dic:
+          filtered_reads_dic[qaccver] = []
+        filtered_reads_dic[qaccver].append(br)
+      else:
+        if qaccver not in filtered_reads_dic:
+          # Read ID has no valid E-Values and won't analyzed
+          removed_reads.add(qaccver)
+        else:
+          # Read ID has valid E-Values, just not this one
+          pass
   
-  return query_dic
+  print(f"\tTotal Reads = {total_reads}")
+  print(f"\tTotal Reads with Valid Blast Results = {len(filtered_reads_dic)}")
+  num_removed_reads = len(removed_reads)
+  if num_removed_reads > 0:
+    print(f"\t[WARNING] Removed Reads = {len(num_removed_reads)}")
+
+  return filtered_reads_dic
+
+def get_proportions(blast_result_list):
+  blast_names = [ blast_result.sblastnames for blast_result in blast_result_list ]
+  freq_dic = collections.Counter(blast_names)
+  total = len(blast_names)
+
+  for id, id_freq in freq_dic.items():
+    if (id_freq/total) > VALID_ID_PROPORTION:
+      return freq_dic, id
+
+  # Nothing met the minimum to be ID'd
+  return freq_dic, None
+
+
+def aggregate_blast_results(query_dic):
+  AMBIGUOUS_KEY = 'ambiguous'
+  read_ids = {
+    AMBIGUOUS_KEY: 0
+  }
+  
+  for qaccver, blast_result_list in query_dic.items():
+    qaccver_freq_dic, id = get_proportions(blast_result_list)
+    if id is not None:
+      if id in read_ids:
+        read_ids[id] += 1
+      else:
+        read_ids[id] = 1
+    else:
+      read_ids[AMBIGUOUS_KEY] += 1
+      # TODO - what to do with this?
+      # for k,v in qaccver_freq_dic.items():
+      #  print(f"\t{k}: {v}")
+
+  print("IDENTIFICATIONS")
+  identifications = []
+  identification_counts = []
+  for identification, id_count in read_ids.items():
+    identifications.append(identification)
+    identification_counts.append(id_count)
+    print(f"\t{identification}: {id_count}")    
+
+  graph_pie(identifications, identification_counts, 'blast_results')
+
+
+def log_settings():
+  print("SETTINGS")
+  print(f"\tMAX_E_VALUE={MAX_E_VALUE}")
+  print(f"\tMAX_MAGNITUDE_DIFFERENCE_ALLOWED={MAX_MAGNITUDE_DIFFERENCE_ALLOWED}")
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='Identify likelihood of contamination')
   parser.add_argument('-f', dest='blast_results_tsv', help='TSV of blast results', required=True)
-
   args = parser.parse_args()
 
   blast_results_tsv = args.blast_results_tsv
+  log_settings()
 
   query_dic = get_query_dic(blast_results_tsv)
+  blast_results = aggregate_blast_results(query_dic)
   output_relevant_results(query_dic)
