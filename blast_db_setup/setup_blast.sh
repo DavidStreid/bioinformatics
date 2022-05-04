@@ -137,7 +137,7 @@ else
   exit 1
 fi
 
-binary_dir=$(realpath ncbi-blast-2.12.0+/bin)
+binary_dir=$(realpath ncbi-blast-${latest_version}+/bin)
 download_script="${binary_dir}/update_blastdb.pl"
 
 if [[ ! -z ${db_name} ]]; then
