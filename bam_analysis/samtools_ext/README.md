@@ -2,6 +2,7 @@
 Utils that seem like they could be in samtools
 
 `extract_double_clipped_reads.sh` - Outputs `double_clipped_reads.sam` & `double_clipped_reads.fa` files with only the double-clipped reads from an input SAM
+
 `isolate_clipped_reads.sh` - Outputs `*_clipped.sam` & `*_clipped_collated.bam` which are SAM/BAM files that have only the filtered double-soft/hard clipped reads.
 
 ## isolate_clipped_reads.sh
@@ -11,9 +12,9 @@ Utils that seem like they could be in samtools
 * `*_clipped_rgid.txt` - RGIDs matching input clipping filters
 
 ### Run
-#### Extract all read pairs where both reads have soft-clipping
+#### Extract all read pairs where both reads have double soft-clipping
 ```
-../isolate_clipped_reads.sh -f sample.sam -c S -p
+$ ./isolate_clipped_reads.sh -f sample.sam -c S -p
 [INPUTS]
 BAM=sample.sam
 CLIPPING_FILTER=S
@@ -34,9 +35,9 @@ Shuffling/Grouping reads into collated BAM=sample_clipped_collated.bam
 
 Done.
 ```
-#### Extract all reads pairs where one of the reads have soft-clipping
+#### Extract all reads pairs where at least one of the reads have double soft-clipping
 ```
-../isolate_clipped_reads.sh -f sample.sam -c H
+$ ./isolate_clipped_reads.sh -f sample.sam -c H
 [INPUTS]
 BAM=sample.sam
 CLIPPING_FILTER=H
@@ -57,8 +58,9 @@ Shuffling/Grouping reads into collated BAM=sample_clipped_collated.bam
 Done.
 ```
 
-#### Extract all reads pairs where both reads have soft OR hard clipping
+#### Extract all reads pairs where both reads have double soft OR hard clipping
 ```
+$ ./isolate_clipped_reads.sh -f sample.sam -c HS -p
 [INPUTS]
 BAM=sample.sam
 CLIPPING_FILTER=H

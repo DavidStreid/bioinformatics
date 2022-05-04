@@ -1,5 +1,6 @@
 #!/bin/bash
 # Isolates hard/soft clipped reads in SAM file
+# TODO - Add single-clipping option
 
 options="\t-f, file: SAM/BAM file\n\t-c, clipping: H=Hard\tS=Soft\tHS=Hard & Soft\n\t-p, paried-clipping: Flag to only include reads where both reads have the \"-c\" clipping"
 help_string="./isolate_clipped_reads.sh -f file [-c clipping] [-p paired-clipping]\n${options}"
