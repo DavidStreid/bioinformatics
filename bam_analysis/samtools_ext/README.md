@@ -63,25 +63,6 @@ Done.
 $ ./isolate_clipped_reads.sh -f sample.sam -c HS -p
 [INPUTS]
 BAM=sample.sam
-CLIPPING_FILTER=H
-PAIRED_CLIPPING_FILTER=
-
-Extracting RGIDs of clipped BAM reads: H_clipped_rgid.txt
-REGEX="[0-9]+[H].+[H]$"
-Found 3 clipped RGIDs
-
-Including all RGIDs w/ clipping of at least one paired-read
-
-Writing sample_clipped.sam
-	headers...
-	reads...
-
-Shuffling/Grouping reads into collated BAM=sample_clipped_collated.bam
-
-Done.
-[pplnuser@sga01 test_3]$ ../isolate_clipped_reads.sh -f sample.sam -c HS -p
-[INPUTS]
-BAM=sample.sam
 CLIPPING_FILTER=HS
 PAIRED_CLIPPING_FILTER=TRUE
 
