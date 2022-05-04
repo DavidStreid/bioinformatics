@@ -3,9 +3,9 @@
 # TODO - Add single-clipping option
 
 options="\t-f, file: SAM/BAM file\n\t-c, clipping: H=Hard\tS=Soft\tHS=Hard & Soft\n\t-n, number of rgids: Max number of RGIDs to put in filtered BAM\n\t-p, paried-clipping: Flag to only include reads where both reads have the\n"
-help_string="./isolate_clipped_reads.sh -f file [-c clipping] [-n num_reads] [-p paired-clipping]\n${options}"
+help_string="./isolate_clipped_reads.sh -f file [-c clipping] [-n num_reads] [-p] [-q]\n${options}"
 
-while getopts ":f:c:n:ph" opt; do
+while getopts ":f:c:n:pqh" opt; do
     case $opt in
         f) INPUT_BAM=${OPTARG}
         ;;
@@ -14,7 +14,9 @@ while getopts ":f:c:n:ph" opt; do
         n) NUM_READS=${OPTARG}
         ;;
         p) PAIRED_CLIPPING_FILTER="TRUE"
-        ;; 
+        ;;
+        q) OUTPUT_FQ="TRUE"
+        ;;
         h) printf "${help_string}" && exit 0
         ;;
     esac 
@@ -95,6 +97,22 @@ COLLATED_BAM="$(echo ${CLIPPED_READ_BAM} | cut -d'.' -f1)_collated.bam"
 echo "Shuffling/Grouping reads into collated BAM=${COLLATED_BAM}"
 samtools collate -o ${COLLATED_BAM} ${CLIPPED_READ_BAM}
 echo ""
+
+if [[ ! -z ${OUTPUT_FQ} ]]; then
+  FQ_FILE="$(echo ${COLLATED_BAM} | cut -d'.' -f1).fq"
+  rm -f ${FQ_FILE}
+  echo "Outputing FASTQ file: ${FQ_FILE}"
+  samtools view ${COLLATED_BAM} | \
+    while IFS= read line; do
+      CIGAR=$(echo "${line}" | cut -f6)
+      QNAME=$(echo "${line}" | cut -f1)
+      ID="@${QNAME}___${CIGAR}"
+      echo ${ID} >> ${FQ_FILE}
+      echo "${line}" | cut -f10 >> ${FQ_FILE}
+      echo "+" >> ${FQ_FILE}
+      echo "${line}" | cut -f11 >> ${FQ_FILE}
+    done
+fi
 
 echo "Done."
 
