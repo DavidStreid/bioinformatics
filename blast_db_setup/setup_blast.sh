@@ -150,7 +150,7 @@ if [[ ! -z ${db_name} ]]; then
   mkdir ${log_dir}
   eval ${CMD} > ${log_dir}/download_${db_name}.out 2>&1
   files=$(find . -type f -name "*.tar.gz" | sort)
-  total=$(echo ${files} | cut ' ' '\n' | wc -l | grep -oE [0-9])
+  total=$(echo ${files} | cut -d' ' '\n' | wc -l | grep -oE [0-9])
   for f in ${files}; do
     index=$(echo ${f} | xargs basename | cut -d'.' -f2)
     echo "[${index}] Extracting ${f}"
