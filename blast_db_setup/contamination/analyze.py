@@ -9,7 +9,11 @@ IDENTITY_TSV = 'query_identities.tsv'
 IDENTITY_SUMMARY_TSV = 'identity_summary.tsv'
 
 MAX_E_VALUE = 0.1                     # E-Values greater than this are filtered out, NOTE - "E=1" means 1 result expected by chance
-MAX_MAGNITUDE_DIFFERENCE_ALLOWED = 3  # E-Values more than 10^x the best hit are filtered out, e.g. "3" will filter out anything with E-value > (1000 * lowest E) 
+MAX_MAGNITUDE_DIFFERENCE_ALLOWED = 1  # E-Values more than 10^x the best hit are filtered out, e.g. "3" will filter out anything with E-value > (1000 * lowest E) 
+ALLOWED_AMBITUITY = 3                 # ID E-Value within @MAX_MAGNITUDE_DIFFERENCE_ALLOWED before not identifying a read
+# What do these mean? Here are examples - 
+#   - MAX_MAGNITUDE_DIFFERENCE_ALLOWED=1  Results w/ an E-Value within 1 order of magnitude of the best are valid
+#     ALLOWED_AMBITUITY=3                 If the list of valid blast results have less than 3 different IDs, the best e-value is chosen. If there are more, this read isn't considered                                                                  
 
 class blast_result:
   @staticmethod
@@ -136,6 +140,19 @@ def is_valid_blast_result(blast_result, lowest_evalue_for_read_id):
 
   return is_valid_evalue and similar_evalue
 
+
+def get_most_likely_blast_result(blast_result_list):
+  ''' Returns the most likely blast result from the input list
+  :param blast_result_list, blast_result[]
+  :return blast_result
+  '''
+  # If all identifications are the same, return the first one
+  sblastnames = set([ br.sblastnames for br in blast_result_list ])
+  if len(sblastnames) < ALLOWED_AMBITUITY:
+    return blast_result_list[0]
+
+  return None
+
 def aggregate_blast_results(query_dic):
   aggregated_query_dic = {}       # Clone of aggregated query dictionary with only the best blast result
   
@@ -146,16 +163,23 @@ def aggregate_blast_results(query_dic):
     total_blast_results_for_qaccver = len(blast_result_list)
     total_blast_results += total_blast_results_for_qaccver
 
-
     blast_result_list.sort(key=lambda br: br.evalue)
-    best_evalue_result = blast_result_list[0]
+    best_evalue_for_read_id = blast_result_list[0].evalue
+    
+    valid_blast_results = [ br for br in blast_result_list if is_valid_blast_result(br, best_evalue_for_read_id)]
+    best_evalue_result = get_most_likely_blast_result(valid_blast_results)
 
-    best_evalue_for_read_id = best_evalue_result.evalue
+    if best_evalue_result is None:
+      print(f"[WARN - Skipping Ambiguous] Read ID={valid_blast_results[0].qaccver}")
+      # id_e = set([ f"\t{br.sblastnames}\t{br.evalue}" for br in valid_blast_results ])
+      id_evalues = sorted(list(set([ (br.sblastnames, br.evalue) for br in valid_blast_results ])), key=lambda ide: ide[1])
+      print("\n".join([ f"\t{br[0]}\t{br[1]}" for br in id_evalues ]))
+      continue
 
     if len(blast_result_list) > 1:
       best_evalue_result.set_next_magnitude(blast_result_list[1])
-    
-    num_valid_blast_results = len([ br for br in blast_result_list if is_valid_blast_result(br, best_evalue_for_read_id)])
+
+    num_valid_blast_results = len(valid_blast_results)
     if num_valid_blast_results == 0:
       invalid_blast_ids.add(qaccver)
       continue
