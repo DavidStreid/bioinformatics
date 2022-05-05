@@ -11,8 +11,21 @@ $ ./blast_fasta.sh -f sample.fa [-d blastn database]
 > Eg: `ref_prok_rep_genomes`, `nt`, `"ref_prok_rep_genomes nt"`
   * Default: `nt` (this is the [blastn default](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=blastn&PAGE_TYPE=BlastSearch&LINK_LOC=blasthome) and combines nucleotide sequences from across GenBank, EMBL, and DDBJ)
   * Notes:
-    * This database MUST already downloaded and available in the `BLASTDB` directory
-    * Not every read is guaranteed to return results based on the default criteria and database used
+    * The chosen database MUST already downloaded and available in the `BLASTDB` directory. The table below contains databases I think are good choices for detecting contamination
+
+		|Name|Type|Description|
+		|:---:|:---:|:---:|
+		|nt|DNA|Comprensive set of sequences from GenBank, EMBL, DDBJ, PDB, & RefSeq (If only choosing one - choose this one)|
+		|ref_euk_rep_genomes|DNA|Representative Eukaryotic Genomes from NCBI's Refseq Genomes database|
+		|ref_prok_rep_genomes|DNA|Representative Eukaryotic Genomes from NCBI's Refseq Genomes database|
+		|ref_viruses_rep_genomes|DNA|Representative Virus (not viroid) Genomes from NCBI's Refseq Genomes database|
+		|human_genome|DNA|Homo sapiens GRCh38|
+		|env_nt|DNA|samples taken directly from their environment (e.g. Mine Drainage projects)|
+
+    * Not every read is guaranteed to return results based on the default criteria and database used. Therefore, choosing the `-d` database parameter is crucial for getting accurate results
+	    * For instance, If the DB used does not include the species, but is large enough (note: E-Value is directly related to database size) that the read maps to a highly similar region of another species in the DB, then a BLAST result could return a seemingly good E-Value, say `E-Value=1e-10`, that is actually incorrect. In this hypothetical, adding a database with the correct species could reduce the E-Value several orders of magnitude to something like `E-Value=1e-50`, which would clearly be the more confident identification.
+
+
 
 #### Outputs
 `blast_results.tsv` - TSV w/ the following fields for each read that returns BLAST results
@@ -33,6 +46,10 @@ $ ./blast_fasta.sh -f sample.fa [-d blastn database]
 * `scomnames` - Common name for BLAST result 
 * `sblastnames` 
 * `sskingdoms` - Kingdom of BLAST result
+
+#### References
+* [Github Docs](https://github.com/ncbi/blast_plus_docs#blast-databases)
+* [BLAST DB Help](https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html)
 
 ### Extract best identifications for each read
 Ouputs a processed TSV of the best result for each read along w/ helpful statistics such as `magnitude_of_best_result` & `proportion_valid_blast_results`, which allow for analysis of what results are valid.
