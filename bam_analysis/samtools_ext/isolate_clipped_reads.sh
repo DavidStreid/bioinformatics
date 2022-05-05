@@ -1,11 +1,10 @@
 #!/bin/bash
 # Isolates hard/soft clipped reads in SAM file
-# TODO - Add single-clipping option
 
-options="\t-f, file: SAM/BAM file\n\t-c, clipping: H=Hard\tS=Soft\tHS=Hard & Soft\n\t-n, number of rgids: Max number of RGIDs to put in filtered BAM\n\t-p, paried-clipping: Flag to only include reads where both reads have the\n"
-help_string="./isolate_clipped_reads.sh -f file [-c clipping] [-n num_reads] [-p] [-q]\n${options}"
+options="\t-f, file: SAM/BAM file\n\t-c, clipping: H=Hard\tS=Soft\tHS=Hard & Soft\n\t-n, number of rgids: Max number of RGIDs to put in filtered BAM (Default: None)\n\t-p, paried-clipping: Flag to only include reads where both reads have clipping (Default: True)\n\t-s, single-clipped: Search only for single-clipped reads (default: False)\n"
+help_string="./isolate_clipped_reads.sh -f file [-c clipping] [-n num_reads] [-s] [-p] [-q]\n${options}"
 
-while getopts ":f:c:n:pqh" opt; do
+while getopts ":f:c:n:psqh" opt; do
     case $opt in
         f) INPUT_BAM=${OPTARG}
         ;;
@@ -14,6 +13,8 @@ while getopts ":f:c:n:pqh" opt; do
         n) NUM_READS=${OPTARG}
         ;;
         p) PAIRED_CLIPPING_FILTER="TRUE"
+        ;;
+        s) SINGLE_CLIPPED="TRUE"
         ;;
         q) OUTPUT_FQ="TRUE"
         ;;
@@ -40,14 +41,28 @@ fi
 echo "[INPUTS]"
 echo "BAM=${INPUT_BAM}"
 echo "CLIPPING_FILTER=${CLIPPING_FILTER}"
-echo "PAIRED_CLIPPING_FILTER=${PAIRED_CLIPPING_FILTER}"
+echo "[FLAGS]"
+if [[ ! -z ${PAIRED_CLIPPING_FILTER} ]]; then
+  echo "PAIRED_CLIPPING_FILTER=${PAIRED_CLIPPING_FILTER}"
+fi
+if [[ ! -z ${SINGLE_CLIPPED} ]]; then
+  echo "SINGLE_CLIPPED=${SINGLE_CLIPPED}"
+fi
+if [[ ! -z ${OUTPUT_FQ} ]]; then
+  echo "OUTPUT_FQ=${OUTPUT_FQ}"
+fi
 echo ""
 
-# REF: https://www.biostars.org/p/137461/#137631
-CLIPPED_RGID_FILE="${CLIPPING_FILTER}_clipped_rgid.txt"
 echo "Extracting RGIDs of clipped BAM reads: ${CLIPPED_RGID_FILE}"
-REGEX="[0-9]+[${CLIPPING_FILTER}].+[${CLIPPING_FILTER}]$"
-echo "REGEX=\"${REGEX}\""
+if [[ -z ${SINGLE_CLIPPED} ]]; then
+  echo "Looking for double-clipped reads"
+  REGEX="[0-9]+[${CLIPPING_FILTER}].+[${CLIPPING_FILTER}]$"
+else
+  echo "Looking for single-clipped reads"
+  REGEX="[0-9]+[${CLIPPING_FILTER}].+"
+fi
+printf "\tREGEX=\"${REGEX}\"\n"
+CLIPPED_RGID_FILE="${CLIPPING_FILTER}_clipped_rgid.txt"
 samtools view ${INPUT_BAM} | awk -v REGEX="${REGEX}" '$6~/'"$REGEX"'/{print $1}' | sort -k1,1 > ${CLIPPED_RGID_FILE}
 echo "Found $(wc -l ${CLIPPED_RGID_FILE} | grep -oE "[0-9]+") clipped RGIDs"
 echo ""
@@ -75,7 +90,7 @@ if [[ ! -z ${PAIRED_CLIPPING_FILTER} ]]; then
   num_filtered=$(wc -l ${tmp_file} | grep -oE "[0-9]+")
   printf "\tAdded ${num_filtered} RGIDs with clipping of both pairs\n"
   if [[ 0 -eq ${num_filtered} ]]; then
-    echo "\tNo reads match the provided filters. Not writing BAM & exiting.\n"
+    printf "\tNo reads match the provided filters. Not writing BAM & exiting.\n"
     exit 0
   fi 
 else
