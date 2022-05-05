@@ -3,43 +3,6 @@
 available_versions=$(curl ftp://ftp.ncbi.nih.gov/blast/executables/blast+/ 2>/dev/null | rev | cut -d' ' -f1 | rev | grep -oE "[0-9]+.[0-9]+.[0-9]+")
 latest_version=$(curl ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/ 2> /dev/null | grep LATEST | sed 's/.*-> //g')
 
-db_name_options="\t+-----------------------------+------------------------------------------------+\n"
-db_name_options+="\t File Name                    | Content Description                           \n"
-db_name_options+="\t+-----------------------------+------------------------------------------------+\n"
-db_name_options+="\tnr.*tar.gz                    | Non-redundant protein sequences from GenPept,\n"
-db_name_options+="\t                                Swissprot, PIR, PDF, PDB, and NCBI RefSeq\n"
-db_name_options+="\tnt.*tar.gz                    | Partially non-redundant nucleotide sequences from \n"
-db_name_options+="\t                                all traditional divisions of GenBank, EMBL, and DDBJ\n"
-db_name_options+="\t                                excluding GSS,STS, PAT, EST, HTG, and WGS.\n"
-db_name_options+="\tlandmark.tar.gz               | Proteome of 27 model organisms, see \n"
-db_name_options+="\t                                https://blast.ncbi.nlm.nih.gov/smartblast/smartBlast.cgi?CMD=Web&PAGE_TYPE=BlastDocs#searchSets\n"
-db_name_options+="\t16S_ribosomal_RNA             | 16S ribosomal RNA (Bacteria and Archaea type strains)\n"
-db_name_options+="\t18S_fungal_sequences.tar.gz   | 18S ribosomal RNA sequences (SSU) from Fungi type and reference material (BioProject PRJNA39195)\n"
-db_name_options+="\t28S_fungal_sequences.tar.gz   | 28S ribosomal RNA sequences (LSU) from Fungi type and reference material (BioProject PRJNA51803)\n"
-db_name_options+="\tITS_RefSeq_Fungi.tar.gz       | Internal transcribed spacer region (ITS) from Fungi type and reference material (BioProject PRJNA177353)\n"
-db_name_options+="\tITS_eukaryote_sequences.tar.gz| Internal transcribed spacer region (ITS) for eukaryotic sequences\n"
-db_name_options+="\tLSU_eukaryote_rRNA.tar.gz     | Large subunit ribosomal RNA sequences for eukaryotic sequences\n"
-db_name_options+="\tLSU_prokaryote_rRNA.tar.gz    | Large subunit ribosomal RNA sequences for prokaryotic sequences\n"
-db_name_options+="\tSSU_eukaryote_rRNA.tar.gz     | Small subunit ribosomal RNA sequences for eukaryotic sequences\n"
-db_name_options+="\tref_euk_rep_genomes*tar.gz    | Refseq Representative Eukaryotic genomes (1000+ organisms)\n"
-db_name_options+="\tref_prok_rep_genomes*tar.gz   | Refseq Representative Prokaryotic genomes (5700+ organisms)\n"
-db_name_options+="\tref_viruses_rep_genomes*tar.gz   | Refseq Representative Virus genomes (9000+ organisms)\n"
-db_name_options+="\tref_viroids_rep_genomes*tar.gz   | Refseq Representative Viroid genomes (46 organisms)\n"
-db_name_options+="\trefseq_protein.*tar.gz        | NCBI protein reference sequences\n"
-db_name_options+="\trefseq_rna.*tar.gz            | NCBI Transcript reference sequences\n"
-db_name_options+="\tswissprot.tar.gz              | Swiss-Prot sequence database (last major update)\n"
-db_name_options+="\tpataa.*tar.gz                 | Patent protein sequences\n"
-db_name_options+="\tpatnt.*tar.gz                 | Patent nucleotide sequences. Both patent databases\n"
-db_name_options+="\t                                are directly from the USPTO, or from the EPO/JPO\n"
-db_name_options+="\t                                via EMBL/DDBJ\n"
-db_name_options+="\tpdbaa.*tar.gz                 | Sequences for the protein structure from the\n"
-db_name_options+="\t                                Protein Data Bank\n"
-db_name_options+="\tpdbnt.*tar.gz                 | Sequences for the nucleotide structure from the \n"
-db_name_options+="\t                                Protein Data Bank. They are NOT the protein coding\n"
-db_name_options+="\t                                sequences for the corresponding pdbaa entries.\n"
-db_name_options+="\t+-----------------------------+------------------------------------------------+\n"
-db_name_options+="\tFor more info, see https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html"
-
 version_string="\tAvailable blast+ Versions: $(echo ${available_versions})\n\tLatest: ${latest_version}\n"
 help_string="./setup_blast.sh (-v <version>) (-o <os>) (-d <database_name>) (-o <output_path>)\n"
 help_string+="\tversions: $(echo ${available_versions})\n\t\tlatest (default): ${latest_version}\n"
@@ -54,7 +17,7 @@ while getopts ":v:o:d:p:h" opt; do
         ;;
         o) os_input=${OPTARG}
         ;;
-        d) db_name=${OPTARG}
+        d) list_of_dbs_to_download=${OPTARG}
         ;;
         p) out_path=${OPTARG}
         ;;
@@ -92,16 +55,28 @@ echo "blast+ Version: ${download_version}"
 echo "TAR file: ${tar_file}"
 echo "version=${version} (latest: ${latest_version})"
 echo "os_input=${os}"
-if [[ ! -z ${db_name} ]]; then
-  if [[ -z $(echo "${db_name_options}" | grep "${db_name}") ]]; then
-    echo "[ERROR] Invalid db_name. See below,"
-    printf "${db_name_options}"
+if [[ ! -z ${list_of_dbs_to_download} ]]; then
+  available_databases=$(curl ftp://ftp.ncbi.nlm.nih.gov/blast/db/  2>/dev/null | rev | cut -d' ' -f1 | rev | cut -d'.' -f1 | sort | uniq)
+  valid_db_names=""
+  for db_name in ${list_of_dbs_to_download}; do
+    if [[ -z $(echo "${available_databases}" | grep "${db_name}") ]]; then
+      echo "[WARN] Invalid db_name: ${db_name}"
+    else
+      valid_db_names+="${db_name} "
+    fi
+  done
+
+  if [[ -z ${valid_db_names} ]]; then
+    echo "[WARN] Will not download any DBs"
+    printf "\tInvalid DB parameter=\"${list_of_dbs_to_download}\"\n"
+    echo "Valid Databases Below"
+    echo "${available_databases}"
     echo ""
-    exit 1
+  else
+    list_of_dbs_to_download=${valid_db_names}
+    echo "Databases to download=${list_of_dbs_to_download}"
   fi
   out_path=$(realpath ${out_path})
-
-  echo "db_name=${db_name}"
   echo "out_path=${out_path}"
 fi
 echo ""
@@ -140,30 +115,32 @@ fi
 binary_dir=$(realpath ncbi-blast-${latest_version}+/bin)
 download_script="${binary_dir}/update_blastdb.pl"
 
-if [[ ! -z ${db_name} ]]; then
-  echo "Downloading & extracting files for database='${db_name}'"
-  echo "Writing to ${out_path}"
-  CMD="perl ${download_script} ${db_name}"
-  echo ${CMD}
-  cd ${out_path}
+if [[ ! -z ${list_of_dbs_to_download} ]]; then
   log_dir=logs
-  mkdir ${log_dir}
-  eval ${CMD} > ${log_dir}/download_${db_name}.out 2>&1
-  files=$(find . -type f -name "*.tar.gz" | sort)
-  total=$(echo ${files} | cut -d' ' '\n' | wc -l | grep -oE [0-9])
-  for f in ${files}; do
-    index=$(echo ${f} | xargs basename | cut -d'.' -f2)
-    echo "[${index}] Extracting ${f}"
-    tar -zxvf ${f} -C . >> ${log_dir}/extract.out 2>&1
-    if [[ $? -ne 0 ]]; then
-      echo "Extracted ${index}/${total}"
-      echo "Failed to extract ${f}"
-      echo "Download/Extract ${f} manually and all remaining '*.tar.gz' files"
-      echo "[WARN] DO NOT RE-RUN THIS SCRIPT"
-      exit 1
-    fi
-    printf "\t[SUCCESS] Removing ${f}\n"
-    rm ${f}
+  for db_name in ${list_of_dbs_to_download}; do
+    echo "Downloading & extracting files for database='${db_name}'"
+    echo "Writing to ${out_path}"
+    CMD="perl ${download_script} ${db_name}"
+    echo ${CMD}
+    cd ${out_path}  
+    mkdir -p ${log_dir}
+    eval ${CMD} > ${log_dir}/download_${db_name}.out 2>&1
+    files=$(find . -type f -name "*.tar.gz" | sort)
+    total=$(echo ${files} | sed 's/ /\n/g' | wc -l | grep -oE [0-9])
+    for f in ${files}; do
+      index=$(echo ${f} | xargs basename | cut -d'.' -f2)
+      echo "[${index}] Extracting ${f}"
+      tar -zxvf ${f} -C . >> ${log_dir}/extract.out 2>&1
+      if [[ $? -ne 0 ]]; then
+        echo "Extracted ${index}/${total}"
+        echo "Failed to extract ${f}"
+        echo "Download/Extract ${f} manually and all remaining '*.tar.gz' files"
+        echo "[WARN] DO NOT RE-RUN THIS SCRIPT"
+        exit 1
+      fi
+      printf "\t[SUCCESS] Removing ${f}\n"
+      rm ${f}
+    done
   done
   cd -
   echo "Successful download & extraction"
@@ -173,9 +150,11 @@ if [[ ! -z ${db_name} ]]; then
   echo "Export directory of db files as BLASTDB and run blast executables"
   echo "Blast executables: ${binary_dir}"
   echo "EXPORT BLASTDB=$(realpath ${out_path})"
-  echo "Test with -"
-  echo "printf '>test\ntgcaccaaacatgtctaaagctggaaccaaaattactttctt\n' > test.fa"
+  echo ""
+  echo "[TEST SCRIPT]"
+  echo "printf '>test\ntgcaccaaacatgtctaaagctggaaccaaaattactttctt\n' > test.fa\n"
   echo "${binary_dir}/blastn -db ${db_name} -query test.fa -out results.out"
+  echo ""
 else
   echo ""
   echo "For more info, see https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html"
