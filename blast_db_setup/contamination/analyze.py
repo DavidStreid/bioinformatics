@@ -4,9 +4,14 @@ import matplotlib.pyplot as plt
 
 EXPECTED_BLASTNAMES = set()   # BLAST `sblastnames` that are ignored, e.g. if looking for contamination in human saliva, add "primates"
 
-OUTPUT_TSV = 'blast_result_analysis.tsv'
-IDENTITY_TSV = 'query_identities.tsv'
-IDENTITY_SUMMARY_TSV = 'identity_summary.tsv'
+BLAST_RESULT_ANALYSIS = 'blast_result_analysis.tsv'
+READ_TO_ID_TSV = 'query_identities.tsv'
+IDENTITY_PROPORTION_SUMMARY_TSV = 'identity_summary.tsv'
+OUT = {
+  'blast_results': BLAST_RESULT_ANALYSIS,
+  'read_to_id': READ_TO_ID_TSV,
+  'id_proportion': IDENTITY_PROPORTION_SUMMARY_TSV
+}
 
 MAX_E_VALUE = 0.1                     # E-Values greater than this are filtered out, NOTE - "E=1" means 1 result expected by chance
 MAX_MAGNITUDE_DIFFERENCE_ALLOWED = 1  # E-Values more than 10^x the best hit are filtered out, e.g. "3" will filter out anything with E-value > (1000 * lowest E) 
@@ -77,15 +82,13 @@ class blast_result:
 
 
 def output_relevant_results(query_dic):
-  with open(OUTPUT_TSV, 'w') as out:
+  br_out_file = OUT['blast_results']
+  with open(br_out_file, 'w') as out:
     header = '\t'.join(blast_result.get_header())
     out.write(f"{header}\n")
     for highest_hit in query_dic.values():
       out.write(f'{highest_hit.to_string()}\n')
-
-  print("[OUT] BLAST RESULT SUMMARY")
-  print(f"\tIDS & STATISTICS={OUTPUT_TSV}")
-  print(f"\tIDS ONLY={IDENTITY_TSV}")
+  print(f"[OUT] BLAST RESULT SUMMARY:\t{br_out_file}")
 
 def get_query_dic(blast_results_tsv):
   ''' Returns a dictionary of read IDs to their blast results
@@ -211,15 +214,15 @@ class Graph:
     self.y_values = y_values
     self.title = title
 
-  def graph(self):
+  def graph(self, prefix=None):
     assert len(self.x_values) == len(self.y_values)
 
     # https://matplotlib.org/stable/gallery/pie_and_polar_charts/pie_features.html
     graph_title = self.title.upper() 
     fname = self.title.replace(" ", "_") + '.pdf'
-
-    print("[OUT] GRAPHING")
-    print(f"\tfile={fname} (n={len(self.x_values)})")
+    if prefix is not None:
+      fname = f"{prefix}___{fname}"
+    print(f"[OUT] Pie Chart (Total IDs={len(self.x_values)}):\t{fname}")
 
     plt.title(graph_title)
     _, ax1 = plt.subplots()
@@ -245,7 +248,6 @@ def parse_identification_summary(aggregated_query_dic):
     else:
       read_ids[identification] = 1
 
-  print("IDENTIFICATIONS")
   identifications = []
   identification_counts = []
 
@@ -264,12 +266,14 @@ def parse_identification_summary(aggregated_query_dic):
       highest_count_identification = identification
 
   proportion_of_highest_result_ct = "%.2f" % (highest_count / float(len(aggregated_query_dic)))
-  print(f"MOST_IDENTIFIED={highest_count_identification} ({proportion_of_highest_result_ct})")
+  print(f"\tMOST IDENTIFIED={highest_count_identification} ({proportion_of_highest_result_ct})")
 
   id_tuples = list(zip(identifications, identification_counts))
   id_tuples.sort(key=lambda it: it[1], reverse=True)
 
-  with open(IDENTITY_TSV, 'w') as identity_out, open(IDENTITY_SUMMARY_TSV, 'w') as identity_summary_out:
+  read_id_tsv = OUT['read_to_id']
+  id_prop_summary_tsv = OUT['id_proportion']
+  with open(read_id_tsv, 'w') as identity_out, open(id_prop_summary_tsv, 'w') as identity_summary_out:
     header = '\t'.join(blast_result.get_id_header())
     identity_out.write(f"{header}\n")
     for highest_hit in aggregated_query_dic.values():
@@ -281,17 +285,24 @@ def parse_identification_summary(aggregated_query_dic):
       proportion = ct/float(total_ct)
       line = f"{it[0]}\t{ct}\t{proportion}\n"
       identity_summary_out.write(line)
-      
 
+  print(f"[OUT] RGID to Identification:\t{read_id_tsv}")
+  print(f"[OUT] ID Proportion Summary:\t{id_prop_summary_tsv}")
   return Graph(identifications, identification_counts, 'blast identifications per read id')
 
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='Identify likelihood of contamination')
   parser.add_argument('-f', dest='blast_results_tsv', help='TSV of blast results', required=True)
+  parser.add_argument('-p', dest='out_file_prefix', help='prefix for naming out files', required=False)
   args = parser.parse_args()
 
   blast_results_tsv = args.blast_results_tsv
+  out_file_prefix = args.out_file_prefix
+  if out_file_prefix:
+    for type, fname in OUT.items():
+      OUT[type] = f"{out_file_prefix}___{fname}"
+
   log_settings()
 
   query_dic = get_query_dic(blast_results_tsv)
@@ -299,6 +310,6 @@ if __name__ == '__main__':
   aggregated_blast_results = aggregate_blast_results(query_dic)
 
   blast_graph = parse_identification_summary(aggregated_blast_results)
-  blast_graph.graph()
+  blast_graph.graph(out_file_prefix)
 
   output_relevant_results(aggregated_blast_results)

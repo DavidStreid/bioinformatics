@@ -38,37 +38,21 @@ $ ./blast_fasta.sh -f sample.fa [-d blastn database]
 Ouputs a processed TSV of the best result for each read along w/ helpful statistics such as `magnitude_of_best_result` & `proportion_valid_blast_results`, which allow for analysis of what results are valid.
 * e.g. If `magnitude_of_best_results` is very high, this is probably a valid hit
 ```
-$ python3 analyze.py -f blast_results.tsv
+$ python3 analyze.py -f blast_results.tsv -p my_sample
 SETTINGS
-        MAX_E_VALUE=0.1
-        MAX_MAGNITUDE_DIFFERENCE_ALLOWED=3
+	MAX_E_VALUE=0.1
+	MAX_MAGNITUDE_DIFFERENCE_ALLOWED=1
 [IN] BLAST RESULT SUMMARY
-        INPUT = blast_results.tsv
-        Total Reads = 1095
+	INPUT = blast_results.tsv
+	Total Reads = 93
 AGGREGATION
-        total_blast_results=784379
-        Total Reads with Valid Blast Results = 1095
-IDENTIFICATIONS
-        primates: 1052
-        even-toed ungulates: 14
-        carnivores: 2
-        placentals: 1
-        eudicots: 1
-        ants: 5
-        apicomplexans: 11
-        odd-toed ungulates: 1
-        eukaryotes: 3
-        bats: 2
-        monocots: 1
-        coelacanths: 1
-        marsupials: 1
-MOST_IDENTIFIED=primates
-IDENTIFICATION_PROPORTION=0.960730593607306
-[OUT] GRAPHING
-        file=blast_results.pdf (n=13)
-[OUT] BLAST RESULT SUMMARY
-        IDS & STATISTICS=output.tsv
-        IDS ONLY=query_identities.tsv
+	total_blast_results=843597
+	Total Reads with Valid Blast Results = 93
+	MOST IDENTIFIED=firmicutes (0.68)
+[OUT] RGID to Identification:	my_sample___query_identities.tsv
+[OUT] ID Proportion Summary:	my_sample___identity_summary.tsv
+[OUT] Pie Chart (Total IDs=4):	my_sample___blast_identifications_per_read_id.pdf
+[OUT] BLAST RESULT SUMMARY:	my_sample___blast_result_analysis.tsv
 ```
 
 #### Outputs
