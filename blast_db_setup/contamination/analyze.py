@@ -161,6 +161,7 @@ def aggregate_blast_results(query_dic):
   
   invalid_blast_ids = set()
 
+  id_evalue_list = list()   # List of all e-values for the selected identification
   total_blast_results = 0
   for qaccver, blast_result_list in query_dic.items():
     total_blast_results_for_qaccver = len(blast_result_list)
@@ -168,6 +169,8 @@ def aggregate_blast_results(query_dic):
 
     blast_result_list.sort(key=lambda br: br.evalue)
     best_evalue_for_read_id = blast_result_list[0].evalue
+
+    id_evalue_list.append(best_evalue_for_read_id)
     
     valid_blast_results = [ br for br in blast_result_list if is_valid_blast_result(br, best_evalue_for_read_id)]
     best_evalue_result = get_most_likely_blast_result(valid_blast_results)
@@ -202,6 +205,15 @@ def aggregate_blast_results(query_dic):
     best_evalue_result.set_best_evalue_result_sblastnames_proportion(best_evalue_result_sblastnames_proportion)
 
     aggregated_query_dic[qaccver] = best_evalue_result.clone()
+
+  min_e = min(id_evalue_list)
+  max_e = max(id_evalue_list)
+  avg_e = sum(id_evalue_list) / len(id_evalue_list)
+
+  print("E-VALUE Statistics")
+  print(f"\tMIN={min_e}")
+  print(f"\tMAX={max_e}")
+  print(f"\tAVG={avg_e}")
 
   print("AGGREGATION")
   print(f"\ttotal_blast_results={total_blast_results}")
