@@ -19,8 +19,8 @@ if [[ ! -f ${NEW_BAM}.bai ]]; then
 fi
 
 VCF="somatic-hg38_af-only-gnomad.hg38.vcf" 		# https://console.cloud.google.com/storage/browser/gatk-best-practices/somatic-hg38;tab=objects?prefix=&forceOnObjectsSortingFiltering=false
-REF="hg38.fa" 						# ftp://hgdownload.soe.ucsc.edu/goldenPath/currentGenomes/Homo_sapiens/bigZips/hg38.fa.gz
-BED="hg38.bed"	# include all regions			# create
+REF="hg38.fa" 						                    # ftp://hgdownload.soe.ucsc.edu/goldenPath/currentGenomes/Homo_sapiens/bigZips/hg38.fa.gz
+BED="hg38.bed"	                              # include all regions			# create
 
 
 PILUEP_OUTPUT="${sample}_pileups___$(date +%s%N).table"
