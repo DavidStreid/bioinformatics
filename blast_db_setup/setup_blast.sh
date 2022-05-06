@@ -126,7 +126,7 @@ if [[ ! -z ${list_of_dbs_to_download} ]]; then
     cd ${out_path}  
     mkdir -p ${log_dir}
     eval ${CMD} > ${log_dir}/download_${db_name}.out 2>&1
-    files=$(find . -type f -name "*.tar.gz" | sort)
+    files=$(find . -type f -name "${db_name}*.tar.gz" | sort)
     total=$(echo ${files} | sed 's/ /\n/g' | wc -l | grep -oE [0-9])
     for f in ${files}; do
       index=$(echo ${f} | xargs basename | cut -d'.' -f2)
@@ -150,11 +150,26 @@ if [[ ! -z ${list_of_dbs_to_download} ]]; then
 
   echo "Export directory of db files as BLASTDB and run blast executables"
   echo "Blast executables: ${binary_dir}"
-  echo "EXPORT BLASTDB=$(realpath ${out_path})"
   echo ""
-  echo "[TEST SCRIPT]"
-  echo "printf '>test\ntgcaccaaacatgtctaaagctggaaccaaaattactttctt\n' > test.fa\n"
-  echo "${binary_dir}/blastn -db ${db_name} -query test.fa -out results.out"
+
+  echo "[Testing simple sequence]"
+  test_file=".blast_test.fa"
+  printf ">test\ntgcaccaaacatgtctaaagctggaaccaaaattactttctt\n" > ${test_file}
+  test_out_file=".results.out"
+
+  export_cmd="export BLASTDB=$(realpath ${out_path})"
+  echo "${export_cmd}"
+  eval ${export_cmd}
+
+  blast_test_cmd="${binary_dir}/blastn -db ${db_name} -query test.fa -out ${test_out_file}"
+  echo ${blast_test_cmd}
+  eval ${blast_test_cmd}
+  if [[ $? -eq 0 ]]; then
+    echo "SUCCESS"
+  else
+    echo "FAIL"
+  fi
+  rm ${test_file} ${test_out_file}
   echo ""
 else
   echo ""
@@ -165,3 +180,4 @@ else
   echo "  e.g."
   echo "    perl ${download_script} ref_euk_rep_genomes 	# Downloads all eukaryotic genomes"
 fi
+echo "Done."
