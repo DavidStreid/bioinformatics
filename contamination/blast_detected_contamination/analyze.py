@@ -23,17 +23,18 @@ ALLOWED_AMBITUITY = 2                 # ID E-Value within @MAX_MAGNITUDE_DIFFERE
 class blast_result:
   @staticmethod
   def get_header():
-    return ['qaccver', 'pident', 'evalue', 'magnitude_of_best_result', 'proportion_valid_blast_results', 'total_results', 'bitscore', 'scomnames', 'sblastnames', 'sskingdoms']
+    return ['qaccver', 'pident', 'evalue', 'magnitude_of_best_result', 'proportion_valid_blast_results', 'total_results', 'bitscore', 'staxids', 'scomnames', 'sblastnames', 'sskingdoms']
   
   @staticmethod
   def get_id_header():
-    return ['qaccver', 'scomnames', 'sblastnames']
+    return ['qaccver', 'scomnames', 'sblastnames', 'staxids']
 
-  def __init__(self, qaccver, pident, evalue, bitscore, scomnames, sblastnames, sskingdoms):
+  def __init__(self, qaccver, pident, evalue, bitscore, staxids, scomnames, sblastnames, sskingdoms):
     self.qaccver = qaccver
     self.pident = pident
     self.evalue = evalue
     self.bitscore = bitscore
+    self.staxids = staxids
     self.scomnames = scomnames
     self.sblastnames = sblastnames
     self.sskingdoms = sskingdoms
@@ -45,7 +46,7 @@ class blast_result:
     self.best_evalue_result_sblastnames_proportion = 0
 
   def clone(self):
-    br = blast_result(self.qaccver, self.pident, self.evalue, self.bitscore, self.scomnames, self.sblastnames, self.sskingdoms)
+    br = blast_result(self.qaccver, self.pident, self.evalue, self.bitscore, self.staxids, self.scomnames, self.sblastnames, self.sskingdoms)
     br.next_magnitude = self.next_magnitude
     br.prop_valid_blast_results = self.prop_valid_blast_results
     br.best_evalue_result_sblastnames_proportion = self.best_evalue_result_sblastnames_proportion
@@ -71,10 +72,10 @@ class blast_result:
     self.magnitude = self.evalue / float(next_best_evalue)
 
   def to_identity_string(self):
-    return '\t'.join([self.qaccver, self.scomnames, self.sblastnames])
+    return '\t'.join([self.qaccver, self.scomnames, self.sblastnames, self.staxids])
 
   def to_string(self):
-    return '\t'.join([self.qaccver, str(self.pident), str(self.evalue), str(self.next_magnitude), str(self.prop_valid_blast_results), str(self.total_blast_results), str(self.bitscore), self.scomnames, self.sblastnames, self.sskingdoms])
+    return '\t'.join([self.qaccver, str(self.pident), str(self.evalue), str(self.next_magnitude), str(self.prop_valid_blast_results), str(self.total_blast_results), str(self.bitscore), str(self.staxids), self.scomnames, self.sblastnames, self.sskingdoms])
 
   def is_the_best_match(self):
     statistically_significant = self.evalue < 1e-50
@@ -112,11 +113,12 @@ def get_query_dic(blast_results_tsv):
       pident = cols[2]          # % Identity
       evalue = float(cols[10])
       bitscore = float(cols[11])
+      staxids = cols[12]
       scomnames = cols[14]
       sblastnames = cols[15]
       sskingdoms = cols[16]
 
-      br = blast_result(qaccver, pident, evalue, bitscore, scomnames, sblastnames, sskingdoms)
+      br = blast_result(qaccver, pident, evalue, bitscore, staxids, scomnames, sblastnames, sskingdoms)
       
       if qaccver not in filtered_reads_dic:
         last_evalue = br.evalue
