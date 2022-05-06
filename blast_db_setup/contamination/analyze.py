@@ -15,7 +15,7 @@ OUT = {
 
 MAX_E_VALUE = 0.1                     # E-Values greater than this are filtered out, NOTE - "E=1" means 1 result expected by chance
 MAX_MAGNITUDE_DIFFERENCE_ALLOWED = 1  # E-Values more than 10^x the best hit are filtered out, e.g. "3" will filter out anything with E-value > (1000 * lowest E) 
-ALLOWED_AMBITUITY = 3                 # ID E-Value within @MAX_MAGNITUDE_DIFFERENCE_ALLOWED before not identifying a read
+ALLOWED_AMBITUITY = 2                 # ID E-Value within @MAX_MAGNITUDE_DIFFERENCE_ALLOWED before not identifying a read (min=2)
 # What do these mean? Here are examples - 
 #   - MAX_MAGNITUDE_DIFFERENCE_ALLOWED=1  Results w/ an E-Value within 1 order of magnitude of the best are valid
 #     ALLOWED_AMBITUITY=3                 If the list of valid blast results have less than 3 different IDs, the best e-value is chosen. If there are more, this read isn't considered                                                                  
