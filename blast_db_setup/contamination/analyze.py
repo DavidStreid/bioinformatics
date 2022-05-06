@@ -179,6 +179,11 @@ def aggregate_blast_results(query_dic):
       print("\n".join([ f"\t{br[0]}\t{br[1]}" for br in id_evalues ]))
       continue
 
+    if best_evalue_result.sblastnames in EXPECTED_BLASTNAMES:
+      print(f"[INFO - Skipping Expected Result] Read ID={best_evalue_result.qaccver} sblastnames={best_evalue_result.sblastnames}")
+      continue
+
+
     if len(blast_result_list) > 1:
       best_evalue_result.set_next_magnitude(blast_result_list[1])
 
