@@ -10,21 +10,26 @@ $ ./blast_fasta.sh -f sample.fa [-d blastn database]
 * `d`: string, previously downloaded blastn database to use See [BLAST DB Help](https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html) for list of databases
 > Eg: `ref_prok_rep_genomes`, `nt`, `"ref_prok_rep_genomes nt"`
   * Default: `nt` (this is the [blastn default](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=blastn&PAGE_TYPE=BlastSearch&LINK_LOC=blasthome) and combines nucleotide sequences from across GenBank, EMBL, and DDBJ)
-  * Notes:
-    * The chosen database MUST already downloaded and available in the `BLASTDB` directory. The table below contains databases I think are good choices for detecting contamination
 
-		|Name|Type|Description|
-		|:---:|:---:|:---:|
-		|nt|DNA|Comprensive set of sequences from GenBank, EMBL, DDBJ, PDB, & RefSeq (If only choosing one - choose this one)|
-		|ref_euk_rep_genomes|DNA|Representative Eukaryotic Genomes from NCBI's Refseq Genomes database|
-		|ref_prok_rep_genomes|DNA|Representative Eukaryotic Genomes from NCBI's Refseq Genomes database|
-		|ref_viruses_rep_genomes|DNA|Representative Virus (not viroid) Genomes from NCBI's Refseq Genomes database|
-		|human_genome|DNA|Homo sapiens GRCh38|
-		|env_nt|DNA|samples taken directly from their environment (e.g. Mine Drainage projects)|
+#### Choosing a Database
+* The chosen database MUST already downloaded and available in the `BLASTDB` directory. The table below contains databases I think are good choices for detecting contamination
 
-    * Not every read is guaranteed to return results based on the default criteria and database used. Therefore, choosing the `-d` database parameter is crucial for getting accurate results
-	    * For instance, If the DB used does not include the species, but is large enough (note: E-Value is directly related to database size) that the read maps to a highly similar region of another species in the DB, then a BLAST result could return a seemingly good E-Value, say `E-Value=1e-10`, that is actually incorrect. In this hypothetical, adding a database with the correct species could reduce the E-Value several orders of magnitude to something like `E-Value=1e-50`, which would clearly be the more confident identification.
+	|Name|Type|Description|
+	|:---:|:---:|:---:|
+	|nt|DNA|Comprensive set of sequences from GenBank, EMBL, DDBJ, PDB, & RefSeq (If only choosing one - choose this one)|
+	|ref_euk_rep_genomes|DNA|Representative Eukaryotic Genomes from NCBI's Refseq Genomes database|
+	|ref_prok_rep_genomes|DNA|Representative Eukaryotic Genomes from NCBI's Refseq Genomes database|
+	|ref_viruses_rep_genomes|DNA|Representative Virus (not viroid) Genomes from NCBI's Refseq Genomes database|
+	|human_genome|DNA|Homo sapiens GRCh38|
+	|env_nt|DNA|samples taken directly from their environment (e.g. Mine Drainage projects)|
 
+* Not every read is guaranteed to return results based on the default criteria and database used. Therefore, choosing the `-d` database parameter is crucial for getting accurate results
+	* For instance, If the DB used does not include the species, but is large enough (note: E-Value is directly related to database size) that the read maps to a highly similar region of another species in the DB, then a BLAST result could return a seemingly good E-Value, say `E-Value=1e-10`, that is actually incorrect. In this hypothetical, adding a database with the correct species could reduce the E-Value several orders of magnitude to something like `E-Value=1e-50`, which would clearly be the more confident identification.
+* If you know what specie(s) you would like to check for in the sample, you can either build your own database w/ the `makeblastdb` command. Or, you can check the preformatted DBs for that organisms & taxonomic IDs. To do the latter, run the `blastdbcmd` packaged in `ncbi-blast-*+/bin`
+	```
+	$ DB=nt
+	$ blastdbcmd -tax_info -db ${DB}
+	```
 
 
 #### Outputs
