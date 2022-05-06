@@ -60,7 +60,7 @@ if [[ ! -z ${list_of_dbs_to_download} ]]; then
   available_databases=$(curl ftp://ftp.ncbi.nlm.nih.gov/blast/db/  2>/dev/null | rev | cut -d' ' -f1 | rev | cut -d'.' -f1 | sort | uniq)
   valid_db_names=""
   for db_name in ${list_of_dbs_to_download}; do
-    if [[ -z $(echo ${available_databases} | grep " ${db_name} ") ]]; then
+    if [[ -z $(echo "${available_databases}" | grep -E "^${db_name}$") ]]; then
       echo "[WARN] Invalid db_name: ${db_name}"
     else
       valid_db_names+="${db_name} "
