@@ -1,4 +1,5 @@
 #!/bin/bash
+#!/bin/bash
 
 available_versions=$(curl ftp://ftp.ncbi.nih.gov/blast/executables/blast+/ 2>/dev/null | rev | cut -d' ' -f1 | rev | grep -oE "[0-9]+.[0-9]+.[0-9]+")
 latest_version=$(curl ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/ 2> /dev/null | grep LATEST | sed 's/.*-> //g')
@@ -59,7 +60,7 @@ if [[ ! -z ${list_of_dbs_to_download} ]]; then
   available_databases=$(curl ftp://ftp.ncbi.nlm.nih.gov/blast/db/  2>/dev/null | rev | cut -d' ' -f1 | rev | cut -d'.' -f1 | sort | uniq)
   valid_db_names=""
   for db_name in ${list_of_dbs_to_download}; do
-    if [[ -z $(echo "${available_databases}" | grep "${db_name}") ]]; then
+    if [[ -z $(echo ${available_databases} | grep " ${db_name} ") ]]; then
       echo "[WARN] Invalid db_name: ${db_name}"
     else
       valid_db_names+="${db_name} "
@@ -74,10 +75,10 @@ if [[ ! -z ${list_of_dbs_to_download} ]]; then
     echo ""
   else
     list_of_dbs_to_download=${valid_db_names}
-    echo "Databases to download=${list_of_dbs_to_download}"
+    echo "QUEUED_DATABASE_DOWNLOADS=${list_of_dbs_to_download}"
   fi
   out_path=$(realpath ${out_path})
-  echo "out_path=${out_path}"
+  echo "DB_DIR=${out_path}"
 fi
 echo ""
 
