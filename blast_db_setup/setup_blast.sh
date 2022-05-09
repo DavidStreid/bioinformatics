@@ -161,7 +161,7 @@ if [[ ! -z ${list_of_dbs_to_download} ]]; then
   echo "${export_cmd}"
   eval ${export_cmd}
 
-  blast_test_cmd="${binary_dir}/blastn -db ${db_name} -query test.fa -out ${test_out_file}"
+  blast_test_cmd="${binary_dir}/blastn -db ${db_name} -query ${test_file} -out ${test_out_file}"
   echo ${blast_test_cmd}
   eval ${blast_test_cmd}
   if [[ $? -eq 0 ]]; then
