@@ -5,7 +5,7 @@ available_versions=$(curl ftp://ftp.ncbi.nih.gov/blast/executables/blast+/ 2>/de
 latest_version=$(curl ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/ 2> /dev/null | grep LATEST | sed 's/.*-> //g')
 
 version_string="\tAvailable blast+ Versions: $(echo ${available_versions})\n\tLatest: ${latest_version}\n"
-help_string="./setup_blast.sh (-v <version>) (-o <os>) (-d <database_name>) (-o <output_path>)\n"
+help_string="./setup_blast.sh (-v <version>) (-o <os>) (-d <database_name>) (-p <output_path>)\n"
 help_string+="\tversions: $(echo ${available_versions})\n\t\tlatest (default): ${latest_version}\n"
 help_string+="\tos: win64, x64-linux, x64-macosx, x64-win64\n\t\tDefault: x64-linux\n"
 help_string+="\toutput_path: directory to write database files\n"
