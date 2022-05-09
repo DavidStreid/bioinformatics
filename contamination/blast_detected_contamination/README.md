@@ -30,6 +30,7 @@ $ ./blast_fasta.sh -f sample.fa [-d blastn database]
 	$ DB=nt
 	$ blastdbcmd -tax_info -db ${DB}
 	```
+	* There is also a file mapping taxonimc ID to a link for its representative/reference genome. This is the [FTP link](ftp://ftp.ncbi.nlm.nih.gov/genomes/genbank/assembly_summary_genbank.txt) and a [script](ftp://ftp.ncbi.nlm.nih.gov/genomes/genbank/assembly_summary_genbank.txt) that takes in the input taxonomic ID and automatically downloads the reference
 
 
 #### Outputs
