@@ -49,11 +49,13 @@ get_assembly_level() {
 
 # Outline borrowed from this biostars post - https://www.biostars.org/p/306380/#306654
 if [[ -z "$TAXID" ]]; then
-  echo "Usage: retrieveReference.sh NcbiTaxId"
+  echo "./staxis_to_ncbi_assemlby.sh ${TAX_ID}"
   exit
 else
   # Check if tax_id is present in taxonomic databases
-  db_file=$(grep -lE "${TAXID}\t" ${DB_FILES})
+  if [[ ! -z ${DB_FILES} ]]; then
+    db_file=$(grep -lE "${TAXID}\t" ${DB_FILES})
+  fi
   if [[ ! -z ${db_file} ]]; then
     src=$(basename ${db_file})
     ftp="BLAST_DB\tn/a"

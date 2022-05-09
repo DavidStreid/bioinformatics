@@ -17,5 +17,6 @@ NCBI provides a mapping of taxonomic IDs to their reference/representative genom
 The `staxis_to_ncbi_assemlby.sh` is provided to take an NCBI ID and provide a link to the best assembly to use as input to the `makeblastdb` script.
 #### Run
 ```
-./staxis_to_ncbi_assemlby.sh 9606     # Returns the reference genome for Homo Sapiens (Taxonomy ID=9606)
+$ ./staxis_to_ncbi_assemlby.sh 9606     # Returns the reference genome for Homo Sapiens (Taxonomy ID=9606)
+9606    reference genome        Chromosome      https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.29_GRCh38.p14/GCA_000001405.29_GRCh38.p14_genomic.fna.gz
 ```
