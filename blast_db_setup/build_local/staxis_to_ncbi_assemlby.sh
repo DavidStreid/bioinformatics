@@ -49,8 +49,9 @@ get_assembly_level() {
 
 # Outline borrowed from this biostars post - https://www.biostars.org/p/306380/#306654
 if [[ -z "$TAXID" ]]; then
-  echo "./staxis_to_ncbi_assemlby.sh ${TAX_ID}"
-  exit
+  echo "A taxonomic ID is required to run. Usage is below -"
+  printf "\t./staxis_to_ncbi_assemlby.sh \${TAX_ID}\n"
+  exit 1
 else
   # Check if tax_id is present in taxonomic databases
   if [[ ! -z ${DB_FILES} ]]; then
@@ -61,15 +62,22 @@ else
     ftp="BLAST_DB\tn/a"
   else
     if [[ ! -e assembly_summary_genbank.txt ]]; then
+      >&2 echo "Downloading ${TAXID_MAP_FILE}"
       wget ftp://ftp.ncbi.nlm.nih.gov/genomes/genbank/${TAXID_MAP_FILE}
     fi
+    >&2 echo "identifying organism for TAXID=${TAXID}"
+    ORGANISM=$(cut -f6,8 ${TAXID_MAP_FILE} | grep -E "^${TAXID}\t" | cut -f2 | head -1)
+    >&2 echo "ORGANISM=${ORGANISM}"
     src="reference genome"
+    >&2 echo "Checking for valid downloads where refseq_category=${src}"
     ftp=$(get_assembly_level ${src})
     if [[ -z ${ftp} ]]; then
       src="representative genome"
+      >&2 echo "Checking for valid downloads where refseq_category=${src}"
       ftp=$(get_assembly_level ${src})
       if [[ -z ${ftp} ]]; then
         src="na"
+        >&2 echo "Checking for valid downloads where refseq_category=${src}"
         ftp=$(get_assembly_level ${src})
         if [[ -z ${ftp} ]]; then
           src="NONE"
@@ -78,5 +86,5 @@ else
       fi
     fi
   fi
-  printf "${TAXID}\t${src}\t${ftp}\n"
+  printf "${TAXID}\t${ORGANISM}\t${src}\t${ftp}\n"
 fi
