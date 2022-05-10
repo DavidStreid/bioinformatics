@@ -71,7 +71,7 @@ else
     exit 1
   fi
 
-  echo "\tRemoving spaces from fasta description lines"
+  printf "\tRemoving spaces from fasta description lines\n"
   FORMAT_CMD="sed 's/ .*//g' ${temp} > ${input_blastdb_fasta_file}"
   echo "${FASTA_CMD}" >> ${readme}
   eval ${FORMAT_CMD} >> ${fasta_log} 2>&1
