@@ -27,8 +27,11 @@ $ ./blast_fasta.sh -f sample.fa [-d blastn database]
 	* For instance, If the DB used does not include the species, but is large enough (note: E-Value is directly related to database size) that the read maps to a highly similar region of another species in the DB, then a BLAST result could return a seemingly good E-Value, say `E-Value=1e-10`, that is actually incorrect. In this hypothetical, adding a database with the correct species could reduce the E-Value several orders of magnitude to something like `E-Value=1e-50`, which would clearly be the more confident identification.
 * If you know what specie(s) you would like to check for in the sample, you can either build your own database w/ the `makeblastdb` command. Or, you can check the preformatted DBs for that organisms & taxonomic IDs. To do the latter, run the `blastdbcmd` packaged in `ncbi-blast-*+/bin`
 	```
+	# GRAB taxonomic info, specifically taxid
 	$ DB=nt
 	$ blastdbcmd -tax_info -db ${DB}
+	# Extract the sequences for the given taxid
+	$ blastdbcmd -taxids 8036 -db ${DB}
 	```
 	* There is also a file mapping taxonimc ID to a link for its representative/reference genome. This is the [FTP link](ftp://ftp.ncbi.nlm.nih.gov/genomes/genbank/assembly_summary_genbank.txt) and a [script](ftp://ftp.ncbi.nlm.nih.gov/genomes/genbank/assembly_summary_genbank.txt) that takes in the input taxonomic ID and automatically downloads the reference
 
