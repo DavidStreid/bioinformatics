@@ -21,13 +21,14 @@ grep "https" ${INPUT_FILE} | \
     mkdir -p ${workdir}
 
     cd ${workdir}
-
+    fasta_dir=$(realpath fasta)
+    mkdir -p ${fasta_dir}
     log_dir=$(realpath logs)
     mkdir -p ${log_dir}
+    blast_db_folder=$(realpath "blast_db")
+    mkdir -p ${blast_db_folder}
 
-    fasta_dir=$(realpath "fasta")
-    mkdir -p ${fasta_dir}
-    readme="README.md"
+    readme=$(realpath README.md)
     echo "staxid=${staxid}" > ${readme}
     echo "species=${species}" >> ${readme}
     echo "refseq_type=${refseq_type}" >> ${readme}
@@ -60,16 +61,14 @@ grep "https" ${INPUT_FILE} | \
             echo "${line}" >> ${input_blastdb_fasta_file}
           fi
         done
-      rm ${gz_file}
     fi
 
-    blast_db_folder=$(realpath "blast_db")
-    mkdir -p ${blast_db_folder}
     tax_id_map="${blast_db_folder}/taxid_map__${species}__${staxid}.txt"
     printf "\tPreparing tax ID map: $(basename ${tax_id_map})\n"
     grep ">" ${input_blastdb_fasta_file} | sed "s/^>//g" | sed "s/$/ ${staxid}/g" >> ${tax_id_map}
 
     blast_db_title="${species}__${staxid}"
+    blast_db_files_regex="${species}__${staxid}.fa.n*"
     printf "\tCreating BLAST DB: ${blast_db_title}\n"
     CMD="makeblastdb -in ${input_blastdb_fasta_file} -parse_seqids -taxid_map ${tax_id_map} -title '${blast_db_title}' -dbtype nucl"
     printf "\t${CMD}\n"
@@ -84,8 +83,14 @@ grep "https" ${INPUT_FILE} | \
     fi
 
     echo "Moving BLASTDB files to separate directory"
-    mv "${input_blastdb_fasta_file}.*" ${blast_db_folder}
+    rsync -avP --include="${blast_db_files_regex}" --exclude="*" ${fasta_dir}/. ${blast_db_folder} > ${log_dir}/rsync.out 2>&1
+
+    moved_files="${fasta_dir}/${blast_db_files_regex}"
+    ls ${moved_files}
+    if [[ $? -eq 0 ]]; then
+      printf "\tSuccess\n"
+      rm ${moved_files}
+    fi
     popd > /dev/null
   done
-
 echo "Done." 
