@@ -39,7 +39,7 @@ if [[ -z ${SPECIES} ]]; then
   fi
 fi
 
-SPECIES="$(echo ${SPECIES} | sed 's/ /_/g' | sed 's/\.//g')"
+SPECIES="$(echo ${SPECIES} | sed 's/ /_/g' | sed 's/\.//g' | sed 's/\//_/g')"
 
 echo "TAXID=${TAXID}"
 echo "SPECIES=${SPECIES}"
