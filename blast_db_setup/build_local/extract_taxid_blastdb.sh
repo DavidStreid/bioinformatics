@@ -3,14 +3,24 @@
 #   - Extracts only the sequences 
 #   - Using those sequences, creates an isolated blastDB just for that taxonomic ID
 
-TAXID=$1
-SPECIES=$2
-BLAST_DB=$3
+help_string="\t./extract_taxid_blastdb.sh -t \${TAXID} [-s \${SPECIES}] [-b \${BLAST_DB}] [-h]\n"
 
+while getopts ":t:s:b:h" opt; do
+    case $opt in
+        t) TAXID=${OPTARG}
+        ;;
+        s) SPECIES=${OPTARG}
+        ;;
+        d) BLAST_DB=${OPTARG}
+        ;;
+        h) printf "${help_string}" && exit 0
+        ;;
+    esac 
+done
 
 if [[ -z ${TAXID} ]]; then
   echo "Please provide the taxonomic ID. Usage below,"
-  echo "./extract_taxid_blastdb.sh \${TAXID}"
+  printf "${help_string}"
   exit 1
 fi
 which blastdbcmd > /dev/null
