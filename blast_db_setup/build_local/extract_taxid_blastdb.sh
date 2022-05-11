@@ -75,11 +75,11 @@ else
   FORMAT_CMD="sed 's/ .*//g' ${temp} > ${input_blastdb_fasta_file}"
   echo "${FASTA_CMD}" >> ${readme}
   eval ${FORMAT_CMD} >> ${fasta_log} 2>&1
+  rm ${temp}
   if [[ 0 -ne $? ]]; then
     echo "[ERROR] FASTA formatting failed. See ${fasta_log}"
     exit 1
   fi
-  rm ${temp}
 fi
 
 tax_id_map="${fasta_dir}/taxid_map__${SPECIES}__${TAXID}.txt"
@@ -96,6 +96,8 @@ blast_db_log="${log_dir}/log_blastdb_creation___${blast_db_title}.out"
 eval ${CMD} > ${blast_db_log} 2>&1
 if [[ 0 -eq $? ]]; then
   printf "\tSUCCESS TAXID=${TAXID} SPECIES=${SPECIES}\n"
+  printf "\tRemoving FASTA\n"
+  rm ${input_blastdb_fasta_file}
 else
   printf "\tFAIL TAXID=${TAXID} SPECIES=${SPECIES}\n\t\tLOGS=${blast_db_log}\n"
 fi
