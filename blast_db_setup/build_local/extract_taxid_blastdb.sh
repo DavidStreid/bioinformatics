@@ -3,17 +3,17 @@
 #   - Extracts only the sequences 
 #   - Using those sequences, creates an isolated blastDB just for that taxonomic ID
 
-help_string="\t./extract_taxid_blastdb.sh -t \${TAXID} [-s \${SPECIES}] [-b \${BLAST_DB}] [-h]\n"
+help_string="\t./extract_taxid_blastdb.sh -t \${TAXID} [-s \${SPECIES}] [-d \${EXTRACT_DB}] [-h]\n"
 
-while getopts ":t:s:b:h" opt; do
+while getopts ":t:s:d:h" opt; do
     case $opt in
         t) TAXID=${OPTARG}
         ;;
         s) SPECIES=${OPTARG}
         ;;
-        d) BLAST_DB=${OPTARG}
+        d) EXTRACT_DB=${OPTARG}
         ;;
-        h) printf "${help_string}" && exit 0
+        h) printf "${help_string}" && exit 0  
         ;;
     esac 
 done
@@ -28,11 +28,11 @@ if [[ $? -ne 0 ]]; then
   echo "PATH does not have blastdbcmd. Exiting"
   exit 1
 fi
-if [[ -z ${BLAST_DB} ]]; then
-  BLAST_DB="nt"  # The nt BLAST DB is the default
+if [[ -z ${EXTRACT_DB} ]]; then
+  EXTRACT_DB="nt"  # The nt BLAST DB is the default
 fi
 if [[ -z ${SPECIES} ]]; then
-  SPECIES=$(blastdbcmd -taxids ${TAXID} -db ${BLAST_DB} -outfmt "%S" 2> /dev/null | head -1)
+  SPECIES=$(blastdbcmd -taxids ${TAXID} -db ${EXTRACT_DB} -outfmt "%S" 2> /dev/null | head -1)
   if [[ $? -ne 0 ]]; then
     echo "[ERROR] Cannot determine species from TAXID=${TAXID}. Plesae verify taxonomic ID is correct, or provide the species"
     exit 1
@@ -43,11 +43,11 @@ SPECIES="$(echo ${SPECIES} | sed 's/ /_/g' | sed 's/\.//g' | sed 's/\//_/g' | se
 
 echo "TAXID=${TAXID}"
 echo "SPECIES=${SPECIES}"
-echo "BLAST_DB=${BLAST_DB}"
+echo "EXTRACT_DB=${EXTRACT_DB}"
 
 pushd . > /dev/null
 
-workdir="${TAXID}___${SPECIES}___${BLAST_DB}"
+workdir="${TAXID}___${SPECIES}___${EXTRACT_DB}"
 echo ${workdir}
 mkdir -p ${workdir}
 
@@ -62,7 +62,7 @@ mkdir -p ${blast_db_folder}
 readme=$(realpath README.md)
 echo "TAXID=${TAXID}" > ${readme}
 echo "SPECIES=${SPECIES}" >> ${readme}
-echo "BLAST_DB=${BLAST_DB}" >> ${readme}
+echo "EXTRACT_DB=${EXTRACT_DB}" >> ${readme}
 echo "" >> ${readme}
 
 input_blastdb_fasta_file="${fasta_dir}/${TAXID}___${SPECIES}.fa"
@@ -73,11 +73,11 @@ else
   printf "\tpreparing taxid fasta: $(basename ${input_blastdb_fasta_file})\n"
 
   temp="${input_blastdb_fasta_file}.raw"
-  FASTA_CMD="blastdbcmd -taxids ${TAXID} -db ${BLAST_DB} > ${temp}"
+  FASTA_CMD="blastdbcmd -taxids ${TAXID} -db ${EXTRACT_DB} > ${temp}"
   echo "${FASTA_CMD}" >> ${readme}
   eval ${FASTA_CMD} > ${fasta_log} 2>&1
   if [[ 0 -ne $? ]]; then
-    echo "[ERROR] FAILED fasta extraction from ${BLAST_DB}. See ${fasta_log}"
+    echo "[ERROR] FAILED fasta extraction from ${EXTRACT_DB}. See ${fasta_log}"
     exit 1
   fi
 
