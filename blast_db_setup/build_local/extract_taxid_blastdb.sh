@@ -53,11 +53,10 @@ mkdir -p ${workdir}
 
 cd ${workdir}
 fasta_dir=$(realpath fasta)
-mkdir -p ${fasta_dir}
+blast_db_folder=$(realpath "blast_db")
+
 log_dir=$(realpath logs)
 mkdir -p ${log_dir}
-blast_db_folder=$(realpath "blast_db")
-mkdir -p ${blast_db_folder}
 
 readme=$(realpath README.md)
 echo "TAXID=${TAXID}" > ${readme}
@@ -65,6 +64,7 @@ echo "SPECIES=${SPECIES}" >> ${readme}
 echo "EXTRACT_DB=${EXTRACT_DB}" >> ${readme}
 echo "" >> ${readme}
 
+mkdir -p ${fasta_dir}
 input_blastdb_fasta_file="${fasta_dir}/${TAXID}___${SPECIES}.fa"
 if [[ -f ${input_blastdb_fasta_file} ]]; then
   printf "\tFound: ${input_blastdb_fasta_file}. Skipping fasta...\n"
@@ -78,6 +78,7 @@ else
   eval ${FASTA_CMD} > ${fasta_log} 2>&1
   if [[ 0 -ne $? ]]; then
     echo "[ERROR] FAILED fasta extraction from ${EXTRACT_DB}. See ${fasta_log}"
+    rm -rf ${fasta_dir}
     exit 1
   fi
 
@@ -88,6 +89,7 @@ else
   rm ${temp}
   if [[ 0 -ne $? ]]; then
     echo "[ERROR] FASTA formatting failed. See ${fasta_log}"
+    rm -rf ${fasta_dir}
     exit 1
   fi
 fi
@@ -96,6 +98,7 @@ tax_id_map="${fasta_dir}/taxid_map__${SPECIES}__${TAXID}.txt"
 printf "\tPreparing tax ID map: $(basename ${tax_id_map})\n"
 grep ">" ${input_blastdb_fasta_file} | sed "s/^>//g" | sed "s/$/\t${TAXID}/g" > ${tax_id_map}
 
+mkdir -p ${blast_db_folder}
 blast_db_title="${SPECIES}__${TAXID}"
 cd ${blast_db_folder} 
 printf "\tCreating BLAST DB: ${blast_db_title}\n"
@@ -110,5 +113,6 @@ if [[ 0 -eq $? ]]; then
   rm ${input_blastdb_fasta_file}
 else
   printf "\tFAIL TAXID=${TAXID} SPECIES=${SPECIES}\n\t\tLOGS=${blast_db_log}\n"
+  rm -rf ${blast_db_folder}
 fi
 popd > /dev/null
