@@ -208,14 +208,20 @@ def aggregate_blast_results(query_dic):
 
     aggregated_query_dic[qaccver] = best_evalue_result.clone()
 
+  n = len(id_evalue_list)
+
   min_e = min(id_evalue_list)
   max_e = max(id_evalue_list)
-  avg_e = sum(id_evalue_list) / len(id_evalue_list)
+  avg_e = sum(id_evalue_list) / n
+
+  variance = sum( [((x - avg_e) ** 2) for x in id_evalue_list] ) / n 
+  std_e = variance ** 0.5
 
   print("E-VALUE Statistics")
   print(f"\tMIN={min_e}")
   print(f"\tMAX={max_e}")
   print(f"\tAVG={avg_e}")
+  print(f"\tSTD={std_e}")
 
   print("AGGREGATION")
   print(f"\ttotal_blast_results={total_blast_results}")
