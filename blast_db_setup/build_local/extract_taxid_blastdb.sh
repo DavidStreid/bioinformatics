@@ -101,15 +101,17 @@ else
   fi
 fi
 
-tax_id_map="${fasta_dir}/taxid_map__${SPECIES}__${TAXID}.txt"
-printf "\tPreparing tax ID map: $(basename ${tax_id_map})\n"
-grep ">" ${input_blastdb_fasta_file} | sed "s/^>//g" | sed "s/$/\t${TAXID}/g" > ${tax_id_map}
+# TODO - Add map if there are multiole taxids
+# tax_id_map="${fasta_dir}/taxid_map__${SPECIES}__${TAXID}.txt"
+# printf "\tPreparing tax ID map: $(basename ${tax_id_map})\n"
+# grep ">" ${input_blastdb_fasta_file} | sed "s/^>//g" | sed "s/$/\t${TAXID}/g" > ${tax_id_map}
+# CMD="makeblastdb -in ${input_blastdb_fasta_file} -parse_seqids -taxid_map ${tax_id_map} -title '${blast_db_title}' -dbtype nucl -out ${blast_db_title}"
 
 mkdir -p ${blast_db_folder}
 blast_db_title="${SPECIES}__${TAXID}"
 cd ${blast_db_folder} 
 printf "\tCreating BLAST DB: ${blast_db_title}\n"
-CMD="makeblastdb -in ${input_blastdb_fasta_file} -parse_seqids -taxid_map ${tax_id_map} -title '${blast_db_title}' -dbtype nucl -out ${blast_db_title}"
+CMD="makeblastdb -in ${input_blastdb_fasta_file} -parse_seqids -taxid ${TAXID} -title '${blast_db_title}' -dbtype nucl -out ${blast_db_title}"
 printf "\t${CMD}\n"
 echo "${CMD}" >> ${readme}
 blast_db_log="${log_dir}/log_blastdb_creation___${blast_db_title}.out"
