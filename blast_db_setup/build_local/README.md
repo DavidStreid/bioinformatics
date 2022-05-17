@@ -8,17 +8,18 @@
 Two scripts will create BLAST DBs from input taxonomic IDs. The difference is in where the reference files are taken from.
 ### Extract all fastas for the given taxonomic ID from the input BLAST DB
 ```
-$ ./extract_taxid_blastdb.sh 8036
+$ ./extract_taxid_blastdb.sh -t 8036 -d nt
 TAXID=8036
 SPECIES=Salvelinus_alpinus
-BLAST_DB=nt
+EXTRACT_DB=nt
 8036___Salvelinus_alpinus___nt
         preparing taxid fasta: 8036___Salvelinus_alpinus.fa
-\tRemoving spaces from fasta description lines
+        Removing spaces from fasta description lines
         Preparing tax ID map: taxid_map__Salvelinus_alpinus__8036.txt
         Creating BLAST DB: Salvelinus_alpinus__8036
-        makeblastdb -in /Users/dstreid/work/repos/bioinformatics/blast_db_setup/build_local/8036___Salvelinus_alpinus___nt/fasta/8036___Salvelinus_alpinus.fa -parse_seqids -taxid_map /Users/dstreid/work/repos/bioinformatics/blast_db_setup/build_local/8036___Salvelinus_alpinus___nt/fasta/taxid_map__Salvelinus_alpinus__8036.txt -title 'Salvelinus_alpinus__8036' -dbtype nucl -out Salvelinus_alpinus__8036
+        makeblastdb -in /Volumes/StreidD_External/work/bioinformatics/blast_db_setup/build_local/8036___Salvelinus_alpinus___nt/fasta/8036___Salvelinus_alpinus.fa -parse_seqids -taxid_map /Volumes/StreidD_External/work/bioinformatics/blast_db_setup/build_local/8036___Salvelinus_alpinus___nt/fasta/taxid_map__Salvelinus_alpinus__8036.txt -title 'Salvelinus_alpinus__8036' -dbtype nucl -out Salvelinus_alpinus__8036
         SUCCESS TAXID=8036 SPECIES=Salvelinus_alpinus
+        Removing FASTA
 ```
 
 ### Take from NCBI's mapping of taxnomic ID
