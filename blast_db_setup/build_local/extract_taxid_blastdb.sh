@@ -5,13 +5,15 @@
 
 help_string="\t./extract_taxid_blastdb.sh -t \${TAXID} [-s \${SPECIES}] [-d \${EXTRACT_DB}] [-h]\n"
 
-while getopts ":t:s:d:h" opt; do
+while getopts ":t:s:d:o:h" opt; do
     case $opt in
         t) TAXID=${OPTARG}
         ;;
         s) SPECIES=${OPTARG}
         ;;
         d) EXTRACT_DB=${OPTARG}
+        ;;
+        o) OUT_DIR=${OPTARG}
         ;;
         h) printf "${help_string}" && exit 0  
         ;;
@@ -27,6 +29,11 @@ which blastdbcmd > /dev/null
 if [[ $? -ne 0 ]]; then
   echo "PATH does not have blastdbcmd. Exiting"
   exit 1
+fi
+if [[ ! -z ${OUT_DIR} ]]; then
+  if [[ ! -d ${OUT_DIR} ]]; then
+    echo ""
+  fi
 fi
 if [[ -z ${EXTRACT_DB} ]]; then
   EXTRACT_DB="nt"  # The nt BLAST DB is the default
@@ -112,7 +119,19 @@ if [[ 0 -eq $? ]]; then
   printf "\tRemoving FASTA\n"
   rm ${input_blastdb_fasta_file}
 else
-  printf "\tFAIL TAXID=${TAXID} SPECIES=${SPECIES}\n\t\tLOGS=${blast_db_log}\n"
+  printf "\t[ERROR] FAIL TAXID=${TAXID} SPECIES=${SPECIES}\n\t\tLOGS=${blast_db_log}\n"
   rm -rf ${blast_db_folder}
+  exit 1
 fi
+
+if [[ ! -z ${OUT_DIR} ]]; then
+  if [[ -d ${OUT_DIR} ]]; then
+    printf "\tTransferring files to ${OUT_DIR}\n"
+    mv ${blast_db_folder}/* ${OUT_DIR}
+  else
+    printf "\t[ERROR] Invalid Out Directory: ${OUT_DIR}\n"
+  fi
+
+fi
+
 popd > /dev/null
