@@ -140,6 +140,10 @@ DB_NAME=ref_euk_rep_genomes          # Name of the database to use (prefix of th
     ```
   2. If multiple queries are being run in the query file, try one and increase the number of threads, `-num_threads` option. BLAST will [query pack](https://doctorlib.info/medical/blast/13.html) with a set of queries and only return results when ALL of them have been analyzed. 
   3. Re-run w/ an optimized query
+
+#### Other
+* There seems to be a character limit for `blastn -db ${DBS}...` - **TODO**
+
 ### References
 * [blastn documentation](https://www.ncbi.nlm.nih.gov/books/NBK569856/)
 
