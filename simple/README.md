@@ -1,6 +1,12 @@
 # Simple
 Simple things 
 
+## Get Total Number of bases in BED file
+```
+cat file.bed | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
+```
+* REF - [BioStars](https://www.biostars.org/p/68283/#68292)
+
 ## Extracting R1/R2 FASTQs from BAMs
 * Rembmer to sort BAM by name so that paired reads aren't missed
 
