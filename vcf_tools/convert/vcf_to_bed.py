@@ -1,5 +1,7 @@
 import sys
 
+RUN_STR = "python3 vcf_to_bed.py ${VCF}"
+
 def read_vcf(vcf_f, bed_f):
   with open(vcf_f, 'r') as in_f, open(bed_f, 'w') as out_f:
     for raw_line in in_f:
@@ -35,7 +37,16 @@ def read_vcf(vcf_f, bed_f):
       
 
 if __name__ == '__main__':
-  print("I only do VCFs w/ structural variant insertions")
+  if len(sys.argv) == 1:
+    print("[ERROR] No VCF file passed")
+    print(RUN_STR)
+    sys.exit(1)
+
+  print("[WARN] I only do VCFs w/ structural variant insertions")
+
   vcf_f = sys.argv[1]
   bed_f = vcf_f.replace(".vcf", ".bed")
+  print(f"INPUT={vcf_f}")
   read_vcf(vcf_f, bed_f)
+  print(f"OUTPUT={bed_f}")
+  print("Done.")
