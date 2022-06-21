@@ -17,10 +17,17 @@ echo "Extracting reads in FQ=${fq1} FQ2=${fq2}"
 bedtools bamtofastq -i ${sorted_sam} -fq ${fq1} -fq2 ${fq2}
 ```
 
-* Verify
+### Verify
 ```
 samtools flagstat ${original_sam}
 seqkit stats ${fq1}
 seqkit stats ${fq2}
 ```
-
+*  INPUT == OUTPUT
+  * If paired,
+    * INPUT (seqkit) = num_seqs (R1) + num_seqs (R2)
+    * OUTPUT (samtools) = paired in sequencing
+  * If single-read,
+    * INPUT (seqkit) = num_seqs (R1)
+    * OUTPUT (samtools) = mapped
+  *  [REF](https://github.com/arq5x/bedtools2/issues/797)
