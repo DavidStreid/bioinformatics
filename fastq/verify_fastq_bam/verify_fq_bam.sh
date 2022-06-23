@@ -40,7 +40,7 @@ echo ""
 b_file=$(basename ${BAM} | rev | cut -d'.' -f1- | rev)
 b_stats="bam_stats___${b_file}.txt"
 echo "#BAM"
-echo "${BAM}"
+echo "BAM=${BAM}"
 samtools flagstat ${BAM} > ${b_stats}
 
 num_paired_reads=$(grep "paired in sequencing" ${b_stats} | cut -d' ' -f1)
