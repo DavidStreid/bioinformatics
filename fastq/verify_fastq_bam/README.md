@@ -1,0 +1,20 @@
+# Verify FASTQ/BAM
+Util to verify all PAIRED-FASTQs are present in BAM
+
+## RUN
+```
+#FASTQ
+R1=sample_r1.fq
+R2=sample_r2.fq
+
+#BAM
+sample.bam
+
+STATS
+R1_NUM_READS=11146869
+R2_NUM_READS=11146869
+BAM_PAIRED_READS=22293738
+status=LOSSLESS
+	FQ_READS=22293738
+	BAM_PAIRED_READS=22293738
+```
