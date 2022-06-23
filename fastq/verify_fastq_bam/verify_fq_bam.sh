@@ -63,4 +63,4 @@ else
   printf "\tBAM_PAIRED_READS=${num_paired_reads}\n"
 fi
 
- echo "${status}\t${r1_num_reads}\t${r2_num_reads}\t${num_paired_reads}\t${R1}\t${R2}\t${BAM}\n" >> ${OUT}
+printf "${status}\t${r1_num_reads}\t${r2_num_reads}\t${num_paired_reads}\t${R1}\t${R2}\t${BAM}\n" >> ${OUT}
