@@ -20,6 +20,30 @@ $ seqkit stats ${FQ}
 
 3. Time Estimate, **E** - `E = R / T`
 
+## Sort, compress, & index VCF
+1. Sort
+```
+$ java -jar picard.jar SortVcf \
+      I=unsorted.vcf \
+      O=sorted.vcf
+```
+
+2. Compress - [`bgzip`](http://www.htslib.org/doc/bgzip.html) provides a way that allows indexes to be built on the compressed file
+```
+$ bgzip sorted.vcf
+```
+
+3. Index - [`tabix`](http://www.htslib.org/doc/tabix.html)
+```
+$ tabix -p vcf sorted.vcf.gz
+```
+
+4. Review
+```
+$ ls
+sorted.vcf.gz
+sorted.vcf.gz.tbi
+```
 
 ## Get Total Number of bases in BED file
 ```
