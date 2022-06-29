@@ -86,7 +86,6 @@ $ cat chrX.r1.fq.gz chrY.r1.fq.gz > sex.r1.fq.gz
 
 $ gunzip sex.r1.fq.gz
 
-
 $ ls *.fq
 sex.r1.fq
 ```
