@@ -75,3 +75,18 @@ seqkit stats ${fq2}
     * INPUT (seqkit) = num_seqs (R1)
     * OUTPUT (samtools) = mapped
   *  [REF](https://github.com/arq5x/bedtools2/issues/797)
+
+## GZIP'd Files can be concatenated
+```
+$ ls -1
+chrX.r1.fq.gz
+chrY.r1.fq.gz
+
+$ cat chrX.r1.fq.gz chrY.r1.fq.gz > sex.r1.fq.gz
+
+$ gunzip sex.r1.fq.gz
+
+
+$ ls *.fq
+sex.r1.fq
+```
