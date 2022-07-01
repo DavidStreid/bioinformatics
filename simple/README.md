@@ -76,6 +76,25 @@ seqkit stats ${fq2}
     * OUTPUT (samtools) = mapped
   *  [REF](https://github.com/arq5x/bedtools2/issues/797)
 
+## Total count of reads in paried-end BAM - paired vs. unpaired
+
+**Total Reads = Reads_Properly_Paired + Unpaired_Reads**
+* Need to consider paired vs. unpaired by filtering on [PROPER_PAIR](http://www.htslib.org/doc/1.11/samtools-flags.html)-flag
+
+```
+# Get Total Alignments of Properly-Paired Reads for chromosome X
+#    - Note - filter on 3rd column, RNAME, to only grab chrX
+$ samtools view -f 0x2 ${BAM} | cut -f3 | grep "chrX" | wc -l
+12863955
+# Get Total BAM alignments
+$ samtools view ${BAM} | cut -f3 | grep "chrX" | wc -l
+13246578
+
+# Paired Reads (P) 		= 2 * 12863955		= 25,727,910
+# Unpaired Reads (U) 		= 13246578 - 12863955 	= 382,623
+# Total Reads (T) = P + U 	= 25,727,910 + 382,623	= 26,110,533
+```
+
 ## GZIP'd Files can be concatenated
 ```
 $ ls -1
