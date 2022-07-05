@@ -80,9 +80,8 @@ seqkit stats ${fq2}
 
 ### samtools -F/-f
 **Description** - Use SAM flags to filter on/out reads
-**`-F`** - Don't Include
-
-**`-f`** - Include
+* **`-F`** - Don't Include
+* **`-f`** - Include
 
 | Base10 Value | Flag          | Description                                                     |
 |--------------|---------------|-----------------------------------------------------------------|
