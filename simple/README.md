@@ -97,6 +97,7 @@ seqkit stats ${fq2}
 | 512          | QCFAIL        | not passing quality controls                                    |
 | 1024         | DUP           | PCR or optical duplicate                                        |
 | 2048         | SUPPLEMENTARY | supplementary alignment                                         |
+
 [REF](http://www.htslib.org/doc/1.11/samtools-flags.html)
 
 #### Paired reads mapped to different scaffolds (`-F 14`)
