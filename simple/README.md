@@ -76,7 +76,42 @@ seqkit stats ${fq2}
     * OUTPUT (samtools) = mapped
   *  [REF](https://github.com/arq5x/bedtools2/issues/797)
 
-## Total count of reads in paried-end BAM - paired vs. unpaired
+## SAM/BAM
+
+### samtools -F/-f
+**Description** - Use SAM flags to filter on/out reads
+**`-F`** - Don't Include
+
+**`-f`** - Include
+
+| Base10 Value | Flag          | Description                                                     |
+|--------------|---------------|-----------------------------------------------------------------|
+| 1            | PAIRED        | paired-end (or multiple-segment) sequencing technology          |
+| 2            | PROPER_PAIR   | each segment properly aligned according to the aligner          |
+| 4            | UNMAP         | segment unmapped                                                |
+| 8            | MUNMAP        | next segment in the template unmapped                           |
+| 16           | REVERSE       | SEQ is reverse complemented                                     |
+| 32           | MREVERSE      | SEQ of the next segment in the template is reverse complemented |
+| 64           | READ1         | the first segment in the template                               |
+| 128          | READ2         | the last segment in the template                                |
+| 256          | SECONDARY     | secondary alignment                                             |
+| 512          | QCFAIL        | not passing quality controls                                    |
+| 1024         | DUP           | PCR or optical duplicate                                        |
+| 2048         | SUPPLEMENTARY | supplementary alignment                                         |
+[REF](http://www.htslib.org/doc/1.11/samtools-flags.html)
+
+#### Paired reads mapped to different scaffolds (`-F 14`)
+* Filter out
+  * 0x2 each segment properly aligned according to the aligner
+  * 0x4 segment unmapped
+  * 0x8 next segment in the template unmapped
+
+```
+BAM=...
+$ samtools view -F 14 ${BAM}
+```
+
+### Total count of reads in paried-end BAM - paired vs. unpaired
 
 **Total Reads = Reads_Properly_Paired + Unpaired_Reads**
 * Need to consider paired vs. unpaired by filtering on [PROPER_PAIR](http://www.htslib.org/doc/1.11/samtools-flags.html)-flag
