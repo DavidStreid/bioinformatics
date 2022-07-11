@@ -53,7 +53,15 @@ cat file.bed | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
 
 ## Extracting R1/R2 FASTQs from BAMs
 * Rembmer to sort BAM by name so that paired reads aren't missed
-
+* Paired-Read Notes
+  * Mates may not be in the BAM (seuqencing errors, alignment issues, etc.) so the remaining mate cannot be extracted into their pairs (See error below). This will often prevent extraction of all the reads from a BAM
+    ```
+    *****WARNING: Query <RGID> is marked as paired, but it's mate does not occur next to it in your BAM file.  Skipping
+    ```
+  * Will usually end up with the following
+    * Paired: Mates present in BAM
+    * Properly-Paired: Orientation of R1 & R2 is correct, i.e. Forward strand is 5'->3' upstream of reverse strand that is 3'->5'
+  
 ```
 echo "Sorting SAM=${sorted_sam}"
 samtools sort -n -o ${sorted_sam} ${original_sam}
