@@ -151,3 +151,15 @@ $ gunzip sex.r1.fq.gz
 $ ls *.fq
 sex.r1.fq
 ```
+
+## FASTQ
+### Extracting Specific Components
+* Assuming standard [FQ format](https://en.wikipedia.org/wiki/FASTQ_format#Format) with each read & meta-information contained in 4-line components
+```
+IDX=1
+#   0: QUALITY
+#   1: SEQ_ID
+#   2: SEQUENCE
+
+awk 'NR % 4 == ${IDX}' ${FQ}
+```
