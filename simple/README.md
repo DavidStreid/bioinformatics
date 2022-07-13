@@ -54,26 +54,36 @@ cat file.bed | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
 ## Extracting R1/R2 FASTQs from BAMs
 * Rembmer to sort BAM by name so that paired reads aren't missed
 * Paired-Read Notes
-  * Mates may not be in the BAM (seuqencing errors, alignment issues, etc.) so the remaining mate cannot be extracted into their pairs (See error below). This will often prevent extraction of all the reads from a BAM
+  * Secondary-alignment mates may be missing in the BAM. To avoid the error below, remove secondary/supplemental alignments, `-F 2304`, i.e. Filter out (`-F`) secondary & supplemntary (`256` + `2048`) reads prior to extracting. 
     ```
     *****WARNING: Query <RGID> is marked as paired, but it's mate does not occur next to it in your BAM file.  Skipping
     ```
   * Will usually end up with the following
     * Paired: Mates present in BAM
-    * Properly-Paired: 
+    * [Properly-Paired](https://www.biostars.org/p/8318/): 
     
       1. Both mates mapped
       2. Mates map within a reasonable distance of each other (e.g. Different chromosome mapping isn't properly-paired)
       3. Orientation of R1 & R2 is correct, i.e. Forward strand is 5'->3' upstream of reverse strand that is 3'->5'
-  
+
+**1) Extract name-sorted, primary alignments**
 ```
+# OPTION 1) COLLATE
+samtools collate ${original_sam} > ${sorted_sam}
+
+# OPTION 2) SORT
 echo "Sorting SAM=${sorted_sam}"
-samtools sort -n -o ${sorted_sam} ${original_sam}
+samtools view -F 2304 ${original_sam} > primary_alignment.sam
+samtools sort -n -o ${sorted_sam} primary_alignment.sam
+```
+
+**2) Extract FQ files**
+```
 echo "Extracting reads in FQ=${fq1} FQ2=${fq2}"
 bedtools bamtofastq -i ${sorted_sam} -fq ${fq1} -fq2 ${fq2}
 ```
 
-### Verify
+**3) Verify**
 ```
 samtools flagstat ${original_sam}
 seqkit stats ${fq1}
