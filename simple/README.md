@@ -2,10 +2,19 @@
 Simple things for analyzing common bioinformatic file formats, i.e. SAM/BAM, FASTQ, VCF, BED 
 
 * [SAM/BAM](#sambam)
+  * [Filtering SAM Flags](#filtering-sam-flags--f-f)
+  * [Count Reads](#total-count-of-reads-in-paried-end-bam---paired-vs-unpaired)
+  * [Extracting Reads](#extracting-r1r2-fastqs-from-bams)
 * [FASTQ](#fastq)
+  * [Extracting Components](#extracting-specific-components)
 * [VCF](#vcf)
+  * [Sort/Compress/Index](#sort-compress--index-vcf)
 * [BED](#bed)
+  * [Get Number of Bases](#get-total-number-of-bases-in-bed-file)
 * [OTHER](#other)
+  * [Concatenate .gz](#gzipd-files-can-be-concatenated)
+  * [Estimate Alignment Time](#estimate-alignment-time---bwa-mem-will-output-the-number-of-processed-reads)
+* [References](#references)
 
 ## SAM/BAM
 
