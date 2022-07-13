@@ -4,6 +4,7 @@ Simple things for analyzing common bioinformatic file formats, i.e. SAM/BAM, FAS
 * [SAM/BAM](#sambam)
   * [Filtering SAM Flags](#filtering-sam-flags--f-f)
   * [Count Reads](#total-count-of-reads-in-paried-end-bam---paired-vs-unpaired)
+  * [SAM-to-BAM](#sam-to-analysis-ready-bam)
   * [Extracting Reads](#extracting-r1r2-fastqs-from-bams)
 * [FASTQ](#fastq)
   * [Extracting Components](#extracting-specific-components)
@@ -75,6 +76,17 @@ $ samtools view ${BAM} | cut -f3 | grep "chrX" | wc -l
 # Paired Reads (P) 		= 2 * 12863955		= 25,727,910
 # Unpaired Reads (U) 		= 13246578 - 12863955 	= 382,623
 # Total Reads (T) = P + U 	= 25,727,910 + 382,623	= 26,110,533
+```
+
+### SAM to analysis-ready BAM
+* Convert to BAM, sort, & index
+```
+INPUT_SAM=...
+BAM=...         # $(echo ${INPUT_SAM} | sed 's/.sam/.bam/g')    # Get BAM output name
+SORT_BAM=...    # $(echo ${BAM} | sed 's/.bam/_sorted.bam/g')   # Get sorted-BAM output name
+samtools view -h -b ${INPUT_SAM} > ${BAM}
+samtools sort -o ${SORT_BAM} -O BAM
+samtools index ${SORT_BAM}
 ```
 
 ### Extracting R1/R2 FASTQs from BAMs
