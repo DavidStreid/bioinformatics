@@ -177,3 +177,6 @@ IDX=1
 
 awk 'NR % 4 == ${IDX}' ${FQ}
 ```
+
+## References
+* [Common Samtools Usage Examples](https://davetang.org/wiki/tiki-index.php?page=SAMTools#Extracting_SAM_entries_mapping_to_a_specific_loci) 
