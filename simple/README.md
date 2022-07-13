@@ -60,7 +60,11 @@ cat file.bed | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
     ```
   * Will usually end up with the following
     * Paired: Mates present in BAM
-    * Properly-Paired: Orientation of R1 & R2 is correct, i.e. Forward strand is 5'->3' upstream of reverse strand that is 3'->5'
+    * Properly-Paired: 
+    
+      1. Both mates mapped
+      2. Mates map within a reasonable distance of each other (e.g. Different chromosome mapping isn't properly-paired)
+      3. Orientation of R1 & R2 is correct, i.e. Forward strand is 5'->3' upstream of reverse strand that is 3'->5'
   
 ```
 echo "Sorting SAM=${sorted_sam}"
