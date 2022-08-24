@@ -183,6 +183,13 @@ cat file.bed | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
 
 
 ## OTHER
+### Fold - Find AA/Nucleotide at position
+```
+# What amino acid is at position 16?
+$ echo "MITFLPIIFSSLVVVTFVIGNFANGFIALVNSIE" | fold -w 1 | cat -n | grep -P "16\t"
+    16	T
+```
+
 ### GZIP'd Files can be concatenated
 ```
 $ ls -1
