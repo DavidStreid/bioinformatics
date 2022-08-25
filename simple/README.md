@@ -185,9 +185,11 @@ cat file.bed | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
 
 ## OTHER
 ### Fold - Find AA/Nucleotide at position
+e.g. What amino acid is at position 16 of a transcript
 ```
-# What amino acid is at position 16?
-$ echo "MITFLPIIFSSLVVVTFVIGNFANGFIALVNSIE" | fold -w 1 | cat -n | grep -P "16\t"
+TR="MITFLPIIFSSLVVVTFVIGNFANGFIALVNSIE"
+IDX=16
+$ echo "${TR}" | fold -w 1 | cat -n | grep "\s${IDX}\s"
     16	T
 ```
 
