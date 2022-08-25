@@ -151,7 +151,7 @@ awk 'NR % 4 == ${IDX}' ${FQ}
 
 ## VCF
 ### Sort, compress, & index VCF
-1. Sort
+1. Sort (Note - sorts according to the Sequence Dictionary in the VCF's headers)
 ```
 $ java -jar picard.jar SortVcf \
       I=unsorted.vcf \
