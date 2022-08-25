@@ -13,6 +13,7 @@ Simple things for analyzing common bioinformatic file formats, i.e. SAM/BAM, FAS
 * [BED](#bed)
   * [Get Number of Bases](#get-total-number-of-bases-in-bed-file)
 * [OTHER](#other)
+  * [Get Seq Index](#fold---find-aanucleotide-at-position)
   * [Concatenate .gz](#gzipd-files-can-be-concatenated)
   * [Estimate Alignment Time](#estimate-alignment-time---bwa-mem-will-output-the-number-of-processed-reads)
 * [References](#references)
