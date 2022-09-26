@@ -82,6 +82,8 @@ These are paraphrased from the [blastdb README](https://ftp.ncbi.nlm.nih.gov/bla
 * For some reason, sometimes the perl script doesn't download the `.md5` files and the entire script fails
 ```
 DB=nt # One of the preformatted names
+md5sum_calc="md5sum_calc.txt"
+md5sum_download="md5sum_dwld.txt"
 db_files=$(curl ftp://ftp.ncbi.nlm.nih.gov/blast/db/ 2> /dev/null | grep -oE "\s${DB}.[0-9]+.tar.gz" | cut -d' ' -f2)
 for file in ${db_files}; do
   curl ftp://ftp.ncbi.nlm.nih.gov/blast/db/${file} > ${file}
@@ -92,9 +94,11 @@ for file in ${db_files}; do
   fi
   md5_file=${file}.md5
   curl ftp://ftp.ncbi.nlm.nih.gov/blast/db/${md5_file} > ${md5_file}
-  md5sum ${file}    # Should Match
-  cat ${md5_file}
+  md5sum ${file} >> ${md5sum_calc}
+  cat ${md5_file} >> ${md5sum_download}
 done
+
+diff ${md5sum_calc} ${md5sum_download} # Should Match & not have any diffs
 ```
 
 
