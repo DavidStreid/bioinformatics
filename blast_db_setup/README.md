@@ -98,6 +98,7 @@ for file in ${db_files}; do
   cat ${md5_file} >> ${md5sum_download}
 done
 
+# Sometimes the md5sums don't match though... this is even after multiple curl/cyberduck downloads
 diff ${md5sum_calc} ${md5sum_download} # Should Match & not have any diffs
 ```
 
