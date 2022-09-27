@@ -11,7 +11,7 @@ NCBI already has pre-formatted databases and a convenient downloadable script, `
 
 See [Manual Download Guide](#manual-download-guide) for more details. But, to avoid navigating the FTP repo ,`ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+`, and all its versions, there's `setup_blast.sh` that does steps 1 & 2.
 
-## Run
+## Run Setup
 ### Download executables with defaults
 ```
 ./setup_blast.sh
@@ -45,7 +45,6 @@ blastdb=./preformatted_db
   > **MULTIPLE**: `-d "human_genome ref_prok_rep_genomes nt ref_euk_rep_genomes"`
 * `-p`: `string` (optional, default: current working directory) - If specifying a database to download, `-p` specifies the path to write those files to. Note - this will later be the directory pointed to by the environment variable, `BLASTDB`, when running blast. See [Configuring BLAST](https://www.ncbi.nlm.nih.gov/books/NBK569858/)
   > `-p ~/blast_db/preformatted_dbs`
-
 
 ## Manual Download Guide
 ### FTP Notes for Manual Download
@@ -99,7 +98,21 @@ done
 
 
 ## Run blast
-Once the `bin` of all the bash executables for whatever version was specified and the pre-formatted database files are downloaded, blast is very simple to run,
+Once the `bin` of all the bash executables for whatever version was specified and the pre-formatted database files are downloaded, blast is very simple to run.
+* Included is a simple script that will check environment params and run blast on an input fasta and optional blastDB
+* To run blast manually, please follow the steps below after the code snippet.
+
+```
+./run_blast.sh test_fasta.fa simple_db/
+exporting BLASTDB=simple_db/
+INPUTS
+	BLASTDB=simple_db/
+	QUERY=test_fasta.fa
+RUNNING BLAST...
+Done.
+```
+
+### Manual BLAST run
 1. Export `BLASTDB` to be the directory w/ the downloaded database files. See [Configuring BLAST](https://www.ncbi.nlm.nih.gov/books/NBK569858/) for more information. This is the directory w/ the db files that have been extracted, i.e. directory w/ `*.nhr`, `*.nin`, `*.nnd`, `*.nnd`, `*.nni`, `*.nog`, `*.nsq`
     ```
     $ export BLASTDB=...
