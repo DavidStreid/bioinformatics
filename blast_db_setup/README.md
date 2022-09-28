@@ -134,7 +134,12 @@ DB_NAME=ref_euk_rep_genomes          # Name of the database to use (prefix of th
 ./ncbi-blast-2.12.0+/bin/blastn -db ${DB_NAME} -query sample.fa -out results.out
 ```
 
-### Troubleshooting
+### Notes on running BLAST
+#### `blastn` 
+* `blastn` can output many results. This is because it does not have a method of limiting results, other than `max_target_seqs`, which will limit the number of **target sequences**, which will not necessarily limit the number of results that are returned per read.
+  * For this reason, it is recommended to have an additional step to identify true hits that can run on the output of `blastn`
+
+## Troubleshooting
 **STEP 0** - `blastdbcheck`
 * In the ncbi executable download, there is a script that checks the preformatted databses (`./ncbi-blast-2.12.0+/bin/blastdbcheck`). Run this and verify there are no errors
 
