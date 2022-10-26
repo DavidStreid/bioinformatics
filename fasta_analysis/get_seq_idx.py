@@ -13,16 +13,25 @@ def main():
 
   seq = ''
   with open(fa, 'r') as in_f:
-    header = in_f.readline().strip()
-    if ">" in header:
-      pass
-    else:
-      seq += header
-    for line in in_f:
-      seq += line.strip()
-  
-  seq_len = len(seq)
+    for raw_line in in_f:
+      line = raw_line.strip()
+      if line[0] == ">":
+        if len(seq) > 0:  
+          print(f"Checking {header}")
+          analyze_seq(seq, idx)
+          header = None
+          seq = ''
+        header = line
+      else:
+        seq += line
+    if header is not None:
+      print(f"Checking {header}")
+    analyze_seq(seq, idx)
+  print("Done.")
 
+
+def analyze_seq(seq, idx):
+  seq_len = len(seq)
 
   if seq_len < idx + 1:
     print("[ERROR]")
