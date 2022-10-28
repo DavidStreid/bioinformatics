@@ -1,15 +1,25 @@
 import sys
+import argparse
 
 def main():
-  if len(sys.argv) != 3:
-    print("Need fasta & index")
-    sys.exit(1)
+  parser = argparse.ArgumentParser(description='Returns nucleotide & indices of sequences')
+  parser.add_argument('-f', dest='fasta', help='fasta file', required=True)
+  parser.add_argument('-i', dest='index', help='nucleotide index of fasta (int)', required=True)
+  parser.add_argument('-r', dest='range', help='range around index to reterieve nucelotides (int)', required=False)
 
-  fa = sys.argv[1]
-  idx = int(sys.argv[2])
+  args = parser.parse_args()
+
+  fa = args.fasta
+  idx = int(args.index)
+  idx_range = args.range
+  if idx_range is None:
+    idx_range = 3
+  else:
+    idx_range = int(idx_range)
 
   print(f"file={fa}")
   print(f"idx={idx}")
+  print(f"idx_range={idx_range}")
 
   seq = ''
   with open(fa, 'r') as in_f:
@@ -26,11 +36,11 @@ def main():
         seq += line
     if header is not None:
       print(f"Checking {header}")
-    analyze_seq(seq, idx)
+    analyze_seq(seq, idx, idx_range)
   print("Done.")
 
 
-def analyze_seq(seq, idx):
+def analyze_seq(seq, idx, idx_range):
   seq_len = len(seq)
 
   if seq_len < idx + 1:
@@ -45,7 +55,11 @@ def analyze_seq(seq, idx):
   print(f"\tsequence_length={seq_len}")
   print(f"\ttarget_nucl=({idx},{index_nucl})")
   region = ""
-  for i in range(idx-3, idx+4):
+
+  min_idx = idx - idx_range
+  max_idx = min(idx+idx_range+1, seq_len)
+
+  for i in range(min_idx, max_idx):
     region += f" ({i},{seq[i-1]})"
   print(f"\tsequence=(1,{seq[0]})...{region} ...({seq_len},{seq[seq_len-1]})")
   
