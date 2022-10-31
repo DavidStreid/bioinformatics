@@ -3,7 +3,7 @@
 help_string="./run_blast sample.fa [/path/to/BLASTDB]"
 
 fasta=$1
-blastdb=$2
+blastdb=$2	# PATH TO BLASTDB to use
 
 if [[ ! -f ${fasta} ]]; then
   echo "Please provide a fasta file"
@@ -25,6 +25,8 @@ else
   printf "\t${help_string}\n"
   exit 1
 fi
+
+echo "BLASTDB=${BLASTDB}"
 
 ulimit -n 8192
 ulimit -f -n >> ${log}
