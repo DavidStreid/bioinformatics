@@ -2,7 +2,7 @@
 # `get_seq_idx.py`
 Description: Returns the nucloetide at the position provided
 ```
-$ python3 get_seq_idx.py simple.fa 6
+$ python3 get_seq_idx.py -f simple.fa -i 6
 file=simple.fa
 idx=6
 [INFO]
@@ -12,4 +12,22 @@ idx=6
 $ cat simple.fa 
 >simple
 AGACATAGACA
+```
+
+Return the nucleotides around transcript for BRCA1 gene, specifically pathogenic variant [NM_007294.4(BRCA1):c.5558A>G (p.Tyr1853Cys)](https://www.ncbi.nlm.nih.gov/clinvar/variation/55627/?new_evidence=true)
+```
+$ python3 get_seq_idx.py -f NM_007294.4.fa -i 5558 -o NM_007294.4.cut.fa
+file=NM_007294.4.fa
+idx=5558
+idx_range=3
+Checking >NM_007294.4 Homo sapiens BRCA1 DNA repair associated (BRCA1), transcript variant 1, mRNA
+[INFO]
+     sequence_length=7088
+     target_nucl=(5558,G)
+     sequence=(1,G)... (5555,C) (5556,T) (5557,G) (5558,G) (5559,A) (5560,C) (5561,A) ...(7088,A)
+Done.
+
+$ cat NM_007294.4.cut.fa
+>NM_007294.4 Homo sapiens BRCA1 DNA repair associated (BRCA1), transcript variant 1, mRNA (5555, 5561)
+CTGGACA
 ```
