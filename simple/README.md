@@ -20,6 +20,12 @@ Simple things for analyzing common bioinformatic file formats, i.e. SAM/BAM, FAS
 
 ## SAM/BAM
 
+### [Sub-sample BAM](https://www.biostars.org/p/76791/#76791)
+```
+# Extract 1% of reads from BAM
+$ samtools view -s 0.01 -b sample.bam > test.sam
+```
+
 ### Filtering SAM Flags (`-F`/`-f`)
 **Description** - Use SAM flags to filter on/out reads
 * **`-F`** - Don't Include
