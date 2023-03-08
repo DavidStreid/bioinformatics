@@ -2,6 +2,7 @@
 Simple things for analyzing common bioinformatic file formats, i.e. SAM/BAM, FASTQ, VCF, BED 
 
 * [SAM/BAM](#sambam)
+  * [sub-sample BAM](#sub-sample-bam)
   * [Filtering SAM Flags](#filtering-sam-flags--f-f)
   * [Count Reads](#total-count-of-reads-in-paried-end-bam---paired-vs-unpaired)
   * [SAM-to-BAM](#sam-to-analysis-ready-bam)
@@ -23,7 +24,7 @@ Simple things for analyzing common bioinformatic file formats, i.e. SAM/BAM, FAS
 ### [Sub-sample BAM](https://www.biostars.org/p/76791/#76791)
 ```
 # Extract 1% of reads from BAM
-$ samtools view -s 0.01 -b sample.bam > test.sam
+$ samtools view -s 0.01 -b chrX.bam > chrX_tiny.bam
 ```
 
 ### Filtering SAM Flags (`-F`/`-f`)
