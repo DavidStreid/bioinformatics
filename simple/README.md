@@ -14,6 +14,7 @@ Simple things for analyzing common bioinformatic file formats, i.e. SAM/BAM, FAS
 * [BED](#bed)
   * [Get Number of Bases](#get-total-number-of-bases-in-bed-file)
 * [OTHER](#other)
+  * [Helpful find commands](#helpful-find-commands)
   * [Get Seq Index](#fold---find-aanucleotide-at-position)
   * [Concatenate .gz](#gzipd-files-can-be-concatenated)
   * [Estimate Alignment Time](#estimate-alignment-time---bwa-mem-will-output-the-number-of-processed-reads)
@@ -191,6 +192,12 @@ cat file.bed | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
 
 
 ## OTHER
+### Helpful find commands
+**Find all `.bam` & `.bai` files**
+```
+$ find ./ -type f \( -iname \*.bam -o -iname \*.bai \)
+```
+
 ### Fold - Find AA/Nucleotide at position
 e.g. What amino acid is at position 16 of a transcript
 ```
