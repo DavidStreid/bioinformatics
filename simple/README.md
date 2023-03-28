@@ -197,6 +197,10 @@ cat file.bed | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
 ```
 $ find ./ -type f \( -iname \*.bam -o -iname \*.bai \)
 ```
+**`tar` find output to file**
+```
+$ find ./ -type f \( -iname \*.vcf -o -iname \*.fastq \) | tar -zcvf secondary_analysis.tar.gz  -T -
+```
 
 ### Fold - Find AA/Nucleotide at position
 e.g. What amino acid is at position 16 of a transcript
