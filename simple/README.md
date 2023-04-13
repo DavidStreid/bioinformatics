@@ -1,12 +1,13 @@
 # Simple
 Simple things for analyzing common bioinformatic file formats, i.e. SAM/BAM, FASTQ, VCF, BED 
 
-* [SAM/BAM](#sambam)
+* [SAM/BAM/CRAM](#sambam)
   * [sub-sample BAM](#sub-sample-bam)
   * [Filtering SAM Flags](#filtering-sam-flags--f-f)
   * [Count Reads](#total-count-of-reads-in-paried-end-bam---paired-vs-unpaired)
   * [SAM-to-BAM](#sam-to-analysis-ready-bam)
   * [Extracting Reads](#extracting-r1r2-fastqs-from-bams)
+  * [BAM-to-CRAM](#bam-to-cram)
 * [FASTQ](#fastq)
   * [Extracting Components](#extracting-specific-components)
 * [VCF](#vcf)
@@ -146,6 +147,12 @@ seqkit stats ${fq2}
     * INPUT (seqkit) = num_seqs (R1)
     * OUTPUT (samtools) = mapped
   *  [REF](https://github.com/arq5x/bedtools2/issues/797)
+
+### BAM-to-CRAM
+```
+$ samtools view -@ 8 -T ${FA_REF} -b ${cram} -o ${bam}
+```
+* [REF](https://davetang.org/muse/2014/09/26/bam-to-cram/)
 
 ## FASTQ
 ### Extracting Specific Components
