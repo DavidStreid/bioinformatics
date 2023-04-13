@@ -148,11 +148,12 @@ seqkit stats ${fq2}
     * OUTPUT (samtools) = mapped
   *  [REF](https://github.com/arq5x/bedtools2/issues/797)
 
-### BAM-to-CRAM ([REF](https://davetang.org/muse/2014/09/26/bam-to-cram/))
+### BAM-to-CRAM 
 ```
 $ samtools view -@ 8 -T ${FA_REF} -b ${cram} -o ${bam}
 ```
-* **Don't use `sambamba`** - while `sambamba` usually beats `samtools` in speed on shared functionality, `sambamba` support for CRAMs was removed after v0.8 due to [processing issues](https://github.com/biod/sambamba/issues/280). Prior to this version, the `sambamba` speedup was minimal or nonexistant for CRAMs because it wraps the C-language `htslib` library used by `samtools` and doesn't utilize the D-language `sambamba` was built on, which gives it its parallel-processing speed
+* [REF](https://davetang.org/muse/2014/09/26/bam-to-cram/)
+* **[WARNING] Don't use `sambamba`** - while `sambamba` usually beats `samtools` in speed on shared functionality, `sambamba` support for CRAMs was removed after v0.8 due to [processing issues](https://github.com/biod/sambamba/issues/280). Prior to this version, the `sambamba` speedup was minimal or nonexistant for CRAMs because it wraps the C-language `htslib` library used by `samtools` and doesn't utilize the D-language `sambamba` was built on, which gives it its parallel-processing speed
 
 ## FASTQ
 ### Extracting Specific Components
