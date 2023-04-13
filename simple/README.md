@@ -25,7 +25,7 @@ Simple things for analyzing common bioinformatic file formats, i.e. SAM/BAM, FAS
 ### [Sub-sample BAM](https://www.biostars.org/p/76791/#76791)
 ```
 # Extract 1% of reads from BAM
-$ samtools view -s 0.01 -b -h chrX.bam > chrX_tiny.bam
+$ samtools view -s 0.01 -b -h chrX.bam -o chrX_tiny.bam
 ```
 
 ### Filtering SAM Flags (`-F`/`-f`)
