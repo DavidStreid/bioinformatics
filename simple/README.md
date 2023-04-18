@@ -8,6 +8,7 @@ Simple things for analyzing common bioinformatic file formats, i.e. SAM/BAM, FAS
   * [SAM-to-BAM](#sam-to-analysis-ready-bam)
   * [Extracting Reads](#extracting-r1r2-fastqs-from-bams)
   * [BAM-to-CRAM](#bam-to-cram)
+  * [CRAM-to-BAM](#cram-to-bam)
 * [FASTQ](#fastq)
   * [Extracting Components](#extracting-specific-components)
 * [VCF](#vcf)
@@ -150,10 +151,17 @@ seqkit stats ${fq2}
 
 ### BAM-to-CRAM 
 ```
-$ samtools view -@ 8 -T ${FA_REF} -b ${cram} -o ${bam}
+$ samtools view -@ 8 -T ${FA_REF} -C -o ${cram} ${bam}
 ```
 * [REF](https://davetang.org/muse/2014/09/26/bam-to-cram/)
-* **[WARNING] Don't use `sambamba`** - while `sambamba` usually beats `samtools` in speed on shared functionality, `sambamba` support for CRAMs was removed after v0.8 due to [processing issues](https://github.com/biod/sambamba/issues/280). Prior to this version, the `sambamba` speedup was minimal or nonexistant for CRAMs because it wraps the C-language `htslib` library used by `samtools` and doesn't utilize the D-language `sambamba` was built on, which gives it its parallel-processing speed
+* **[WARNING] Don't use `sambamba`** - This will work, but while `sambamba` usually beats `samtools` in speed on shared functionality, `sambamba` speedup is minimal or nonexistant for CRAMs.
+  * This is because `sambamba` wraps the C-language `htslib` library used by `samtools` and doesn't utilize the D-language `sambamba` was built on, which gives it its parallel-processing speed
+
+### CRAM-to-BAM
+```
+$ samtools view -@ 8 -T ${FA_REF} -b ${cram} -o ${bam}
+```
+* **[WARNING] Don't use `sambamba`** - `sambamba` support for CRAMs was removed after v0.8 due to [processing issues](https://github.com/biod/sambamba/issues/280). If trying to convert CRAM-to-BAM w/ `sambamba` it might fail
 
 ## FASTQ
 ### Extracting Specific Components
