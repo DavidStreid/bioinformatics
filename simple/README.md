@@ -151,7 +151,11 @@ seqkit stats ${fq2}
 
 ### BAM-to-CRAM 
 ```
+# BAM -> CRAM
 $ samtools view -@ 8 -T ${FA_REF} -C -o ${cram} ${bam}
+
+# BAM (sorted) -> CRAM/CRAI
+$ samtools view -@ 8 -T ${FA_REF} -C ${bam} | tee ${cram} | samtools index -@ 8 -c - ${cram}.crai
 ```
 * [REF](https://davetang.org/muse/2014/09/26/bam-to-cram/)
 * **[WARNING] Don't use `sambamba`** - This will work, but while `sambamba` usually beats `samtools` in speed on shared functionality, `sambamba` speedup is minimal or nonexistant for CRAMs.
@@ -159,7 +163,11 @@ $ samtools view -@ 8 -T ${FA_REF} -C -o ${cram} ${bam}
 
 ### CRAM-to-BAM
 ```
+# CRAM -> BAM
 $ samtools view -@ 8 -T ${FA_REF} -b ${cram} -o ${bam}
+
+# CRAM (sorted) -> BAM/BAI
+$ samtools view -@ 8 -T ${FA_REF} -b ${cram} | tee ${bam} | samtools index  -@ 8 - ${bam}.bai
 ```
 * **[WARNING] Don't use `sambamba`** - `sambamba` support for CRAMs was removed after v0.8 due to [processing issues](https://github.com/biod/sambamba/issues/280). If trying to convert CRAM-to-BAM w/ `sambamba` it might fail
 
