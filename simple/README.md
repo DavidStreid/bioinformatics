@@ -158,7 +158,7 @@ $ samtools view -@ 8 -T ${FA_REF} -C -o ${cram} ${bam}
 $ samtools view -@ 8 -T ${FA_REF} -C ${bam} | tee ${cram} | samtools index -c - ${cram}.crai
 ```
 * [REF](https://davetang.org/muse/2014/09/26/bam-to-cram/)
-* NOTE - Don't specify threads for `samtools index`. It is less compute-intensive than view so best to not take resources from the `view` command. `samtools` 1.11+ defaults to number of cores available and earlier defaults to `@ 1`
+* NOTE - Don't specify threads for `samtools index`. It is less compute-intensive than view so best to not take resources from the `view` command. `samtools` 1.11+ defaults to number of cores available and earlier defaults to `-@ 1`
 * **[WARNING] Don't use `sambamba`** - This will work, but while `sambamba` usually beats `samtools` in speed on shared functionality, `sambamba` speedup is minimal or nonexistant for CRAMs.
   * This is because `sambamba` wraps the C-language `htslib` library used by `samtools` and doesn't utilize the D-language `sambamba` was built on, which gives it its parallel-processing speed
 
