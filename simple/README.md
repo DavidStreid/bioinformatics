@@ -155,9 +155,10 @@ seqkit stats ${fq2}
 $ samtools view -@ 8 -T ${FA_REF} -C -o ${cram} ${bam}
 
 # BAM (sorted) -> CRAM/CRAI
-$ samtools view -@ 8 -T ${FA_REF} -C ${bam} | tee ${cram} | samtools index -@ 8 -c - ${cram}.crai
+$ samtools view -@ 8 -T ${FA_REF} -C ${bam} | tee ${cram} | samtools index -c - ${cram}.crai
 ```
 * [REF](https://davetang.org/muse/2014/09/26/bam-to-cram/)
+* NOTE - `samtools index` is less time-intensive than view so I would recommend not specifying threads (those resources will be taken from the more compute-intensive `view` command
 * **[WARNING] Don't use `sambamba`** - This will work, but while `sambamba` usually beats `samtools` in speed on shared functionality, `sambamba` speedup is minimal or nonexistant for CRAMs.
   * This is because `sambamba` wraps the C-language `htslib` library used by `samtools` and doesn't utilize the D-language `sambamba` was built on, which gives it its parallel-processing speed
 
@@ -167,8 +168,9 @@ $ samtools view -@ 8 -T ${FA_REF} -C ${bam} | tee ${cram} | samtools index -@ 8 
 $ samtools view -@ 8 -T ${FA_REF} -b ${cram} -o ${bam}
 
 # CRAM (sorted) -> BAM/BAI
-$ samtools view -@ 8 -T ${FA_REF} -b ${cram} | tee ${bam} | samtools index  -@ 8 - ${bam}.bai
+$ samtools view -@ 8 -T ${FA_REF} -b ${cram} | tee ${bam} | samtools index - ${bam}.bai
 ```
+* NOTE - Use fewer threads `-@ #` for `samtools index`, or better yet, don't specify threads at all
 * **[WARNING] Don't use `sambamba`** - `sambamba` support for CRAMs was removed after v0.8 due to [processing issues](https://github.com/biod/sambamba/issues/280). If trying to convert CRAM-to-BAM w/ `sambamba` it might fail
 
 ## FASTQ
