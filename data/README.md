@@ -9,5 +9,8 @@ Reference for where to retrieve sample data
 $ ./get_fastqs.sh
 RETRIEVING FQs
 getting ERR031940_1.filt.fastq.gz
+  done.
+getting ERR031940_2.filt.fastq.gz
+  done.
 ```
 
