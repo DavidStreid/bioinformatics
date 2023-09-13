@@ -9,6 +9,7 @@ Simple things for analyzing common bioinformatic file formats, i.e. SAM/BAM, FAS
   * [Extracting Reads](#extracting-r1r2-fastqs-from-bams)
   * [BAM-to-CRAM](#bam-to-cram)
   * [CRAM-to-BAM](#cram-to-bam)
+  * [CRAM-to-FASTQ](#cram-to-fastq)
 * [FASTQ](#fastq)
   * [Extracting Components](#extracting-specific-components)
 * [VCF](#vcf)
@@ -172,6 +173,13 @@ $ samtools view -@ 8 -T ${FA_REF} -b ${cram} | tee ${bam} | samtools index - ${b
 ```
 * NOTE - Use fewer threads `-@ #` for `samtools index`, or better yet, don't specify threads at all
 * **[WARNING] Don't use `sambamba`** - `sambamba` support for CRAMs was removed after v0.8 due to [processing issues](https://github.com/biod/sambamba/issues/280). If trying to convert CRAM-to-BAM w/ `sambamba` it might fail
+
+### CRAM-to-FASTQ
+#### Single-End
+* Writes primary alignment reads to FASTQ (`-F 0X900`)
+```
+$ samtools fastq -F 0x900 -0 ${FQ} ${CRAM} --reference ${REF}
+```
 
 ## FASTQ
 ### Extracting Specific Components
