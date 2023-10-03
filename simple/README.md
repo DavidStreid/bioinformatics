@@ -2,6 +2,7 @@
 Simple things for analyzing common bioinformatic file formats, i.e. SAM/BAM, FASTQ, VCF, BED 
 
 * [SAM/BAM/CRAM](#sambam)
+  * [tee index](#tee-index)
   * [sub-sample BAM](#sub-sample-bam)
   * [Filtering SAM Flags](#filtering-sam-flags--f-f)
   * [Count Reads](#total-count-of-reads-in-paried-end-bam---paired-vs-unpaired)
@@ -24,6 +25,13 @@ Simple things for analyzing common bioinformatic file formats, i.e. SAM/BAM, FAS
 * [References](#references)
 
 ## SAM/BAM
+### tee index
+`tee` is a helpful command that will pipe input to standard out AND file. This is helpful to write a processed BAM to file and index simultaneously.
+```
+$ sambamba view -s 0.01 -f bam -h --subsampling-seed 123 ${INPUT} | \
+  tee ${OUTPUT} | \
+  samtools index - ${OUTPUT}.bai
+```
 
 ### [Sub-sample BAM](https://www.biostars.org/p/76791/#76791)
 ```
