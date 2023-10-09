@@ -14,6 +14,7 @@ Simple things for analyzing common bioinformatic file formats, i.e. SAM/BAM, FAS
 * [FASTQ](#fastq)
   * [Extracting Components](#extracting-specific-components)
 * [VCF](#vcf)
+  * [Find overlapping variants within a window](#find-overlapping-variants)
   * [Sort/Compress/Index](#sort-compress--index-vcf)
 * [BED](#bed)
   * [Get Number of Bases](#get-total-number-of-bases-in-bed-file)
@@ -207,6 +208,22 @@ awk 'NR % 4 == ${IDX}' ${FQ}
 ```
 
 ## VCF
+### Find overlapping variants
+```
+f1=${FN}
+f2=${IN}
+OVERLAP=5
+echo "OVERLAP=${OVERLAP}"
+grep -v "^#" ${f1} | awk '{print $1"\t"$2"\t"$2}' > f1.bed
+grep -v "^#" ${f2} | awk '{print $1"\t"$2"\t"$2}' > f2.bed
+
+OUT="overlap.bed"
+bedtools window -a f1.bed -b f2.bed -w ${OVERLAP} > ${OUT}
+
+bedtools intersect -a ${f1} -b ${OUT} > $(basename ${f1} | sed "s/.vcf/_overlap${OVERLAP}.vcf/g")
+bedtools intersect -a ${f2} -b ${OUT} > $(basename ${f2} | sed "s/.vcf/_overlap${OVERLAP}.vcf/g")
+```
+
 ### Sort, compress, & index VCF
 1. Sort (Note - sorts according to the Sequence Dictionary in the VCF's headers)
 ```
