@@ -23,6 +23,7 @@ Simple things for analyzing common bioinformatic file formats, i.e. SAM/BAM, FAS
   * [Get Seq Index](#fold---find-aanucleotide-at-position)
   * [Concatenate .gz](#gzipd-files-can-be-concatenated)
   * [Estimate Alignment Time](#estimate-alignment-time---bwa-mem-will-output-the-number-of-processed-reads)
+  * [Save time Output to File](#time-command-and-write-to-file)
 * [References](#references)
 
 ## SAM/BAM
@@ -309,6 +310,19 @@ $ seqkit stats ${FQ}
 ```
 
 3. Time Estimate, **E** - `E = R / T`
+
+### Time command AND write to file
+Wrap the `time <CMD>` in `()`
+```
+$ (time ls -l) > output.txt 2>&1
+$ echo output.txt
+total 20
+-rw-r--r--. 1 me grp 284 Oct 11 18:59 output.txt
+
+real    0m0.005s
+user    0m0.001s
+sys     0m0.004s
+```
 
 
 ## References
