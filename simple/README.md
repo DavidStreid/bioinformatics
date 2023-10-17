@@ -214,7 +214,7 @@ awk 'NR % 4 == ${IDX}' ${FQ}
 If the region is known, use `bcftools`- 
 * `mpileup` to generate a [pileup summary](https://davetang.org/muse/2015/08/26/samtools-mpileup/)
 * `call` to call the variant
-* 
+
 e.g. Looking for [RFC1 STR](https://github.com/Illumina/ExpansionHunter/blob/master/variant_catalog/grch38/variant_catalog.json#L527)
 ```
 ref=hg38.fa
