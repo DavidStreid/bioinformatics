@@ -14,6 +14,7 @@ Simple things for analyzing common bioinformatic file formats, i.e. SAM/BAM, FAS
 * [FASTQ](#fastq)
   * [Extracting Components](#extracting-specific-components)
 * [VCF](#vcf)
+  * [Variant Call Region](#variant-call-region)
   * [Find overlapping variants within a window](#find-overlapping-variants)
   * [Sort/Compress/Index](#sort-compress--index-vcf)
 * [BED](#bed)
@@ -209,6 +210,21 @@ awk 'NR % 4 == ${IDX}' ${FQ}
 ```
 
 ## VCF
+### Variant Call Region
+If the region is known, use `bcftools`- 
+* `mpileup` to generate a [pileup summary](https://davetang.org/muse/2015/08/26/samtools-mpileup/)
+* `call` to call the variant
+* 
+e.g. Looking for [RFC1 STR](https://github.com/Illumina/ExpansionHunter/blob/master/variant_catalog/grch38/variant_catalog.json#L527)
+```
+ref=hg38.fa
+chr=chr4
+start=39348424
+end=39348479
+aln_file=sample.bam
+bcftools mpileup -f {ref} -r {chr}:{start}:{end} {aln_file} | bcftools call -mv -Ov -o sample.vcf 
+```
+
 ### Find overlapping variants
 ```
 f1=${FN}
