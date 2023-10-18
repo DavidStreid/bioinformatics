@@ -3,7 +3,8 @@ Simple things for analyzing common bioinformatic file formats, i.e. SAM/BAM, FAS
 
 * [SAM/BAM/CRAM](#sambam)
   * [tee index](#tee-index)
-  * [sub-sample BAM](#sub-sample-bam)
+  * [sub-sample Alignment (random)](#sub-sample-alignment-randomly)
+  * [sub-sample Alignment (by region)](#sub-sample-alignment-by-region)
   * [Filtering SAM Flags](#filtering-sam-flags--f-f)
   * [Count Reads](#total-count-of-reads-in-paried-end-bam---paired-vs-unpaired)
   * [SAM-to-BAM](#sam-to-analysis-ready-bam)
@@ -36,7 +37,7 @@ $ sambamba view -s 0.01 -f bam -h --subsampling-seed 123 ${INPUT} | \
   samtools index - ${OUTPUT}.bai
 ```
 
-### [Sub-sample BAM](https://www.biostars.org/p/76791/#76791)
+### [Sub-sample Alignment randomly](https://www.biostars.org/p/76791/#76791)
 ```
 # Extract 1% of reads from BAM
 $ SS=0.01
@@ -47,6 +48,20 @@ $ OUTPUT=$(basename ${INPUT} | sed "s/.bam/_ss${SS}.bam/g")	# e.g. "sample_ss0.0
 $ samtools view -s 0.01 -b -h ${INPUT} -o ${OUTPUT}
 # V2: SAMBABMBA (Same thing, but faster)
 $ sambamba view -s 0.01 -f bam -h --subsampling-seed 123 -o ${OUTPUT} ${INPUT}"
+```
+
+### Sub-Sample Alignment by region
+```
+CRAM=sample.cram        # CRAM to subsample
+BED=region.bed          # Region to subsample CRAM
+
+base=$(basename ${CRAM} | cut -d'.' -f1)
+ss_base=${base}__subSampled
+sort_base=${ss_base}__sorted
+
+bedtools intersect -a ${CRAM} -b ${BED} -sorted -split > ${ss_base}.cram
+samtools sort -o ${sort_base}.cram ${ss_base}.cram
+samtools index ${sort_base}.cram
 ```
 
 ### Filtering SAM Flags (`-F`/`-f`)
