@@ -54,12 +54,13 @@ $ sambamba view -s 0.01 -f bam -h --subsampling-seed 123 -o ${OUTPUT} ${INPUT}"
 ```
 CRAM=sample.cram        # CRAM to subsample
 BED=region.bed          # Region to subsample CRAM
+REF=hg38.fa		# FASTA (if converting CRAM - not needed for BAMs)
 
 base=$(basename ${CRAM} | cut -d'.' -f1)
 ss_base=${base}__subSampled
 sort_base=${ss_base}__sorted
 
-bedtools intersect -a ${CRAM} -b ${BED} -sorted -split > ${ss_base}.cram
+bedtools intersect -a ${CRAM} --cram-ref ${REF} -b ${BED} -sorted -split > ${ss_base}.cram
 samtools sort -o ${sort_base}.cram ${ss_base}.cram
 samtools index ${sort_base}.cram
 ```
