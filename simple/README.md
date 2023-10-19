@@ -58,11 +58,8 @@ REF=hg38.fa		# FASTA (if converting CRAM - not needed for BAMs)
 
 base=$(basename ${CRAM} | cut -d'.' -f1)
 ss_base=${base}__subSampled
-sort_base=${ss_base}__sorted
 
-bedtools intersect -a ${CRAM} --cram-ref ${REF} -b ${BED} -sorted -split > ${ss_base}.cram
-samtools sort -o ${sort_base}.cram ${ss_base}.cram
-samtools index ${sort_base}.cram
+samtools view -b -L ${BED} -@ 8 -T ${REF} ${CRAM} | tee ${ss_base}.bam | samtools index - ${ss_base}.bam.bai
 ```
 
 ### Filtering SAM Flags (`-F`/`-f`)
