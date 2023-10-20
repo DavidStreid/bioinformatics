@@ -59,7 +59,11 @@ REF=hg38.fa		# FASTA (if converting CRAM - not needed for BAMs)
 base=$(basename ${CRAM} | cut -d'.' -f1)
 ss_base=${base}__subSampled
 
-samtools view -b -L ${BED} -@ 8 -T ${REF} ${CRAM} | tee ${ss_base}.bam | samtools index - ${ss_base}.bam.bai
+# -b: to convert to BAM
+samtools view -L ${BED} -@ 8 -T ${REF} ${CRAM} | tee ${ss_base}.cram | samtools index - ${ss_base}.cram.crai
+
+# If input is BAM - much faster
+# sambamba view -L ${BED} -t 8 ${BAM} | tee ${ss_base}.bam | samtools index - ${ss_base}.bam.bai 
 ```
 
 ### Filtering SAM Flags (`-F`/`-f`)
