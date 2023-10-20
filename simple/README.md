@@ -6,6 +6,8 @@ Simple things for analyzing common bioinformatic file formats, i.e. SAM/BAM, FAS
   * [sub-sample Alignment (random)](#sub-sample-alignment-randomly)
   * [sub-sample Alignment (by region)](#sub-sample-alignment-by-region)
   * [Filtering SAM Flags](#filtering-sam-flags--f-f)
+    * [Primary Alignments Only](#only-primary-alignments)
+    * [Improperly-Aligned Reads](#paired-reads-improperly-aligned)
   * [Count Reads](#total-count-of-reads-in-paried-end-bam---paired-vs-unpaired)
   * [SAM-to-BAM](#sam-to-analysis-ready-bam)
   * [Extracting Reads](#extracting-r1r2-fastqs-from-bams)
@@ -88,7 +90,17 @@ samtools view -L ${BED} -@ 8 -T ${REF} ${CRAM} | tee ${ss_base}.cram | samtools 
 
 [REF](http://www.htslib.org/doc/1.11/samtools-flags.html)
 
-#### Paired reads mapped to different scaffolds (`-F 14`)
+#### Primary Alignments Only
+```
+# -F: Exclude FLAG, i.e. output no reads with these FLAGs
+#   not primary alignment (0x100)
+#   supplementary alignment (0x800)
+samtools view -b -F 2304 ${BAM}
+
+# sambamba view -F "(not secondary_alignment) and (not supplementary)" -f bam -h -t 8 ${BAM}
+```
+
+#### Paired reads improperly aligned (`-F 14`)
 * Filter out
   * 0x2 each segment properly aligned according to the aligner
   * 0x4 segment unmapped
