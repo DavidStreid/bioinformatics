@@ -63,7 +63,7 @@ ss_base=${base}__subSampled
 samtools view -L ${BED} -@ 8 -T ${REF} ${CRAM} | tee ${ss_base}.cram | samtools index - ${ss_base}.cram.crai
 
 # If input is BAM - much faster
-# sambamba view -L ${BED} -t 8 ${BAM} | tee ${ss_base}.bam | samtools index - ${ss_base}.bam.bai 
+# sambamba view -f bam -h -L ${BED} -t 8 ${BAM} | tee ${ss_base}.bam | samtools index - ${ss_base}.bam.bai 
 ```
 
 ### Filtering SAM Flags (`-F`/`-f`)
