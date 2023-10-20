@@ -12,7 +12,7 @@ Simple things for analyzing common bioinformatic file formats, i.e. SAM/BAM, FAS
   * [BAM-to-CRAM](#bam-to-cram)
   * [CRAM-to-BAM](#cram-to-bam)
   * [CRAM-to-FASTQ](#cram-to-fastq)
-* [FASTQ](#fastq)
+* [FASTA/FASTQ](#fasta-and-fastq)
   * [Extracting Components](#extracting-specific-components)
 * [VCF](#vcf)
   * [Variant Call Region](#variant-call-region)
@@ -211,10 +211,26 @@ $ samtools view -@ 8 -T ${FA_REF} -b ${cram} | tee ${bam} | samtools index - ${b
 #### Single-End
 * Writes primary alignment reads to FASTQ (`-F 0X900`)
 ```
-$ samtools fastq -F 0x900 -0 ${FQ} ${CRAM} --reference ${REF}
+# -o: All reads write to file
+$ samtools fastq -F 0x900 -o ${FQ} ${CRAM} --reference ${REF}
+```
+#### Paired-End
+```
+# -1: reads marked R1 write to file
+# -2: reads marked R2 write to file
+$ samtools fastq -F 0x900 -1 r1.fq -2 r2.fq ${BAM}
 ```
 
-## FASTQ
+## FASTA and FASTQ
+### Retrieving fasta region
+[bedtools getfasta](https://bedtools.readthedocs.io/en/latest/content/tools/getfasta.html)
+```
+BED=region.bed
+REF=hg38.fa
+
+$ bedtools getfasta -fi ${REF} -bed ${BED}
+```
+
 ### Extracting Specific Components
 * Assuming standard [FQ format](https://en.wikipedia.org/wiki/FASTQ_format#Format) with each read & meta-information contained in 4-line components
 ```
