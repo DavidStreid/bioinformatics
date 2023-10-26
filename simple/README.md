@@ -15,6 +15,7 @@ Simple things for analyzing common bioinformatic file formats, i.e. SAM/BAM, FAS
   * [CRAM-to-BAM](#cram-to-bam)
   * [CRAM/BAM-to-FASTQ](#cram-or-bam-to-fastq)
 * [FASTA/FASTQ](#fasta-and-fastq)
+  * [Retrieving FASTA region](#retrieving-fasta-region)
   * [Extracting Components](#extracting-specific-components)
 * [VCF](#vcf)
   * [Variant Call Region](#variant-call-region)
