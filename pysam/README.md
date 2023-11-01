@@ -15,7 +15,7 @@ reads_in_region = aln.fetch(chr, start, end)
 
 ## Useful Functions
 ### [AlignmentFile](https://pysam.readthedocs.io/en/latest/api.html#pysam.AlignmentFile)
-#### [fetch] (https://pysam.readthedocs.io/en/latest/api.html#pysam.AlignmentFile.fetch) - Retreive reads in alignment
+#### [fetch](https://pysam.readthedocs.io/en/latest/api.html#pysam.AlignmentFile.fetch) - Retreive reads in alignment
 * Returns iterator over reads
 ```
 reads_in_region = aln.fetch(chr, start, end) 
