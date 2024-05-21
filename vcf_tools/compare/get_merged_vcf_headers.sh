@@ -1,7 +1,7 @@
 #!/bin/bash
 
-f1=s1.vcf
-f2=s2.vcf
+f1=$1
+f2=$2
 
 if [[ ! -f ${f1} || ! -f ${f2} ]]; then
   echo "Need f1 & f2"
