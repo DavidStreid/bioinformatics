@@ -20,6 +20,11 @@ SAMPLES=['sample1']
 VCF file diffs=84
 ```
 
+### TODO 
+* Smarter handling of genotypes
+  * \>1 sample column
+  * Sample columns in different order
+
 ## Note
 A valid VCF will specify the type & columns, i.e. add something like this
 ```
