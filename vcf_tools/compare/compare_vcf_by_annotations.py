@@ -16,6 +16,44 @@ def run():
   process(f1, f2)
 
 
+class Variant:
+  def __init__(self):
+    self.chrom = None
+    self.pos = None
+    self.id = None
+    self.ref = None
+    self.alt = None
+    self.qual = None
+    self.filter = None
+    self.info = None
+    self.format = None
+    self.samples = None
+
+
+  def process(self, raw_line):
+    self.valid = True
+    if raw_line in ['', '\n']:
+      self.valid = False
+      return
+    vals = parse(raw_line)
+    if len(vals) < 10:
+      self.valid = False
+      return
+    self.chrom = vals[0]
+    self.pos = int(vals[1])
+    self.id = vals[2]
+    self.ref = vals[3]
+    self.alt = vals[4]
+    self.qual = vals[5]
+    self.filter = vals[6]
+    self.info = vals[7]
+    self.format = vals[8].split(':')
+    self.samples = vals[9:]
+  
+  def to_string(self):
+    return f'{self.chrom}#{self.pos}#{self.ref}#{self.alt}'
+
+
 def process(fname_1, fname_2):
   print(f'vcf_1={fname_1}')
   print(f'vcf_1={fname_2}')
@@ -51,7 +89,7 @@ def process(fname_1, fname_2):
         update_v1_list = [v for v in v1_list if v not in [p[0] for p in same]]
         update_v2_list = [v for v in v2_list if v not in [p[1] for p in same]]
         for _v1, _v2 in zip(update_v1_list, update_v2_list):
-          diffs.extend(compare(_v1, _v2))
+          diffs.extend(compare_variants(_v1, _v2))
 
         v1_ct = len(update_v1_list)
         v2_ct = len(update_v2_list)
@@ -95,10 +133,8 @@ def process_diffs(diff_list, out_fname):
     v1 = diff[2]
     v2 = diff[3]
     d_type_set.add(d_type)
-    d_subtype_set.add(diff[1])
-    if d_type not in diff_map[variant]:
-      diff_map[variant][d_type] = {}
-    diff_map[variant][d_type][d_subtype] = [v1, v2]
+    d_subtype_set.add(d_subtype)
+    diff_map[variant][d_subtype] = [v1, v2]
   print(f'TOTAL_VARIANTS={len(diff_map)}')
   print(f'TOTAL_DIFFS={len(diff_list)}')
   print(f'\tTYPES={len(d_type_set)}\t[{", ".join(list(d_type_set)[:5])}...]')
@@ -111,16 +147,15 @@ def process_diffs(diff_list, out_fname):
     out_f.write('\t'.join(headers) + '\n')
     for variant, v_map in diff_map.items():
       line_1, line_2 = [variant], [variant]
-      for d_type, d_type_map in v_map.items():
-        for st in output_order:
-          line_1.append(d_type_map.get(st, ['-', '-'])[0])
-          line_2.append(d_type_map.get(st, ['-', '-'])[1])
+      for st in output_order:          
+        line_1.append(v_map.get(st, ['-', '-'])[0])
+        line_2.append(v_map.get(st, ['-', '-'])[1])
       out_f.write('\t'.join(line_1) + '\n')
       out_f.write('\t'.join(line_2) + '\n')
 
 
 
-def compare(v1, v2):
+def compare_variants(v1: Variant, v2: Variant):
   diffs = []
   if v1.chrom != v2.chrom:
     diffs.append(['chr', v1.chrom, v2.chrom])
@@ -139,9 +174,7 @@ def compare(v1, v2):
 
   i1, i2 = get_info_dict(v1.info), get_info_dict(v2.info)
   diffs.extend(compare_dicts(i1, i2, 'info', INFO_ORDER_NOT_IMPORTANT))
-
-  diffs.extend(compare_sets(v1.format, v2.format, 'format'))
-
+  diffs.extend(compare_lists(v1.format, v2.format, 'format'))
   v1_smp_dicts = [get_fmt_smp_dict(v1.format, s) for s in v1.samples]
   v2_smp_dicts = [get_fmt_smp_dict(v2.format, s) for s in v2.samples]
 
@@ -174,18 +207,20 @@ def compare_dicts(i1, i2, label, order_not_important):
   return diffs
 
 
-def compare_sets(l1, l2, label):
+def compare_lists(l1, l2, label):
+  if type(l1) != list or type(l2) != list:
+    raise ValueError(f'Invalid types\t{l1} ({type(l1)})\t{l2} ({type(l2)})')
   diffs = []
   s1, s2 = set(l1), set(l2)
   for k in s1.difference(s2):
-    diffs.append([f'{label}:{k}', k, None])
+    diffs.append([f'{label}:{k}', 'PRESENT', 'MISSING'])
   for k in s2.difference(s1):
-    diffs.append([f'{label}:{k}', None, k])
+    diffs.append([f'{label}:{k}', 'MISSING', 'PRESENT'])
   return diffs
 
 
 def same_variant(v1, v2):
-  return len(compare(v1, v2)) == 0
+  return len(compare_variants(v1, v2)) == 0
 
 
 def parse(raw_line):
@@ -231,7 +266,7 @@ def get_info_dict(info):
 
 
 def get_fmt_smp_dict(fmt, smp):
-  return dict(zip(fmt.split(':'), smp.split(':')))
+  return dict(zip(fmt, smp.split(':')))
 
 
 def get_past_headers(f):
@@ -241,44 +276,6 @@ def get_past_headers(f):
   samples = parse(line)[9:]
   print(f'SAMPLES={samples}')
   return f
-
-
-class Variant:
-  def __init__(self):
-    self.chrom = None
-    self.pos = None
-    self.id = None
-    self.ref = None
-    self.alt = None
-    self.qual = None
-    self.filter = None
-    self.info = None
-    self.format = None
-    self.samples = None
-
-
-  def process(self, raw_line):
-    self.valid = True
-    if raw_line in ['', '\n']:
-      self.valid = False
-      return
-    vals = parse(raw_line)
-    if len(vals) < 10:
-      self.valid = False
-      return
-    self.chrom = vals[0]
-    self.pos = int(vals[1])
-    self.id = vals[2]
-    self.ref = vals[3]
-    self.alt = vals[4]
-    self.qual = vals[5]
-    self.filter = vals[6]
-    self.info = vals[7]
-    self.format = vals[8]
-    self.samples = vals[9:]
-  
-  def to_string(self):
-    return f'{self.chrom}#{self.pos}#{self.ref}#{self.alt}'
 
 
 if __name__ == '__main__':
