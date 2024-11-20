@@ -17,29 +17,24 @@ if [[ ! -f ${vcf1} || ! -f ${vcf2} ]]; then
   exit 1
 fi
 
-
-f_same_1="shared_vcf1.tsv"
-f_same_2="shared_vcf2.tsv"
-f_diff_1="vcf1_only.tsv"
-f_diff_2="vcf2_only.tsv"
-cmds=("bedtools intersect -u -a ${vcf1} -b ${vcf2} > ${f_same_1}"
-"bedtools intersect -u -a ${vcf1} -b ${vcf2} > ${f_same_2}"
-"bedtools subtract -a ${vcf1} -b ${vcf2} > ${f_diff_1}"
-"bedtools subtract -a ${vcf2} -b ${vcf1} > ${f_diff_2}")
+shared_file="shared.tsv"
+vcf1_only="vcf1_only.tsv"
+vcf2_only="vcf2_only.tsv"
+cmds=("bedtools intersect -f 1 -r -a ${vcf1} -b ${vcf2} > ${shared_file}"   # same exact position
+"bedtools subtract -f 1 -a ${vcf1} -b ${vcf2} > ${vcf1_only}"               # VCF1 variants with NO overlap
+"bedtools subtract -f 1 -a ${vcf2} -b ${vcf1} > ${vcf2_only}")              # VCF2 variants with NO overlap
 for cmd in "${cmds[@]}"; do
   echo "${cmd}"
   eval "${cmd}"
 done
 
 
-same_in_1=$(cat ${f_same_1} | wc -l)
-same_in_2=$(cat ${f_same_2} | wc -l)
-new_diffs=$(cat ${f_diff_1} | wc -l)
-old_diffs=$(cat ${f_diff_2} | wc -l)
+shared_ct=$(cat ${shared_file} | wc -l)
+old_diffs=$(cat ${vcf1_only} | wc -l)
+new_diffs=$(cat ${vcf2_only} | wc -l)
  
 
-echo "vcf1_same=${same_in_1}"
-echo "vcf2_same=${same_in_2}"
+echo "shared=${shared_ct}"
 echo "vcf1_only=${new_diffs}"
 echo "vcf2_only=${old_diffs}"
 jaccard=$(bedtools jaccard -b $vcf1 -a $vcf2 | cut -f3)
