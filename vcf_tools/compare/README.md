@@ -31,6 +31,8 @@ VCF file diffs=84
 * Start = `POS`
 * End = `POS + length(REF) - 1`
 
+i.e. **insertions need to be at the position exactly** beacuse their interval will be 1 regardless of the insert size. Deletions on the other hand will have an interval the size of the deleted REF sequence
+
 e.g.
 ```
 $ cat *.vcf
