@@ -13,7 +13,7 @@ bcftools view -r chr1:10000-1000000 ${VCF}.gz -o subset_chr1_10000_1000000.vcf.g
 ### VCF -> BED
 
 ```
-grep -Ev "^#" sample.vcf  | awk '{print $1"\t"$2 - 1"\t"length($4) + $2}' # > sample.bed && bedtools merge sample.bed
+grep -Ev "^#" sample.vcf  | awk '{print $1"\t"$2 - 1"\t"length($4) + $2}' # > sample.bed && bedtools merge -i sample.bed
 ```
 
 ![0/1-based](http://s16.postimg.cc/9ne4syrp1/insertion_or_deletion.jpg)
