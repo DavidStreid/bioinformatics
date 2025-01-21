@@ -23,19 +23,19 @@ grep -Ev "^#" sample.vcf  | awk '{print $1"\t"$2 - 1"\t"length($4) + $2}' # > sa
 * `bedtools intersect` will take the length of the REF into account. As in if the BED region position does not intersect `POS`, but does intersect `POS + len(ref)`, then the entry will be output in the intersection. See below -
 
 ```
-$ tail -1 test.bed test.vcf
+$ tail -1 test.bed test.vcf    # INPUT - VCF: TAC, BED: C -> 1/3
 ==> test.bed <==
 chr1	2	3
 
 ==> test.vcf <==
 chr1	1	v1	TAC	T	.	PASS	.	.	.
-$ bedtools intersect -a test.vcf -b test.bed
+$
+$ 
+$ bedtools intersect -a test.vcf -b test.bed    # Any intersect yields entry
 chr1	1	v1	TAC	T	.	PASS	.	.	.
-$ bedtools intersect -a test.vcf -b test.bed
+$ bedtools intersect -f 0.33 -a test.vcf -b test.bed    # 0.33 < 1/3 - variant
 chr1	1	v1	TAC	T	.	PASS	.	.	.
-$ bedtools intersect -f 0.33 -a test.vcf -b test.bed
-chr1	1	v1	TAC	T	.	PASS	.	.	.
-$ bedtools intersect -f 0.34 -a test.vcf -b test.bed
+$ bedtools intersect -f 0.34 -a test.vcf -b test.bed    # 0.34 > 1/3 - no output
 $ 
 ```
 
