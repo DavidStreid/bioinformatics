@@ -1,5 +1,5 @@
 # Bedtools 
-notes for using bedtools with VCFs
+Notes for using bedtools with VCFs
 
 ## INPUT
 ```
@@ -30,6 +30,7 @@ To make this the most strict, use `-A`, which will not output ANY feature that h
 ```
 $ bedtools subtract -A -a snv.vcf -b del.vcf
 $ bedtools subtract -A -b snv.vcf -a del.vcf
+$ 
 ```
 
 ## INTERSECT
