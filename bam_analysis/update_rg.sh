@@ -15,6 +15,4 @@ fi
 FMT=$(echo ${SFX} | awk '{print toupper($0)}')
 OUT="$(basename ${SAM} | rev | cut -f2- -d'.' | rev).${SFX}"
 printf "FMT=${FMT}\tOUT=${OUT}\n"
-
-export PATH="/mnt/storage/primary/databases/alma-engine-dbs/samtools-1.18/bin/:${PATH}"
 samtools addreplacerg -w -r "ID:${ID}\tLB:Seq\tPL:Illumina\tSM:${ID}" ${SAM} -O ${FMT} -o ${OUT}
