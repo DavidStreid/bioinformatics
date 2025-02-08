@@ -11,27 +11,33 @@ Collection of scripts to analyze a bam
 Output to BAM
 
 ```
+OUT=$1
 ./cmd.sh | \
   samtools view -b | \
-  tee out.bam | \
-  samtools index - out.bam.bai
+  tee ${OUT} | \
+  samtools index - ${OUT}.bai
 ```
 
 Output to CRAM
 
 ```
+OUT=$1
+REF=$2
 ./cmd.sh | \
   samtools view -C -T $REF - | \
-  tee out.cram | \
-  samtools index -c - out.cram.crai
+  tee ${OUT} | \
+  samtools index -c - ${OUT}.crai
 ```
 
 ### Modify readgroups
+* `-w` is to overwrite the readgroup if it already exists
+* can also add `PL` for the sequencing platform (e.g. `\tPL:ILLUMINA`)
+
 ```
 ID=$1
 SAM=$2
 samtools addreplacerg \
-  -r "ID:${ID}" ${SAM} # -O CRAM # If CRAM, must already be in CRAM format
+  -w -r "ID:${ID}\tLB:Seq\tSM:${ID}" ${SAM} # -O CRAM # If CRAM, must already be in CRAM format
 ```
 
 ## SCRIPTS
