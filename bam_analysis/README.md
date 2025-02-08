@@ -3,15 +3,16 @@ Collection of scripts to analyze a bam
 
 ## TASKS
 
-### Piping command output to specific SAM format
+### `samtools` - piping STDOUT to compressed output
 
-* If outputting to CRAM, include the `-C -T $REF` arguments to `samtools view`
-
+* If outputting to CRAM, include the `-C -T $REF` (e.g. `-C -T hg38.fa`)
+* Add `-@ $T` to add more threads (e.g. `@ 16`)
+ 
 Output to BAM
 
 ```
 ./cmd.sh | \
-  samtools view -b  | \
+  samtools view -b | \
   tee out.bam | \
   samtools index - out.bam.bai
 ```
@@ -29,7 +30,7 @@ Output to CRAM
 ```
 ID=$1
 SAM=$2
-samtools addreplacerg -@ 16 \
+samtools addreplacerg \
   -r "ID:${ID}" ${SAM} # -O CRAM # If CRAM, must already be in CRAM format
 ```
 
