@@ -40,6 +40,8 @@ samtools addreplacerg \
   -w -r "ID:${ID}\tLB:Seq\tSM:${ID}" ${SAM} # -O CRAM # If CRAM, must already be in CRAM format
 ```
 
+* See `./update_rg.sh` - takes new ID and SAM file and writes to BAM (can write to CRAM, just needs manual edit of `SFX`)
+
 ## SCRIPTS
 
 ###  haplotag_count.sh
