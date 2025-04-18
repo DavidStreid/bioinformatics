@@ -9,7 +9,7 @@ for chrom in $(samtools idxstats ${B1} | grep -Ev "random|chrUn|\*" | cut -f1); 
   echo ${chrom}
   c1=${chrom}.${b1_base}.sam
   c2=${chrom}.${b2_base}.sam
-  samtools view -h ${B1} "${chrom}" | sort > ${chrom}.${b1_base}.sam
-  samtools view -h ${B2} "${chrom}" | sort > ${chrom}.${b2_base}.sam
-  diff ${c1} ${c2} > diff_${chromt}.txt
+  samtools view ${B1} "${chrom}" | sort > ${chrom}.${b1_base}.sam
+  samtools view ${B2} "${chrom}" | sort > ${chrom}.${b2_base}.sam
+  diff ${c1} ${c2} > diff_${chrom}.txt
 done

@@ -1,9 +1,13 @@
 # BAM comparison
 Compares the numerical fields of two input BAM files created from different aligners (e.g. compares one aligner's MAPQ score to another on the same input FASTQ files)
 
+## `bam_comparison_exact.sh`
+
+**USE THIS ONE** - python script will run forever and eventually run out of memory
+
 ## `bam_comparison_exact.py`
 Compares two BAM files that should be exactly the same - checks all fields and tags. Tags can be out-of-order
-* Some RAM restrictions - will load every difference-per-CHROM before releasing memory, e.g. 60GB human BAM -> 4-5GB RAM usage (more for the earlier chroms)
+* MAJOR RAM restrictions - will load every difference-per-CHROM before releasing memory, e.g. 60GB human BAM -> 200GB RAM usage (for the earlier chroms)
 * Outputs a `<CHROM>.columns_only.tsv` & `<CHROM>.values.tsv`, which will have either just the fields, or the fields plus different values, respectively
 
 ### RUN
