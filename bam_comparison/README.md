@@ -1,10 +1,43 @@
 # BAM comparison
 Compares the numerical fields of two input BAM files created from different aligners (e.g. compares one aligner's MAPQ score to another on the same input FASTQ files)
 
+## `bam_comparison_exact.py`
+Compares two BAM files that should be exactly the same - checks all fields and tags. Tags can be out-of-order
+* Some RAM restrictions - will load every difference-per-CHROM before releasing memory, e.g. 60GB human BAM -> 4-5GB RAM usage (more for the earlier chroms)
+* Outputs a `<CHROM>.columns_only.tsv` & `<CHROM>.values.tsv`, which will have either just the fields, or the fields plus different values, respectively
+
+### RUN
+```
+$ python bam_comparison_exact.py sample.1.bam sample.2.bam
+Processing chrM
+	chrM	0
+	chrM	250000
+	chrM	500000
+	chrM	750000
+	chrM	1000000
+	chrM	1250000
+READ_COMPARISON	CHROM=chrM	SHARED=637935	R1_ONLY=0	R2_ONLY=0
+Processing chr1
+	chr1	1500000
+    ...
+$ cut -f2,3 bam_comparison.chrM.columns_only.tsv  | grep -v "-" | sort | uniq -c
+     12 1	flag
+ 597917 1	query_qualities
+    249 1	tags__MD
+    243 1	tags__NM
+    206 2	flag,query_qualities
+   8981 2	query_qualities
+   8981 2	tags__MD
+   8903 2	tags__NM
+```
+
+
+## `bam_util_to_csv.py`
+
 Tools:
 * [BamUtil](https://genome.sph.umich.edu/wiki/BamUtil:_diff)
 
-## Steps
+### Steps
 0. **Install python environment**
 ```
 $ conda create --name bam_compare --file requirements.txt
