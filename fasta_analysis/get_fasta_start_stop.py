@@ -19,6 +19,7 @@ CDS/CDS Complement      166..195
 CDS/CDS Complement      166..378
 CDS/CDS Complement      166..447
 '''
+import sys
 
 MAX_TO_PRINT = 3
 stop_codons_rna = ['UAA', 'UAG', 'UGA']
@@ -27,12 +28,37 @@ stop_codons = set(stop_codons_rna + stop_codons_dna)
 
 
 def run():
-  seq = read_fa('refseq.fa')
+  seq = read_fa(sys.argv[1])
+
+  # TODO - Like this, then can check for premature STOP codons
+  # changes = [[3708, 'G', 'A']] # From 'c.3709G>A
+  changes = []
+  seq = apply_changes(seq)
+  
   print('FORWARD')
   read_seq(seq)
 
   print('\nREVERSE')
   read_seq(reverse_complement(seq))
+
+
+def apply_changes(seq, changes=[]):
+  if len(changes) == 0:
+    return seq
+  
+  # changes = [[3708, 'G', 'A']] # From 'c.3709G>A'
+  seq_list = list(seq)
+
+  print(f'Applying {len(changes)} mutations to seq')
+
+  for [pos, ref, alt] in changes:
+    if seq_list[pos] != ref:
+      raise ValueError(f'Not valid change\t{pos}\t{ref}\t{alt}')
+    seq_list[pos] = alt
+
+  new_seq = ''.join(seq_list)
+
+  return new_seq
 
 
 def read_fa(fname):
