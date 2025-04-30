@@ -1,4 +1,25 @@
 
+# `get_fasta_start_stop.py`
+
+```
+$ python get_fasta_start_stop.py
+Parsing >NM_006904.7...
+
+FORWARD
+START   11
+Found 27 stop codons, printing first 3
+CDS/CDS Complement      11..12397       # CORRECT ONE - see https://www.ncbi.nlm.nih.gov/nuccore/NM_006904.7
+CDS/CDS Complement      11..12439
+CDS/CDS Complement      11..12475
+
+REVERSE
+START   166
+Found 184 stop codons, printing first 3
+CDS/CDS Complement      166..195
+CDS/CDS Complement      166..378
+CDS/CDS Complement      166..447
+```
+
 # `get_seq_idx.py`
 Description: Returns the nucloetide at the position provided
 ```
