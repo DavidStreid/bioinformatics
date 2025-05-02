@@ -53,6 +53,11 @@ Done.
 ### Run `makeblastdb`
 * See [Building a BLAST database with your (local) sequences](https://www.ncbi.nlm.nih.gov/books/NBK569841/) for more information
 ```
+$ grep -E "^>" ref_genome.fa 
+>seq1
+>seq2
+>seq3
+
 $ head -3 ${tax_id_map}   # input fasta sequence IDs to their taxonomic node (not mandatory, but highly recommended)
 seq1 9501
 seq2 812

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+DB_NAMES="ref_euk_rep_genomes, nt, nr, ref_prok_rep_genomes, ref_viruses_rep_genomes, ref_viroids_rep_genomes, refseq_protein, refseq_rna"
+
 available_versions=$(curl ftp://ftp.ncbi.nih.gov/blast/executables/blast+/ 2>/dev/null | rev | cut -d' ' -f1 | rev | grep -oE "[0-9]+.[0-9]+.[0-9]+")
 latest_version=$(curl ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/ 2> /dev/null | grep LATEST | sed 's/.*-> //g')
 
@@ -8,7 +10,7 @@ help_string="./setup_blast.sh (-v <version>) (-o <os>) (-d <database_name>) (-p 
 help_string+="\tversions: $(echo ${available_versions})\n\t\tlatest (default): ${latest_version}\n"
 help_string+="\tos: win64, x64-linux, x64-macosx, x64-win64\n\t\tDefault: x64-linux\n"
 help_string+="\toutput_path: directory to write database files\n"
-help_string+="\tdatabase_names: See https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html\n"
+help_string+="\tdatabase_names: ${DB_NAMES}\n\n\tSee https://ftp.ncbi.nlm.nih.gov/blast/documents/blastdb.html\n"
 
 
 while getopts ":v:o:d:p:h" opt; do
@@ -178,5 +180,10 @@ else
   echo "perl ${download_script} <DB_NAME>"
   echo "  e.g."
   echo "    perl ${download_script} ref_euk_rep_genomes 	# Downloads all eukaryotic genomes"
+  printf "\n\tDB_NAME in ${DB_NAMES}\n"
+  echo "After that,"
+  echo "  1. Extract *.tar.gz files"
+  echo "  2. Export `export BLASTDB=...` to the directory containing extracted files"
+  echo "OR, see ./build_local to build DB from transcripts" 
 fi
 echo "Done."

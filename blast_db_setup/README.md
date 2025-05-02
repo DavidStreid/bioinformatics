@@ -130,7 +130,7 @@ Done.
 
 **Example**
 ```
-export BLASTDB==path/to/formatted_db_files
+export BLASTDB=path/to/formatted_db_files
 DB_NAME=ref_euk_rep_genomes          # Name of the database to use (prefix of the DB file names)
 ./ncbi-blast-2.12.0+/bin/blastn -db ${DB_NAME} -query sample.fa -out results.out
 ```
