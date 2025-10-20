@@ -1,7 +1,7 @@
 # BAM ANALYSIS
 Collection of scripts to analyze a bam
 
-## TASKS
+## samtools
 
 ### `samtools` - piping STDOUT to compressed output
 
@@ -28,6 +28,17 @@ REF=$2
   tee ${OUT} | \
   samtools index -c - ${OUT}.crai
 ```
+
+### `samtools tview` - view SAM file like IGV
+
+[tview docs](https://www.htslib.org/doc/samtools-tview.html)
+
+```
+# e.g. view SAMPLE alignments in SRY gene region
+samtools tview -p chrY:2786855 sample.bam
+```
+![samtools tview](https://samtools.sourceforge.net/images/seq2-156.png)
+
 
 ### Modify readgroups
 * `-w` is to overwrite the readgroup if it already exists
