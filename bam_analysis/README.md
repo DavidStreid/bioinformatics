@@ -39,6 +39,16 @@ samtools tview -p chrY:2786855 sample.bam
 ```
 ![samtools tview](https://samtools.sourceforge.net/images/seq2-156.png)
 
+### `samtools depth` - retrieve depth of a SAM at a specific region
+
+```
+$ samtools depth -r chrM:11800-12000 sample.bam
+chrM	11800	201
+chrM	11801	200
+...
+chrM	11999	160
+chrM	12000	161
+```
 
 ### Modify readgroups
 * `-w` is to overwrite the readgroup if it already exists
