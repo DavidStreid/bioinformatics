@@ -65,8 +65,8 @@ samtools addreplacerg \
 
 ### `samtools collate` / `samtools fastq` - BAM -> FASTQ
 
-* `samtools collate` - groups read names by read-name
-* `samtools fastq` 
+* `samtools collate` - outputs SAM grouped by read-name
+* `samtools fastq` - convert BAM to FASTQ
 
 ```
 BAM=...
