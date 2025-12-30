@@ -50,7 +50,7 @@ chrM	11999	160
 chrM	12000	161
 ```
 
-### Modify readgroups
+### `samtools addreplacerg` - Modify readgroups
 * `-w` is to overwrite the readgroup if it already exists
 * can also add `PL` for the sequencing platform (e.g. `\tPL:ILLUMINA`)
 
@@ -62,6 +62,20 @@ samtools addreplacerg \
 ```
 
 * See `./update_rg.sh` - takes new ID and SAM file and writes to BAM (can write to CRAM, just needs manual edit of `SFX`)
+
+### `samtools collate` / `samtools fastq` - BAM -> FASTQ
+
+* `samtools collate` - groups read names by read-name
+* `samtools fastq` 
+
+```
+BAM=...
+samtools collate ${BAM} -u -@ 8 -O | \
+  samtools fastq -1 R1.fq -2 R2.fq -n -0 ambiguous.fq -s singletons.fq
+
+# ambiguous.fq - R1 & R2 flags are both set or unset  (or /dev/null)
+# singleton.fq - Unpaired reads                       (or /dev/null)
+```
 
 ## SCRIPTS
 
