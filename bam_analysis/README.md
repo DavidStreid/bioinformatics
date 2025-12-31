@@ -77,6 +77,19 @@ samtools collate ${BAM} -u -@ 8 -O | \
 # singleton.fq - Unpaired reads                       (or /dev/null)
 ```
 
+## bedtools
+
+### BAM -> BED
+
+#### `bamtobed` - retrieves **MAPPED** regions covered by BAM
+
+* **IMPORTANT**: `bamtobed` will exclude hard-clipped, soft-clipped, and inserted regions as well as unmapped reads
+  * e.g. `CIGAR=59S48M2D25M19S` -> 75 bp region in the bed
+
+```
+bedtools bamtobed -i SAMPLE.bam | bedtools merge -i stdin > SAMPLE.merged.bed
+```
+
 ## SCRIPTS
 
 ###  haplotag_count.sh
