@@ -6,6 +6,21 @@ Compares the numerical fields of two input BAM files created from different alig
 **USE THIS ONE** - python script will run forever and eventually run out of memory
 
 ## `bam_comparison_exact.py`
+
+UPDATE: Better way is use [`samtools checksum`](https://www.htslib.org/doc/samtools-checksum.html) (v1.13+), which does checksums on combinations of the SAM fields
+
+**Most Strict** - Compare all tags, CIGAR, and defaults
+```
+samtools checksum -C -t '*' sample.bam
+```
+
+**Less Strict** - Exclude certain fields and auxillary tags
+```
+samtools checksum -C -t '*,RG' sample.bam 	# Ignores RG tag
+samtools checksum -C -t 'RG' sample.bam 	# Only checks RG tag
+samtools checksum sample.bam 				# No CIGAR/MAPQ and default auxillary tags, "BC,FI,QT,RT,TC"
+```
+
 Compares two BAM files that should be exactly the same - checks all fields and tags. Tags can be out-of-order
 * MAJOR RAM restrictions - will load every difference-per-CHROM before releasing memory, e.g. 60GB human BAM -> 200GB RAM usage (for the earlier chroms)
 * Outputs a `<CHROM>.columns_only.tsv` & `<CHROM>.values.tsv`, which will have either just the fields, or the fields plus different values, respectively
