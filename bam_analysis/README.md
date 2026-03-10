@@ -65,13 +65,14 @@ samtools addreplacerg \
 
 ### `samtools collate` / `samtools fastq` - BAM -> FASTQ
 
-* `samtools collate` - outputs SAM grouped by read-name
+* `samtools collate` - outputs SAM grouped by read-name (parallelize if possible via `-@`)
 * `samtools fastq` - convert BAM to FASTQ
 
 ```
 BAM=...
-samtools collate ${BAM} -u -@ 8 -O | \
-  samtools fastq -1 R1.fq -2 R2.fq -n -0 ambiguous.fq -s singletons.fq
+THREADS=8
+samtools collate ${BAM} -u -@ ${THREADS} -O | \
+  samtools fastq -@ ${THREADS} -1 R1.fq -2 R2.fq -n -0 ambiguous.fq -s singletons.fq
 
 # ambiguous.fq - R1 & R2 flags are both set or unset  (or /dev/null)
 # singleton.fq - Unpaired reads                       (or /dev/null)
