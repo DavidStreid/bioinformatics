@@ -39,6 +39,58 @@ samtools tview -p chrY:2786855 sample.bam
 ```
 ![samtools tview](https://samtools.sourceforge.net/images/seq2-156.png)
 
+### `samtools coverage` - view coverage of SAM over a region
+
+[coverage docs](https://www.htslib.org/doc/samtools-coverage.html)
+
+```
+BAM=...
+REG=... # e.g. chr1:1200-2100
+paste <(samtools coverage -r chr1:1-2 ${BAM} | head -1 | sed 's/\t/\n/g') \
+  <(samtools coverage -r ${REG} ${BAM} | tail -1 | sed 's/\t/\n/g')
+```
+
+
+#### Histogram visualization
+
+**Distribution**
+
+```
+$ samtools coverage -A -w 32 -r chr1:1M-12M input.bam
+
+chr1 (249.25Mbp)
+>  24.19% | .                              | Number of reads: 528695
+>  21.50% |::                              |     (132000 filtered)
+>  18.81% |::                              | Covered bases:   1.07Mbp
+>  16.12% |::                           :  | Percent covered: 9.727%
+>  13.44% |::  :  .       ::            : :| Mean coverage:   3.5x
+>  10.75% |:: ::  :       ::          : : :| Mean baseQ:      34.4
+>   8.06% |:::::  :       ::        : : : :| Mean mapQ:       55.8
+>   5.37% |::::: ::      :::      : ::::: :| 
+>   2.69% |::::: :::     :::  ::: :::::::::| Histo bin width: 343.8Kbp
+>   0.00% |:::::::::::. :::::::::::::::::::| Histo max bin:   26.873%
+        1.00M     4.44M     7.87M       12.00M 
+```
+
+**Depth**
+
+```
+samtools coverage  -m -r 'chr1:24500000-25600000' --plot-depth -w 32 -A input.bam
+
+chr1 (249.25Mbp)
+>    38.8 |            .:::::::            | Number of reads: 283218
+>    34.5 |            ::::::::            |     (3327 filtered)
+>    30.2 |           :::::::::.           | Covered bases:   1.10Mbp
+>    25.9 |.:::::.:.::::::::::::::::::::::.| Percent covered: 99.83%
+>    21.6 |::::::::::::::::::::::::::::::::| Mean coverage:   33.2x
+>    17.2 |::::::::::::::::::::::::::::::::| Mean baseQ:      37.2
+>    12.9 |::::::::::::::::::::::::::::::::| Mean mapQ:       59.3
+>     8.6 |::::::::::::::::::::::::::::::::|
+>     4.3 |::::::::::::::::::::::::::::::::| Histo bin width: 34.5Kbp
+>     0.0 |::::::::::::::::::::::::::::::::| Histo max cov:   43.117
+        24.50M    24.84M    25.19M      25.60M
+```
+
 ### `samtools depth` - retrieve depth of a SAM at a specific region
 
 ```
