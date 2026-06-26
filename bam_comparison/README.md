@@ -1,13 +1,23 @@
 # BAM comparison
-Compares the numerical fields of two input BAM files created from different aligners (e.g. compares one aligner's MAPQ score to another on the same input FASTQ files)
 
-## `bam_comparison_exact.sh`
+## GATK/Picard CompareSAMs
 
-**USE THIS ONE** - python script will run forever and eventually run out of memory
+[CompareSAMs](https://gatk.broadinstitute.org/hc/en-us/articles/360037593571-CompareSAMs-Picard)
 
-## `bam_comparison_exact.py`
+```
+# Verify SAM-equivalence, ignoring differences in headers (e.g. `@RG` `ID`/`SM`)
+gatk CompareSAMs ${SAM_1} ${SAM_2} LENIENT_HEADER=true
 
-UPDATE: Better way is use [`samtools checksum`](https://www.htslib.org/doc/samtools-checksum.html) (v1.13+), which does checksums on combinations of the SAM fields
+# CRAM
+gatk CompareSAMs ${SAM_1} ${SAM_2} LENIENT_HEADER=true REFERENCE_SEQUENCE=hg38.fa
+
+# Equivalence - low-utility
+gatk CompareSAMs ${SAM_1} ${SAM_2}
+```
+
+## `samtools checksum`
+
+[`samtools checksum`](https://www.htslib.org/doc/samtools-checksum.html) (v1.23+), which does checksums on combinations of the SAM fields
 
 **Most Strict** - Compare all tags, CIGAR, and defaults
 ```
@@ -24,6 +34,17 @@ samtools checksum sample.bam 				# No CIGAR/MAPQ and default auxillary tags, "BC
 Compares two BAM files that should be exactly the same - checks all fields and tags. Tags can be out-of-order
 * MAJOR RAM restrictions - will load every difference-per-CHROM before releasing memory, e.g. 60GB human BAM -> 200GB RAM usage (for the earlier chroms)
 * Outputs a `<CHROM>.columns_only.tsv` & `<CHROM>.values.tsv`, which will have either just the fields, or the fields plus different values, respectively
+
+
+# DEPRECATED - Much better ways above
+
+Compares the numerical fields of two input BAM files created from different aligners (e.g. compares one aligner's MAPQ score to another on the same input FASTQ files)
+
+## `bam_comparison_exact.sh`
+
+**USE THIS ONE** - python script will run forever and eventually run out of memory
+
+## `bam_comparison_exact.py`
 
 ### RUN
 ```
