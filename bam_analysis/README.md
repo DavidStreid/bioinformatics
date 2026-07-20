@@ -130,6 +130,42 @@ samtools collate ${BAM} -u -@ ${THREADS} -O | \
 # singleton.fq - Unpaired reads                       (or /dev/null)
 ```
 
+### CRAM / BAM conversion
+
+**BAM -> CRAM**
+
+```
+REF=hg38.fa
+BAM=sample.bam   # INPUT
+CRAM=sample.cram # OUTPUT
+THREADS=8
+samtools view \
+  -@ ${THREADS} \
+  -C \
+  -T ${REF} \
+  ${BAM} \ 
+  | tee ${CRAM} \
+  | samtools index -c - ${CRAM}.crai
+```
+
+**CRAM -> BAM**
+
+```
+REF=hg38.fa
+CRAM=sample.cram # INPUT
+BAM=sample.bam   # OUTPUT
+THREADS=8
+samtools view \
+  -@ ${THREADS} \
+  -T ${REF} \
+  -b \
+  ${CRAM} \
+  | tee ${BAM} \
+  | samtools index - ${BAM}.bai
+```
+
+
+
 ## bedtools
 
 ### BAM -> BED
