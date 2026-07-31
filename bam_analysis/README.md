@@ -50,6 +50,18 @@ paste <(samtools coverage -r chr1:1-2 ${BAM} | head -1 | sed 's/\t/\n/g') \
   <(samtools coverage -r ${REG} ${BAM} | tail -1 | sed 's/\t/\n/g')
 ```
 
+**CRAM**
+
+```
+CRAM=...
+REF=hg38.fa
+REG=chr19:40991131-41018413 # CYP2B6 
+
+# samtools v1.22
+paste <(samtools coverage --reference "${REF}" -r chr1:1-2 "${CRAM}" | head -1 | sed 's/\t/\n/g') \
+      <(samtools coverage --reference "${REF}" -r "${REG}" "${CRAM}" | tail -1 | sed 's/\t/\n/g')
+```
+
 
 #### Histogram visualization
 
