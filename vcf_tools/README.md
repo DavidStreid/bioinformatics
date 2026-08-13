@@ -1,6 +1,17 @@
 # VCF Tools
 Scripts and notes for analyzing VCF files
 
+## Check if valid - `bcftools view`
+
+Example - `sample.vcf` has a new line at the end
+```
+$ tail -1 sample.vcf
+
+$ bcftools view sample.vcf
+[E::bcf_hdr_add_sample_len] Empty sample name: trailing spaces/tabs in the header line?
+Failed to read from sample.vcf: could not parse header
+```
+
 ## Indexing
 * `bgzip`/`tabix` - important for indexing a file for easy viewing
 ```
