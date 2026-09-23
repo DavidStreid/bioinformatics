@@ -29,6 +29,62 @@ REF=$2
   samtools index -c - ${OUT}.crai
 ```
 
+helpful bash functions I like to put in a `~/.bash_profile`
+
+#### `b2c`
+
+Convert bam to cram, just provide the bam
+
+```
+b2c() {
+    if [ -z "$1" ]; then
+        echo "Usage: b2c <filename.bam>" >&2
+        return 1
+    fi
+
+    local bam="$1"
+    # Strips '.bam' suffix if present and appends '.cram'
+    local base="${bam%.bam}"
+    local cram="$(basename ${base}.cram)"
+
+    cat << EOF
+samtools \\
+  view -@ 50 \\
+  -C \\
+  -T GRCh38 \\
+  -o ${cram} \\
+  --write-index \\
+  ${bam}
+EOF
+}
+```
+
+#### `c2b`
+
+```
+c2b() {
+    if [ -z "$1" ]; then
+        echo "Usage: cram2bam_cmd <filename.cram>" >&2
+        return 1
+    fi
+
+    local cram="$1"
+    # Strips '.cram' suffix if present and appends '.bam'
+    local base="${cram%.cram}"
+    local bam="$(basename ${base}.bam)"
+    local bai="${bam}.bai"
+
+    cat << EOF
+samtools \\
+  view -@ 50 \\
+  -T GRCh38.fa \\
+  -b ${cram} \\
+  | tee ${bam} \\
+  | samtools index - ${bai}
+EOF
+}
+```
+
 ### `samtools tview` - view SAM file like IGV
 
 [tview docs](https://www.htslib.org/doc/samtools-tview.html)
