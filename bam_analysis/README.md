@@ -183,11 +183,12 @@ samtools addreplacerg \
 
 * See `./update_rg.sh` - takes new ID and SAM file and writes to BAM (can write to CRAM, just needs manual edit of `SFX`)
 
-### `samtools collate` / `samtools fastq` - BAM -> FASTQ
+### `samtools collate` / `samtools fastq` - BAM/CRAM -> FASTQ
 
 * `samtools collate` - outputs SAM grouped by read-name (parallelize if possible via `-@`)
 * `samtools fastq` - convert BAM to FASTQ
 
+**BAM/CRAM -> FASTQ**
 ```
 BAM=...
 THREADS=8
@@ -196,6 +197,20 @@ samtools collate ${BAM} -u -@ ${THREADS} -O | \
 
 # ambiguous.fq - R1 & R2 flags are both set or unset  (or /dev/null)
 # singleton.fq - Unpaired reads                       (or /dev/null)
+# ADDITIONAL ARG: --reference "${REF}"                to convert CRAM -> FASTQ
+```
+
+### `samtools reset`
+
+* `samtools reset` - converts a mapped SAM into unmapped BAM, but removes tags added by aligners determined by a default black list
+
+**BAM/CRAM -> uBAM** - Convert to an unmapped BAM 
+* For cases where the BAM contains important information, like methylation (`MM`/`ML` tags for Pacbio/Oxford Nanopore), which would otherwise be lost by conversion to FASTQ. NOTE - these are not removed because they are not part of `samtools reset` default blacklist (`AS`, `CC`, `CG`, `CP`, `H0`, `H1`, `H2`, `HI`, `IH`, `MC`, `MD`, `MQ`, `NM`, `SA`, `TS`)
+
+```
+# `-F 0x900` excludes secondary and supplementary alignments upfront
+samtools view -@ "${THREADS}" -T "${REF}" -F 0x900 -u "${CRAM}" | \
+  samtools reset -@ "${THREADS}" -o unmapped.bam -
 ```
 
 ### CRAM / BAM conversion
