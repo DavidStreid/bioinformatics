@@ -35,6 +35,35 @@ Compares two BAM files that should be exactly the same - checks all fields and t
 * MAJOR RAM restrictions - will load every difference-per-CHROM before releasing memory, e.g. 60GB human BAM -> 200GB RAM usage (for the earlier chroms)
 * Outputs a `<CHROM>.columns_only.tsv` & `<CHROM>.values.tsv`, which will have either just the fields, or the fields plus different values, respectively
 
+## Content Comparisons
+
+### [`samtools stats`](https://www.htslib.org/doc/samtools-stats.html)
+`samtools stats` - collects a suite of read & base metrics. Summary Numbers (SN) table automatically filters to only primary alignments (`-F 0x900` filter) by default
+
+```
+# ARG: --reference "${REF}"	- Analyze CRAM
+samtools stats -@ 8 s1.bam > s1.stats
+samtools stats -@ 8 s2.bam > s2.stats
+```
+
+### More granular analysis
+
+While the Summary Numbers (SN) of `samtools stats` does most of this, to isolate numbers (and possibly filter), use the general idea to run the commands below on the BAM/CRAM/SAM files being compared to see if they yield the same results.
+
+```
+# Count total reads
+# ARG: -F 0x900 	- to only select primary alignments)
+#      -T "${REF}"	- Analyze CRAM
+samtools view -@ 8  -c sample.bam
+
+# Total bases
+samtools view -@ 8 sample.bam | \
+	  awk '{sum += length($10)} END {print "bases: " sum}'
+
+# Count reads carrying tag
+TAG="MM:Z"	# e.g. checking for methylation tags
+samtools view -@ 8 sample.bam | grep -c "${TAG}"
+```
 
 # DEPRECATED - Much better ways above
 
